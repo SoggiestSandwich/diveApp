@@ -19,7 +19,7 @@ struct ScoreSelectorView: View {
     
     @Binding var currentIndex: Int
     @Binding var currentDiver: Int
-    @Binding var diverList: [divers]
+    @Binding var diverList: [Divers]
     @Binding var currentDive: Int
     
     @State var findTrash: Int = 0
@@ -262,9 +262,9 @@ struct ScoreSelectorView: View {
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
         ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([
-            divers(name: "fob Inker", school: "Quarter Mule High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-            divers(name: "Bob Trinket", school: "Half Donkey High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-            divers(name: "Rob Winker", school: "Full Pony High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0)
+            Divers(name: "fob Inker", school: "Quarter Mule High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
+            Divers(name: "Bob Trinket", school: "Half Donkey High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
+            Divers(name: "Rob Winker", school: "Full Pony High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0)
         ]), currentDive: .constant(0))
     }
 }

@@ -11,18 +11,18 @@ struct ScoreInfoView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
-    @State var diverList: [divers] = [
-        divers(name: "fob Inker", school: "Quarter Mule High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-        divers(name: "Bob Trinket", school: "Half Donkey High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-        divers(name: "Rob Winker", school: "Full Pony High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0)
+    @State private var diverList: [Divers] = [
+        Divers(name: "fob Inker", school: "Quarter Mule High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
+        Divers(name: "Bob Trinket", school: "Half Donkey High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
+        Divers(name: "Rob Winker", school: "Full Pony High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0)
     ]
     
-    @State var currentDiver: Int = 0
-    @State var currentDive: Int = 0
-    @State var halfAdded: Bool = true
-    @State var currentIndex: Int = 0
+    @State private var currentDiver: Int = 0
+    @State private var currentDive: Int = 0
+    @State private var halfAdded: Bool = true
+    @State private var currentIndex: Int = 0
     
-    @State var scoresArray: [scores] = []
+    @State private var scoresArray: [scores] = []
     
     var body: some View {
         VStack {

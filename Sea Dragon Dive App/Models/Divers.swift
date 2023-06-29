@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct divers {
+struct Divers {
     let name: String
     let school: String
     var dives: [dives]
