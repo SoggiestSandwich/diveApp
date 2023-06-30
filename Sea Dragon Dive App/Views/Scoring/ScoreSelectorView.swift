@@ -19,7 +19,7 @@ struct ScoreSelectorView: View {
     
     @Binding var currentIndex: Int
     @Binding var currentDiver: Int
-    @Binding var diverList: [Divers]
+    @Binding var diverList: [diverEntry]
     @Binding var currentDive: Int
     
     @State var findTrash: Int = 0
@@ -63,7 +63,7 @@ struct ScoreSelectorView: View {
             HStack {
                 Text("Score: ")
                     .font(.title2.bold())
-                Text(String(format: "%.2f", diverList[currentDiver].dives[currentDive].score))
+                Text(String(format: "%.2f", /*diverList[currentDiver].dives[currentDive].score*/1))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
                     .overlay(
@@ -73,7 +73,7 @@ struct ScoreSelectorView: View {
                 
                 Text("Total: ")
                     .font(.title2.bold())
-                Text(String(format: "%.2f", diverList[currentDiver].totalScore))
+                Text(String(format: "%.2f", diverList[currentDiver].score ?? 0))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
                     .overlay(
@@ -177,14 +177,14 @@ struct ScoreSelectorView: View {
     }
     
     func SetRoundScore() {
-        diverList[currentDiver].dives[currentDive].score = 0
-        diverList[currentDiver].totalScore = 0
+        //diverList[currentDiver].dives[currentDive].score = 0
+        diverList[currentDiver].score = 0
         var max: Float = -1
         var min: Float = 11
         var maxIndex: Int = 0
         var minIndex: Int = 8
         for scores in scoresArray {
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score + scores.score
+            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score + scores.score
         }
         if scoresArray.count >= 5 {
             for scores in scoresArray {
@@ -193,7 +193,7 @@ struct ScoreSelectorView: View {
                     maxIndex = scores.index
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
             
             for scores in scoresArray {
                 if scores.score < min {
@@ -201,7 +201,7 @@ struct ScoreSelectorView: View {
                     minIndex = scores.index
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
             max = -1
             min = 11
         }
@@ -211,19 +211,19 @@ struct ScoreSelectorView: View {
                     max = scores.score
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
             
             for scores in scoresArray {
                 if scores.score <= min && scores.index != minIndex {
                     min = scores.score
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
         }
-        diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score * diverList[currentDiver].dives[currentDive].degreeOfDiff
+        //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score * diverList[currentDiver].dives[currentDive].degreeOfDiff
         
         for dive in diverList[currentDiver].dives {
-            diverList[currentDiver].totalScore = diverList[currentDiver].totalScore + dive.score
+            //diverList[currentDiver].score = diverList[currentDiver].score + dive.score
         }
     }
     
@@ -261,10 +261,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([
-            Divers(name: "fob Inker", school: "Quarter Mule High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-            Divers(name: "Bob Trinket", school: "Half Donkey High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0),
-            Divers(name: "Rob Winker", school: "Full Pony High School", dives: [dives(name: "dive1", degreeOfDiff: 1, score: 0), dives(name: "dive2", degreeOfDiff: 1.2, score: 0), dives(name: "dive3", degreeOfDiff: 1.4, score: 0)], totalScore: 0)
-        ]), currentDive: .constant(0))
+        ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([diverEntry(dives: ["Kakorward Kakwist"], level: 0, name: "Kakaw", team: "Kakawington High")]), currentDive: .constant(0))
     }
 }

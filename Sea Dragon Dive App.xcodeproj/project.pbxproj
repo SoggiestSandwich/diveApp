@@ -8,6 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		161FF7122A4DD4770096F2C8 /* CoachAndDiverEntries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7112A4DD4770096F2C8 /* CoachAndDiverEntries.swift */; };
+		161FF74F2A4F41FC0096F2C8 /* Position+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7472A4F41FC0096F2C8 /* Position+CoreDataClass.swift */; };
+		161FF7502A4F41FC0096F2C8 /* Position+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7482A4F41FC0096F2C8 /* Position+CoreDataProperties.swift */; };
+		161FF7512A4F41FC0096F2C8 /* Category+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7492A4F41FC0096F2C8 /* Category+CoreDataClass.swift */; };
+		161FF7522A4F41FC0096F2C8 /* Category+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74A2A4F41FC0096F2C8 /* Category+CoreDataProperties.swift */; };
+		161FF7532A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74B2A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift */; };
+		161FF7542A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74C2A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift */; };
+		161FF7552A4F41FC0096F2C8 /* Dive+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74D2A4F41FC0096F2C8 /* Dive+CoreDataClass.swift */; };
+		161FF7562A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74E2A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift */; };
+		161FF7592A4F69890096F2C8 /* DataBaseFiller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */; };
 		162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */; };
 		16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */; };
 		16C049E62A3BA6AE003C623D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E52A3BA6AE003C623D /* Assets.xcassets */; };
@@ -20,12 +29,20 @@
 		16C04A042A40B642003C623D /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C04A032A40B642003C623D /* ScoreView.swift */; };
 		16C04A072A423412003C623D /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 16C04A062A423412003C623D /* CodeScanner */; };
 		16C04A0E2A424EFA003C623D /* Dives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C04A0D2A424EFA003C623D /* Dives.swift */; };
-		16C04A102A42507D003C623D /* Divers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C04A0F2A42507D003C623D /* Divers.swift */; };
 		16C04A142A44D01B003C623D /* Scores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C04A132A44D01B003C623D /* Scores.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		161FF7112A4DD4770096F2C8 /* CoachAndDiverEntries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachAndDiverEntries.swift; sourceTree = "<group>"; };
+		161FF7472A4F41FC0096F2C8 /* Position+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Position+CoreDataClass.swift"; sourceTree = "<group>"; };
+		161FF7482A4F41FC0096F2C8 /* Position+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Position+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		161FF7492A4F41FC0096F2C8 /* Category+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Category+CoreDataClass.swift"; sourceTree = "<group>"; };
+		161FF74A2A4F41FC0096F2C8 /* Category+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Category+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		161FF74B2A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WithPosition+CoreDataClass.swift"; sourceTree = "<group>"; };
+		161FF74C2A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WithPosition+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		161FF74D2A4F41FC0096F2C8 /* Dive+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dive+CoreDataClass.swift"; sourceTree = "<group>"; };
+		161FF74E2A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dive+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBaseFiller.swift; sourceTree = "<group>"; };
 		162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreInfoView.swift; sourceTree = "<group>"; };
 		16C049DE2A3BA6AD003C623D /* Sea Dragon Dive App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sea Dragon Dive App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sea_Dragon_Dive_AppApp.swift; sourceTree = "<group>"; };
@@ -38,7 +55,6 @@
 		16C04A012A3D138D003C623D /* ScoreSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreSelectorView.swift; sourceTree = "<group>"; };
 		16C04A032A40B642003C623D /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 		16C04A0D2A424EFA003C623D /* Dives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dives.swift; sourceTree = "<group>"; };
-		16C04A0F2A42507D003C623D /* Divers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Divers.swift; sourceTree = "<group>"; };
 		16C04A132A44D01B003C623D /* Scores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scores.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -65,6 +81,21 @@
 			path = Scoring;
 			sourceTree = "<group>";
 		};
+		161FF7572A4F47720096F2C8 /* CoreDataProperties */ = {
+			isa = PBXGroup;
+			children = (
+				161FF7472A4F41FC0096F2C8 /* Position+CoreDataClass.swift */,
+				161FF7482A4F41FC0096F2C8 /* Position+CoreDataProperties.swift */,
+				161FF7492A4F41FC0096F2C8 /* Category+CoreDataClass.swift */,
+				161FF74A2A4F41FC0096F2C8 /* Category+CoreDataProperties.swift */,
+				161FF74B2A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift */,
+				161FF74C2A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift */,
+				161FF74D2A4F41FC0096F2C8 /* Dive+CoreDataClass.swift */,
+				161FF74E2A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift */,
+			);
+			path = CoreDataProperties;
+			sourceTree = "<group>";
+		};
 		16C049D52A3BA6AD003C623D = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */,
+				161FF7572A4F47720096F2C8 /* CoreDataProperties */,
 				16C04A082A424005003C623D /* Models */,
 				16C049F62A3BB085003C623D /* Views */,
 				16C049E52A3BA6AE003C623D /* Assets.xcassets */,
@@ -106,6 +138,7 @@
 		16C049F62A3BB085003C623D /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */,
 				16C049F42A3BA6F1003C623D /* LoginScreenView.swift */,
 				161FF7142A4E22890096F2C8 /* Scoring */,
 			);
@@ -116,7 +149,6 @@
 			isa = PBXGroup;
 			children = (
 				16C04A0D2A424EFA003C623D /* Dives.swift */,
-				16C04A0F2A42507D003C623D /* Divers.swift */,
 				16C04A132A44D01B003C623D /* Scores.swift */,
 				161FF7112A4DD4770096F2C8 /* CoachAndDiverEntries.swift */,
 			);
@@ -199,18 +231,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				161FF7532A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift in Sources */,
+				161FF7502A4F41FC0096F2C8 /* Position+CoreDataProperties.swift in Sources */,
+				161FF7592A4F69890096F2C8 /* DataBaseFiller.swift in Sources */,
 				16C049F52A3BA6F1003C623D /* LoginScreenView.swift in Sources */,
 				16C049EE2A3BA6AE003C623D /* Sea_Dragon_Dive_App.xcdatamodeld in Sources */,
 				16C04A042A40B642003C623D /* ScoreView.swift in Sources */,
 				16C04A022A3D138D003C623D /* ScoreSelectorView.swift in Sources */,
 				16C049EB2A3BA6AE003C623D /* Persistence.swift in Sources */,
-				16C04A102A42507D003C623D /* Divers.swift in Sources */,
+				161FF7552A4F41FC0096F2C8 /* Dive+CoreDataClass.swift in Sources */,
 				16C04A0E2A424EFA003C623D /* Dives.swift in Sources */,
 				162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */,
 				16C049FA2A3BC968003C623D /* AddDiversView.swift in Sources */,
 				161FF7122A4DD4770096F2C8 /* CoachAndDiverEntries.swift in Sources */,
+				161FF74F2A4F41FC0096F2C8 /* Position+CoreDataClass.swift in Sources */,
 				16C04A142A44D01B003C623D /* Scores.swift in Sources */,
+				161FF7542A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift in Sources */,
+				161FF7512A4F41FC0096F2C8 /* Category+CoreDataClass.swift in Sources */,
 				16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */,
+				161FF7522A4F41FC0096F2C8 /* Category+CoreDataProperties.swift in Sources */,
+				161FF7562A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

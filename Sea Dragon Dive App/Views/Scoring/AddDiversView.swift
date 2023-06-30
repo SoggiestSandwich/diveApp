@@ -20,6 +20,8 @@ struct AddDiversView: View {
     @State private var VList: [diverEntry] = []
     @State private var EList: [diverEntry] = []
     @State private var editingList = true
+    @State private var showPopUp = false
+    @State private var showAlert = false
     
     struct Codes: Identifiable {
         let name: String
@@ -56,9 +58,17 @@ struct AddDiversView: View {
                     .font(.largeTitle.bold())
                 
                 List {
-                    Section(header: Text("Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        ForEach(Array(zip(JVList.indices, JVList)), id: \.0) { index, diver in
+                    Section(header: Text("Exhibition").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                        ForEach(Array(zip(EList.indices, EList)), id: \.0) { index, diver in
                             Text("\(index + 1). \(diver.name)\n\(diver.team!)")
+                        }
+                        .onMove { (indexSet, index) in
+                            self.EList.move(fromOffsets: indexSet, toOffset: index)
+                        }
+                    }
+                    Section(header: Text("Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                        ForEach(Array(zip(JVList.indices, JVList)), id: \.1) { index, diver in
+                            Text("\(index + EList.count + 1). \(diver.name)\n\(diver.team!)")
                         }
                         .onMove { (indexSet, index) in
                             self.JVList.move(fromOffsets: indexSet, toOffset: index)
@@ -66,18 +76,10 @@ struct AddDiversView: View {
                     }
                     Section(header: Text("Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         ForEach(Array(zip(VList.indices, VList)), id: \.1) { index, diver in
-                            Text("\(index + JVList.count + 1). \(diver.name)\n\(diver.team!)")
+                            Text("\(index + EList.count + JVList.count + 1). \(diver.name)\n\(diver.team!)")
                         }
                         .onMove { (indexSet, index) in
                             self.VList.move(fromOffsets: indexSet, toOffset: index)
-                        }
-                    }
-                    Section(header: Text("Exhibition").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        ForEach(Array(zip(EList.indices, EList)), id: \.1) { index, diver in
-                            Text("\(index + JVList.count + VList.count + 1). \(diver.name)\n\(diver.team!)")
-                        }
-                        .onMove { (indexSet, index) in
-                            self.EList.move(fromOffsets: indexSet, toOffset: index)
                         }
                     }
                 }
@@ -102,7 +104,14 @@ struct AddDiversView: View {
                     self.ScannerSheet
                 }
                 //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
-                NavigationLink(destination: ScoreInfoView()) {
+                Button {
+                    if !consolidateDiverList().isEmpty {
+                        showPopUp = true
+                    }
+                    else {
+                        showAlert = true
+                    }
+                } label: {
                     Text("Start Event")
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .bold()
@@ -115,6 +124,17 @@ struct AddDiversView: View {
                             
                         )
                 }
+                .alert("Official's Approval Required", isPresented: $showPopUp) {
+                    Button("Cancel", role: .cancel) {}
+                    NavigationLink(destination: ScoreInfoView(diverList: consolidateDiverList())) {
+                        Text("Confirm")
+                    }
+                } message: {
+                    Text("Has an official reviewed the dive entries and diver order?")
+                }
+                .alert("You must enter divers before starting an event", isPresented: $showAlert) {
+                    Button("OK", role: .cancel) {}
+                }
             }
         }
     }
@@ -126,24 +146,38 @@ struct AddDiversView: View {
         for coach in coachList {
             for diver in coach.diverEntries {
                 if diver.level == 0 {
+                    EList.append(diver)
+                    EList[EList.count - 1].team = coach.team
+                }
+                if diver.level == 1 {
                     JVList.append(diver)
                     JVList[JVList.count - 1].team = coach.team
                 }
-                if diver.level == 1 {
+                if diver.level == 2 {
                     VList.append(diver)
                     VList[VList.count - 1].team = coach.team
-                }
-                if diver.level == 2 {
-                    EList.append(diver)
-                    EList[EList.count - 1].team = coach.team
                 }
             }
         }
     }
-}
-
-struct AddDiversView_Previews: PreviewProvider {
-    static var previews: some View {
-        AddDiversView()
+    
+    func consolidateDiverList() -> [diverEntry] {
+        var allDivers: [diverEntry] = []
+        for diver in EList {
+            allDivers.append(diver)
+        }
+        for diver in JVList {
+            allDivers.append(diver)
+        }
+        for diver in VList {
+            allDivers.append(diver)
+        }
+        return allDivers
+    }
+    
+    struct AddDiversView_Previews: PreviewProvider {
+        static var previews: some View {
+            AddDiversView()
+        }
     }
 }

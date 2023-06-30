@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22F82" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
-    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
-        <attribute name="categooryName" optional="YES" attributeType="String"/>
+    <entity name="Category" representedClassName="Category" syncable="YES">
         <attribute name="categoryId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="categoryName" optional="YES" attributeType="String"/>
         <relationship name="catDive" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Dive" inverseName="category" inverseEntity="Dive"/>
-        <relationship name="subCatDive" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Dive" inverseName="subCategory" inverseEntity="Dive"/>
+        <relationship name="subCatDive" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Dive" inverseName="subCategory" inverseEntity="Dive"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="categoryId"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Dive" representedClassName="Dive" syncable="YES" codeGenerationType="class">
+    <entity name="Dive" representedClassName="Dive" syncable="YES">
         <attribute name="diveCategoryId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="diveName" optional="YES" attributeType="String"/>
         <attribute name="diveNbr" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
@@ -25,13 +25,13 @@
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
-    <entity name="Position" representedClassName="Position" syncable="YES" codeGenerationType="class">
+    <entity name="Position" representedClassName="Position" syncable="YES">
         <attribute name="positionCode" optional="YES" attributeType="String"/>
         <attribute name="positionId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="positionName" optional="YES" attributeType="String"/>
         <relationship name="withPosition" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WithPosition" inverseName="position" inverseEntity="WithPosition"/>
     </entity>
-    <entity name="WithPosition" representedClassName="WithPosition" syncable="YES" codeGenerationType="class">
+    <entity name="WithPosition" representedClassName="WithPosition" syncable="YES">
         <attribute name="degreeOfDifficulty" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="diveNbr" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="positionId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
