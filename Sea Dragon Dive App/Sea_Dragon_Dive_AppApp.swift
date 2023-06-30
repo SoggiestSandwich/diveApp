@@ -13,7 +13,7 @@ struct Sea_Dragon_Dive_AppApp: App {
 
     var body: some Scene {
         WindowGroup {
-            DataBaseFiller()
+            LoginScreenView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }

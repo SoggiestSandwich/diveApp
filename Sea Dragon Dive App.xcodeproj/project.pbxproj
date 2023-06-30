@@ -16,7 +16,6 @@
 		161FF7542A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74C2A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift */; };
 		161FF7552A4F41FC0096F2C8 /* Dive+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74D2A4F41FC0096F2C8 /* Dive+CoreDataClass.swift */; };
 		161FF7562A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF74E2A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift */; };
-		161FF7592A4F69890096F2C8 /* DataBaseFiller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */; };
 		162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */; };
 		16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */; };
 		16C049E62A3BA6AE003C623D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E52A3BA6AE003C623D /* Assets.xcassets */; };
@@ -42,7 +41,6 @@
 		161FF74C2A4F41FC0096F2C8 /* WithPosition+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WithPosition+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		161FF74D2A4F41FC0096F2C8 /* Dive+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dive+CoreDataClass.swift"; sourceTree = "<group>"; };
 		161FF74E2A4F41FC0096F2C8 /* Dive+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dive+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataBaseFiller.swift; sourceTree = "<group>"; };
 		162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreInfoView.swift; sourceTree = "<group>"; };
 		16C049DE2A3BA6AD003C623D /* Sea Dragon Dive App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sea Dragon Dive App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sea_Dragon_Dive_AppApp.swift; sourceTree = "<group>"; };
@@ -138,7 +136,6 @@
 		16C049F62A3BB085003C623D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				161FF7582A4F69890096F2C8 /* DataBaseFiller.swift */,
 				16C049F42A3BA6F1003C623D /* LoginScreenView.swift */,
 				161FF7142A4E22890096F2C8 /* Scoring */,
 			);
@@ -233,7 +230,6 @@
 			files = (
 				161FF7532A4F41FC0096F2C8 /* WithPosition+CoreDataClass.swift in Sources */,
 				161FF7502A4F41FC0096F2C8 /* Position+CoreDataProperties.swift in Sources */,
-				161FF7592A4F69890096F2C8 /* DataBaseFiller.swift in Sources */,
 				16C049F52A3BA6F1003C623D /* LoginScreenView.swift in Sources */,
 				16C049EE2A3BA6AE003C623D /* Sea_Dragon_Dive_App.xcdatamodeld in Sources */,
 				16C04A042A40B642003C623D /* ScoreView.swift in Sources */,
@@ -382,6 +378,7 @@
 				DEVELOPMENT_TEAM = J3WKRLGM6Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan QR codes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -414,6 +411,7 @@
 				DEVELOPMENT_TEAM = J3WKRLGM6Q;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app uses the camera to scan QR codes.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

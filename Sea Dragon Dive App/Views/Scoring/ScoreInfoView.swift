@@ -90,7 +90,7 @@ struct ScoreInfoView: View {
                     }
                     halfAdded = true
                 } label: {
-                    Text(currentDiver == diverList.count - 1 && currentDive == diverList[currentDiver].dives.count - 1 ? "Finish Event" : "Next Diver")
+                    Text(currentDiver == diverList.count - 1 && currentDive >= diverList[currentDiver].dives.count - 1 ? "Finish Event" : "Next Diver")
                         .padding(.bottom)
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .bold()
@@ -150,7 +150,7 @@ struct ScoreInfoView: View {
 
 struct ScoreInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreInfoView(diverList: [diverEntry(dives: ["Kakorward Kakwist"], level: 0, name: "Kakaw", team: "Kakawington High")])
+        ScoreInfoView(diverList: [diverEntry(dives: ["Kakorward Kakwist", "h"], level: 0, name: "Kakaw", team: "Kakawington High"), diverEntry(dives: ["Kakorward Kakwist", "h"], level: 0, name: "Kakaw", team: "Kakawington High")])
     }
 }
 /*
