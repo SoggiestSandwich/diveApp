@@ -6,10 +6,11 @@
 //
 
 import CoreData
+import SwiftUI
 
 struct PersistenceController {
     static let shared = PersistenceController()
-
+    
     static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
@@ -23,9 +24,9 @@ struct PersistenceController {
         }
         return result
     }()
-
+    
     let container: NSPersistentContainer
-
+    
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "Sea_Dragon_Dive_App")
         if inMemory {
@@ -35,7 +36,7 @@ struct PersistenceController {
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
                 // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
+                
                 /*
                  Typical reasons for an error here include:
                  * The parent directory does not exist, cannot be created, or disallows writing.
@@ -50,4 +51,34 @@ struct PersistenceController {
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
+    /*func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+       preloadData()
+        
+        return true
+    }
+    
+    private func preloadData() {
+        let preloadedDataKey = "didPreloadData"
+        let userDefaults = UserDefaults.standard
+        
+        if userDefaults.bool(forKey: preloadedDataKey) == false {
+            guard let urlPath = Bundle.main.url(forResource: "DiveData", withExtension: "plist") else {
+                return
+            }
+            
+            let backgroundContext = container.newBackgroundContext()
+            
+            backgroundContext.perform {
+                
+                if let arrayContents = NSArray(contentsOf: urlPath) as? [[String: Any]] {
+                    for dictionary in arrayContents {
+                        let categoryObject = Category(context: backgroundContext)
+                        var categoryArray = dictionary["item 3"]
+                        print(categoryArray ?? "Failed")
+                    }
+                    //userDefaults.set(true, forKey: preloadedDataKey)
+                }
+            }
+        }
+    }*/
 }
