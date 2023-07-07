@@ -16,18 +16,18 @@ struct ScoreView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
-    @State var score: Float
+    @State var score: Double
     @State var offset = CGSize.zero
     
     var index: Int
     
     @State var dragState = DragState.unknown
     
-    var onChanged: ((CGPoint, Float) -> DragState)?
-    var onEnded: ((CGPoint, Int, Float) -> Void)?
+    var onChanged: ((CGPoint, Double) -> DragState)?
+    var onEnded: ((CGPoint, Int, Double) -> Void)?
     
     var body: some View {
-                Text(String(format: setFormat(score: score), score))
+        Text(String(format: setFormat(score: Float(score)), score))
                     .font(.title)
                     .frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.width * 0.13 : UIScreen.main.bounds.size.width * 0.06, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.05 : UIScreen.main.bounds.size.width * 0.033)
                     .overlay(

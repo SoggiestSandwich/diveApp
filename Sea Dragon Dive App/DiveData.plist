@@ -649,7 +649,7 @@
 			<integer>3</integer>
 			<integer>4</integer>
 		</array>
-		<key>CategoryName</key>
+		<key>categoryName</key>
 		<array>
 			<string>Forward</string>
 			<string>Back</string>

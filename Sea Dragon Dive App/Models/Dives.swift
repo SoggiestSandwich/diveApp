@@ -9,6 +9,7 @@ import Foundation
 
 struct dives {
     let name: String
-    let degreeOfDiff: Float
-    var score: Float
+    let degreeOfDiff: Double
+    var score: Double
+    let position: String
 }

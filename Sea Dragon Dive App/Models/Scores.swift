@@ -8,7 +8,7 @@
 import Foundation
 
 struct scores: Identifiable {
-    var score: Float
+    var score: Double
     var index: Int
     let id = UUID()
 }

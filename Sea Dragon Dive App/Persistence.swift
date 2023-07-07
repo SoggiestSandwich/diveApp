@@ -51,34 +51,4 @@ struct PersistenceController {
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
-    /*func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-       preloadData()
-        
-        return true
-    }
-    
-    private func preloadData() {
-        let preloadedDataKey = "didPreloadData"
-        let userDefaults = UserDefaults.standard
-        
-        if userDefaults.bool(forKey: preloadedDataKey) == false {
-            guard let urlPath = Bundle.main.url(forResource: "DiveData", withExtension: "plist") else {
-                return
-            }
-            
-            let backgroundContext = container.newBackgroundContext()
-            
-            backgroundContext.perform {
-                
-                if let arrayContents = NSArray(contentsOf: urlPath) as? [[String: Any]] {
-                    for dictionary in arrayContents {
-                        let categoryObject = Category(context: backgroundContext)
-                        var categoryArray = dictionary["item 3"]
-                        print(categoryArray ?? "Failed")
-                    }
-                    //userDefaults.set(true, forKey: preloadedDataKey)
-                }
-            }
-        }
-    }*/
 }

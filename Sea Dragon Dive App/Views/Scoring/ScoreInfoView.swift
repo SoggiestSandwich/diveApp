@@ -11,7 +11,7 @@ struct ScoreInfoView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.verticalSizeClass) var verticalSizeClass
     
-    @State var diverList: [diverEntry]
+    @State var diverList: [divers]
     
     @State private var currentDiver: Int = 0
     @State private var currentDive: Int = 0
@@ -73,8 +73,8 @@ struct ScoreInfoView: View {
                             currentDiver = currentDiver + 1
                             currentIndex = 0
                         }
-                        else if currentDiver + 1 == diverList.count && currentDive + 1 == diverList.count {
-                            
+                        else if currentDiver + 1 == diverList.count && currentDive + 1 == diverList[currentDiver].dives.count {
+                            //finish event
                         }
                         else {
                             while !scoresArray.isEmpty {
@@ -111,9 +111,9 @@ struct ScoreInfoView: View {
             .padding(verticalSizeClass == .regular ? .horizontal : .top)
             
             Spacer()
-            Text(diverList[currentDiver].name)
+            Text(diverList[currentDiver].diverEntries.name)
                 .font(.title2.bold())
-            Text("\(diverList[currentDiver].team ?? "")\nDive \(currentDive + 1) - \(diverList[currentDiver].dives[currentDive])\nDegree of Difficulty: ")
+            Text("\(diverList[currentDiver].diverEntries.team ?? "")\nDive \(currentDive + 1) - \(diverList[currentDiver].dives[currentDive].name) - \(diverList[currentDiver].dives[currentDive].position)\nDegree of Difficulty: \(String(diverList[currentDiver].dives[currentDive].degreeOfDiff))")
                 .frame(alignment: .center)
                 .padding(.horizontal)
                 .font(.system(size: verticalSizeClass == .regular ? 20 : 15))
@@ -125,10 +125,10 @@ struct ScoreInfoView: View {
     
     func nextDiver() -> String {
         if currentDiver < diverList.count - 1 {
-            return diverList[currentDiver + 1].name
+            return diverList[currentDiver + 1].diverEntries.name
         }
         else if currentDiver == diverList.count - 1 && currentDive != diverList[currentDiver].dives.count - 1 {
-            return diverList[0].name
+            return diverList[0].diverEntries.name
         }
         else {
             return ""
@@ -137,10 +137,10 @@ struct ScoreInfoView: View {
     
     func previousDiver() -> String {
         if currentDiver > 0 {
-            return diverList[currentDiver - 1].name
+            return diverList[currentDiver - 1].diverEntries.name
         }
         else if currentDiver == 0 && currentDive != 0 {
-            return diverList[diverList.count - 1].name
+            return diverList[diverList.count - 1].diverEntries.name
         }
         else {
             return ""
@@ -150,14 +150,13 @@ struct ScoreInfoView: View {
 
 struct ScoreInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreInfoView(diverList: [diverEntry(dives: ["Kakorward Kakwist", "h"], level: 0, name: "Kakaw", team: "Kakawington High"), diverEntry(dives: ["Kakorward Kakwist", "h"], level: 0, name: "Kakaw", team: "Kakawington High")])
+        ScoreInfoView(diverList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: 0, position: "tempPos")], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"))])
     }
 }
 /*
-struct diverEntry: Codable, Hashable {
-    let dives: [String]
-    let level: Int
+struct dives {
     let name: String
-    var team: String?
+    let degreeOfDiff: Double
+    var score: Double
 }
 */

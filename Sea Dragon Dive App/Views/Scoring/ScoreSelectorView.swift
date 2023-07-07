@@ -19,7 +19,7 @@ struct ScoreSelectorView: View {
     
     @Binding var currentIndex: Int
     @Binding var currentDiver: Int
-    @Binding var diverList: [diverEntry]
+    @Binding var diverList: [divers]
     @Binding var currentDive: Int
     
     @State var findTrash: Int = 0
@@ -63,7 +63,7 @@ struct ScoreSelectorView: View {
             HStack {
                 Text("Score: ")
                     .font(.title2.bold())
-                Text(String(format: "%.2f", /*diverList[currentDiver].dives[currentDive].score*/1))
+                Text(String(format: "%.2f", diverList[currentDiver].dives[currentDive].score))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
                     .overlay(
@@ -73,7 +73,7 @@ struct ScoreSelectorView: View {
                 
                 Text("Total: ")
                     .font(.title2.bold())
-                Text(String(format: "%.2f", diverList[currentDiver].score ?? 0))
+                Text(String(format: "%.2f", diverList[currentDiver].diverEntries.score ?? 0))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
                     .overlay(
@@ -89,7 +89,7 @@ struct ScoreSelectorView: View {
                         Button {
                             if scoresArray.count < 7 {
                                 currentIndex = currentIndex + 1
-                                let tempScore = scores(score: Float(number), index: currentIndex)
+                                let tempScore = scores(score: Double(number), index: currentIndex)
                                 scoresArray.append(tempScore)
                             }
                             halfAdded = false
@@ -177,14 +177,14 @@ struct ScoreSelectorView: View {
     }
     
     func SetRoundScore() {
-        //diverList[currentDiver].dives[currentDive].score = 0
-        diverList[currentDiver].score = 0
-        var max: Float = -1
-        var min: Float = 11
+        diverList[currentDiver].dives[currentDive].score = 0
+        diverList[currentDiver].diverEntries.score = 0
+        var max: Double = -1
+        var min: Double = 11
         var maxIndex: Int = 0
         var minIndex: Int = 8
         for scores in scoresArray {
-            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score + scores.score
+            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score + scores.score
         }
         if scoresArray.count >= 5 {
             for scores in scoresArray {
@@ -193,7 +193,7 @@ struct ScoreSelectorView: View {
                     maxIndex = scores.index
                 }
             }
-            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
             
             for scores in scoresArray {
                 if scores.score < min {
@@ -201,7 +201,7 @@ struct ScoreSelectorView: View {
                     minIndex = scores.index
                 }
             }
-            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
             max = -1
             min = 11
         }
@@ -211,23 +211,23 @@ struct ScoreSelectorView: View {
                     max = scores.score
                 }
             }
-            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
             
             for scores in scoresArray {
                 if scores.score <= min && scores.index != minIndex {
                     min = scores.score
                 }
             }
-            //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
         }
-        //diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score * diverList[currentDiver].dives[currentDive].degreeOfDiff
+        diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score * diverList[currentDiver].dives[currentDive].degreeOfDiff
         
         for dive in diverList[currentDiver].dives {
-            //diverList[currentDiver].score = diverList[currentDiver].score + dive.score
+            diverList[currentDiver].diverEntries.score = (diverList[currentDiver].diverEntries.score ?? 0) + dive.score
         }
     }
     
-    func scoreMoved(location: CGPoint, score: Float) -> DragState {
+    func scoreMoved(location: CGPoint, score: Double) -> DragState {
         findTrash = findTrash + 1
         let match = buttonFrames.firstIndex(where: {
             $0.contains(location)
@@ -240,7 +240,7 @@ struct ScoreSelectorView: View {
         }
     }
     
-    func scoreDropped(location: CGPoint, scoreIndex: Int, score: Float) {
+    func scoreDropped(location: CGPoint, scoreIndex: Int, score: Double) {
         let match = buttonFrames.firstIndex(where: {
             $0.contains(location)
         })
@@ -261,6 +261,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([diverEntry(dives: ["Kakorward Kakwist"], level: 0, name: "Kakaw", team: "Kakawington High")]), currentDive: .constant(0))
+        ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: 0, position: "tempPos")], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0))
     }
 }
