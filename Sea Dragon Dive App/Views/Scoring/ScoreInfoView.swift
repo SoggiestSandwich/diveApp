@@ -14,6 +14,7 @@ struct ScoreInfoView: View {
     
     @State var diverList: [divers]
     
+    @State var dropDiverAlert = false
     @State var backAlert = false
     @State private var currentDiver: Int = 0
     @State private var currentDive: Int = 0
@@ -93,6 +94,9 @@ struct ScoreInfoView: View {
                                     currentIndex = 0
                                 }
                             }
+                            else if diverList[currentDiver].dives[currentDive].score.count == 0 {
+                                dropDiverAlert = true
+                            }
                             else {
                                 
                             }
@@ -114,6 +118,14 @@ struct ScoreInfoView: View {
                                         .font(.subheadline)
                                 )
                                 .padding(.trailing)
+                        }
+                        .alert("No scores were submitted", isPresented: $dropDiverAlert) {
+                            Button("Cancel", role: .cancel) {}
+                            Button("Confirm") {
+                                self.presentationMode.wrappedValue.dismiss()
+                            }
+                        } message: {
+                            Text("would you like to continue and drop this diver?")
                         }
                     }
                 }
