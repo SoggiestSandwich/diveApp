@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct LoginScreenView: View {
+    //@StateObject private var store = EventStore()
     @State var username: String = ""
     @State var userSchool: String = ""
     @State var selection: Int = 0
@@ -85,7 +86,8 @@ struct LoginScreenView: View {
     @ViewBuilder
     func getDestination() -> some View {
         switch selection {
-        case 3: AddDiversView()
+        case 3: EventSelectionView()
+            
         default: EmptyView()
         }
     }

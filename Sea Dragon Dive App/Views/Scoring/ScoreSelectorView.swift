@@ -12,13 +12,15 @@ struct ScoreSelectorView: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
+    @EnvironmentObject var eventStore: EventStore
+    
     @Binding var halfAdded: Bool
     @State var buttonFrames = [CGRect](repeating: .zero, count: 1)
-    
     @Binding var currentIndex: Int
     @Binding var currentDiver: Int
     @Binding var diverList: [divers]
     @Binding var currentDive: Int
+    @Binding var eventList: events
     
     @State var findTrash: Int = 0
     
@@ -64,20 +66,12 @@ struct ScoreSelectorView: View {
                 Text(String(format: "%.2f", diverList[currentDiver].dives[currentDive].roundScore))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
-                    .overlay(
-                        Rectangle()
-                            .stroke(lineWidth: 2)
-                    )
                 
                 Text("Total: ")
                     .font(.title2.bold())
                 Text(String(format: "%.2f", diverList[currentDiver].diverEntries.score ?? 0))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
-                    .overlay(
-                        Rectangle()
-                            .stroke(lineWidth: 2)
-                    )
             }
             .padding()
             
@@ -92,6 +86,7 @@ struct ScoreSelectorView: View {
                             }
                             halfAdded = false
                             SetRoundScore()
+                            saveEventData()
                         } label: {
                             Text("\(number)")
                                 .frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.width * 0.18 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.04 : 0)
@@ -113,6 +108,7 @@ struct ScoreSelectorView: View {
                             }
                             halfAdded = true
                             SetRoundScore()
+                            saveEventData()
                         } label: {
                             Text("+.5")
                                 .frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.width * 0.18 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.04 : 0)
@@ -134,6 +130,7 @@ struct ScoreSelectorView: View {
                             }
                             halfAdded = false
                             SetRoundScore()
+                            saveEventData()
                         } label: {
                             Text("0")
                                 .frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.width * 0.18 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.04 : 0)
@@ -155,6 +152,7 @@ struct ScoreSelectorView: View {
                             }
                             halfAdded = true
                             SetRoundScore()
+                            saveEventData()
                         } label: {
                             Text("10")
                                 .frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.width * 0.18 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.04 : 0)
@@ -259,11 +257,31 @@ struct ScoreSelectorView: View {
                 i = i + 1
             }
         }
+        saveEventData()
+    }
+    
+    func saveEventData() {
+        for diver in diverList {
+            if diver.diverEntries.level == 0 {
+                eventList.EList.append(diver)
+            }
+            else if diver.diverEntries.level == 1 {
+                eventList.JVList.append(diver)
+            }
+            else if diver.diverEntries.level == 2 {
+                eventList.VList.append(diver)
+            }
+        }
+        eventStore.saveEvent()
+        
+        eventList.EList = []
+        eventList.JVList = []
+        eventList.VList = []
     }
 }
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0))
+        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [])))
     }
 }

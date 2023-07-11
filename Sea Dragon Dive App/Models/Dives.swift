@@ -7,15 +7,16 @@
 
 import Foundation
 
-struct dives: Hashable {
+struct dives: Hashable, Codable {
     let name: String
     let degreeOfDiff: Double
     var score: [scores]
     let position: String
     var roundScore: Double
+    var scored: Bool?
     
     static func == (lhs: dives, rhs: dives) -> Bool {
-        return lhs.name == rhs.name && lhs.degreeOfDiff == rhs.degreeOfDiff && lhs.score == rhs.score && lhs.position == rhs.position && lhs.roundScore == rhs.roundScore
+        return lhs.name == rhs.name && lhs.degreeOfDiff == rhs.degreeOfDiff && lhs.score == rhs.score && lhs.position == rhs.position && lhs.roundScore == rhs.roundScore && lhs.scored == rhs.scored
     }
     func hash(into hasher: inout Hasher) {
         hasher.combine(name)
@@ -23,5 +24,6 @@ struct dives: Hashable {
         hasher.combine(score)
         hasher.combine(position)
         hasher.combine(roundScore)
+        hasher.combine(scored)
     }
 }
