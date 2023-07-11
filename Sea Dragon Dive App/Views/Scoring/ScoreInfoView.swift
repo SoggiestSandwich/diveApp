@@ -123,7 +123,7 @@ struct ScoreInfoView: View {
                             Button("Cancel", role: .cancel) {}
                             Button("Confirm") {
                                 print("aaaaaaaaaaaa")
-                                print("")
+                                print("opopopopopopo")
                             }
                         } message: {
                             Text("would you like to continue and drop this diver?")
