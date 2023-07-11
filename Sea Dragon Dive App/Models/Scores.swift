@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct scores: Identifiable {
+struct scores: Identifiable, Hashable {
     var score: Double
     var index: Int
     let id = UUID()

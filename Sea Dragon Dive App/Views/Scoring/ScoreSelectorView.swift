@@ -12,8 +12,6 @@ struct ScoreSelectorView: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
-    @Binding var scoresArray: [scores]
-    
     @Binding var halfAdded: Bool
     @State var buttonFrames = [CGRect](repeating: .zero, count: 1)
     
@@ -35,7 +33,7 @@ struct ScoreSelectorView: View {
                         .padding(.bottom)
                     //scores
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 30, maximum: 150)), count: verticalSizeClass == .regular ? 3 : 7)) {
-                        ForEach(scoresArray) { score in
+                        ForEach(diverList[currentDiver].dives[currentDive].score) { score in
                             ScoreView(score: score.score, index: score.index, onChanged: self.scoreMoved, onEnded: self.scoreDropped)
                         }
                     }
@@ -63,7 +61,7 @@ struct ScoreSelectorView: View {
             HStack {
                 Text("Score: ")
                     .font(.title2.bold())
-                Text(String(format: "%.2f", diverList[currentDiver].dives[currentDive].score))
+                Text(String(format: "%.2f", diverList[currentDiver].dives[currentDive].roundScore))
                     .padding(5)
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
                     .overlay(
@@ -87,10 +85,10 @@ struct ScoreSelectorView: View {
                 ForEach(1...12, id: \.self) { number in
                     if number < 10 {
                         Button {
-                            if scoresArray.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: Double(number), index: currentIndex)
-                                scoresArray.append(tempScore)
+                                diverList[currentDiver].dives[currentDive].score.append(tempScore)
                             }
                             halfAdded = false
                             SetRoundScore()
@@ -109,8 +107,8 @@ struct ScoreSelectorView: View {
                     else if number == 10 {
                         Button {
                             if !halfAdded {
-                                if scoresArray[scoresArray.count - 1].score < 10 {
-                                    scoresArray[currentIndex - 1] = scores(score: scoresArray[currentIndex - 1].score + 0.5, index: currentIndex)
+                                if diverList[currentDiver].dives[currentDive].score[diverList[currentDiver].dives[currentDive].score.count - 1].score < 10 {
+                                    diverList[currentDiver].dives[currentDive].score[currentIndex - 1] = scores(score: diverList[currentDiver].dives[currentDive].score[currentIndex - 1].score + 0.5, index: currentIndex)
                                 }
                             }
                             halfAdded = true
@@ -129,10 +127,10 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 11 {
                         Button {
-                            if scoresArray.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 0, index: currentIndex)
-                                scoresArray.append(tempScore)
+                                diverList[currentDiver].dives[currentDive].score.append(tempScore)
                             }
                             halfAdded = false
                             SetRoundScore()
@@ -150,10 +148,10 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 12 {
                         Button {
-                            if scoresArray.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 10, index: currentIndex)
-                                scoresArray.append(tempScore)
+                                diverList[currentDiver].dives[currentDive].score.append(tempScore)
                             }
                             halfAdded = true
                             SetRoundScore()
@@ -177,54 +175,59 @@ struct ScoreSelectorView: View {
     }
     
     func SetRoundScore() {
-        diverList[currentDiver].dives[currentDive].score = 0
-        diverList[currentDiver].diverEntries.score = 0
+        var roundScore: Double = 0
         var max: Double = -1
         var min: Double = 11
         var maxIndex: Int = 0
         var minIndex: Int = 8
-        for scores in scoresArray {
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score + scores.score
+        for scores in diverList[currentDiver].dives[currentDive].score {
+            roundScore = roundScore + scores.score
         }
-        if scoresArray.count >= 5 {
-            for scores in scoresArray {
+        if diverList[currentDiver].dives[currentDive].score.count >= 5 {
+            for scores in diverList[currentDiver].dives[currentDive].score {
                 if scores.score > max {
                     max = scores.score
                     maxIndex = scores.index
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            roundScore = roundScore - max
             
-            for scores in scoresArray {
+            for scores in diverList[currentDiver].dives[currentDive].score {
                 if scores.score < min {
                     min = scores.score
                     minIndex = scores.index
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            roundScore = roundScore - min
             max = -1
             min = 11
         }
-        if scoresArray.count == 7 {
-            for scores in scoresArray {
+        if diverList[currentDiver].dives[currentDive].score.count == 7 {
+            for scores in diverList[currentDiver].dives[currentDive].score {
                 if scores.score >= max && scores.index != maxIndex {
                     max = scores.score
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - max
+            roundScore = roundScore - max
             
-            for scores in scoresArray {
+            for scores in diverList[currentDiver].dives[currentDive].score {
                 if scores.score <= min && scores.index != minIndex {
                     min = scores.score
                 }
             }
-            diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score - min
+            roundScore = roundScore - min
         }
-        diverList[currentDiver].dives[currentDive].score = diverList[currentDiver].dives[currentDive].score * diverList[currentDiver].dives[currentDive].degreeOfDiff
-        
+        roundScore = roundScore * diverList[currentDiver].dives[currentDive].degreeOfDiff
+        diverList[currentDiver].dives[currentDive].roundScore = roundScore
+        SetTotalScore()
+    }
+    
+    func SetTotalScore() {
+        var totalScore: Double = 0
         for dive in diverList[currentDiver].dives {
-            diverList[currentDiver].diverEntries.score = (diverList[currentDiver].diverEntries.score ?? 0) + dive.score
+            totalScore += dive.roundScore
         }
+        diverList[currentDiver].diverEntries.score = totalScore
     }
     
     func scoreMoved(location: CGPoint, score: Double) -> DragState {
@@ -247,12 +250,12 @@ struct ScoreSelectorView: View {
         if match != nil {
             currentIndex = currentIndex - 1
             
-            scoresArray.remove(at: scoreIndex - 1)
+            diverList[currentDiver].dives[currentDive].score.remove(at: scoreIndex - 1)
             SetRoundScore()
             
             var i = 0
-            while i < scoresArray.count {
-                scoresArray[i].index = i + 1
+            while i < diverList[currentDiver].dives[currentDive].score.count {
+                diverList[currentDiver].dives[currentDive].score[i].index = i + 1
                 i = i + 1
             }
         }
@@ -261,6 +264,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(scoresArray: .constant([]), halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: 0, position: "tempPos")], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0))
+        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0))
     }
 }

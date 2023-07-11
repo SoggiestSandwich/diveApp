@@ -15,7 +15,7 @@ struct coachEntry: Codable {
 
 struct diverEntry: Codable, Hashable {
     let dives: [String]
-    let level: Int
+    var level: Int
     let name: String
     var team: String?
     var score: Double?

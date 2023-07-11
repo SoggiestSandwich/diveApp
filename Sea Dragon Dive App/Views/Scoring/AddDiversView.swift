@@ -28,6 +28,7 @@ struct AddDiversView: View {
     @State private var editingList = true
     @State private var showPopUp = false
     @State private var showAlert = false
+    @State private var teamsArray: [String] = []
     
     struct Codes: Identifiable {
         let name: String
@@ -49,7 +50,19 @@ struct AddDiversView: View {
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         if entries != nil {
                             if checkCodeValidity(entry: entries!) {
-                                coachList = []
+                                for team in teamsArray {
+                                    var breakLoop = false
+                                    if team == entries?.team {
+                                        for coach in 0..<coachList.count {
+                                            if !breakLoop {
+                                                if coachList[coach].team == entries?.team {
+                                                    coachList.remove(at: coach)
+                                                    breakLoop = true
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 coachList.append(entries!)
                                 sortDivers()
                             }
@@ -121,7 +134,7 @@ struct AddDiversView: View {
                 .sheet(isPresented: $isPresentingScanner) {
                     self.ScannerSheet
                 }
-
+                
                 //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
                 Button {
                     if !consolidateDiverList().isEmpty {
@@ -161,6 +174,9 @@ struct AddDiversView: View {
     }
     
     func sortDivers() {
+        JVList = []
+        VList = []
+        EList = []
         for coach in coachList {
             for diver in coach.diverEntries {
                 if diver.level == 0 {
@@ -179,6 +195,111 @@ struct AddDiversView: View {
                     VList[VList.count - 1].score = 0
                 }
             }
+        }
+        //create array of every team
+        for diver in EList {
+            var addTeam = true
+            for tempTeam in teamsArray {
+                if diver.team == tempTeam {
+                    addTeam = false
+                }
+            }
+            if addTeam == true {
+                teamsArray.append(diver.team!)
+            }        }
+        if !EList.isEmpty {
+            sortEListByTeam()
+        }
+        if !JVList.isEmpty {
+            sortJVListByTeam()
+        }
+        if !VList.isEmpty {
+            sortVListByTeam()
+        }
+    }
+    
+    func sortEListByTeam() {
+        var index: Int = 0
+        var tempEList: [diverEntry] = []
+        
+        while !EList.isEmpty {
+            var breakLoop = false
+            for diver in 0..<EList.count {
+                if breakLoop == false {
+                    if EList[diver].team == teamsArray[index] {
+                        tempEList.append(EList[diver])
+                        EList.remove(at: diver)
+                        breakLoop = true
+                    }
+                }
+            }
+            if index != teamsArray.count - 1 {
+                index += 1
+            }
+            else {
+                index = 0
+            }
+        }
+        while !tempEList.isEmpty {
+            EList.append(tempEList[tempEList.count - 1])
+            tempEList.remove(at: tempEList.count - 1)
+        }
+    }
+    
+    func sortJVListByTeam() {
+        var index: Int = 0
+        var tempJVList: [diverEntry] = []
+        
+        while !JVList.isEmpty {
+            var breakLoop = false
+            for diver in 0..<JVList.count {
+                if !breakLoop {
+                    if JVList[diver].team == teamsArray[index] {
+                        tempJVList.append(JVList[diver])
+                        JVList.remove(at: diver)
+                        breakLoop = true
+                    }
+                }
+            }
+            if index != teamsArray.count - 1 {
+                index += 1
+            }
+            else {
+                index = 0
+            }
+        }
+        while !tempJVList.isEmpty {
+            EList.append(tempJVList[tempJVList.count - 1])
+            tempJVList.remove(at: tempJVList.count - 1)
+        }
+    }
+    
+    
+    func sortVListByTeam() {
+        var index: Int = 0
+        var tempVList: [diverEntry] = []
+        
+        while !VList.isEmpty {
+            var breakLoop = false
+            for diver in 0..<VList.count {
+                if !breakLoop {
+                    if VList[diver].team == teamsArray[index] {
+                        tempVList.append(VList[diver])
+                        VList.remove(at: diver)
+                        breakLoop = true
+                    }
+                }
+            }
+            if index != teamsArray.count - 1 {
+                index += 1
+            }
+            else {
+                index = 0
+            }
+        }
+        while !tempVList.isEmpty {
+            EList.append(tempVList[tempVList.count - 1])
+            tempVList.remove(at: tempVList.count - 1)
         }
     }
     
@@ -207,6 +328,7 @@ struct AddDiversView: View {
     }
     
     func makeFinalDiverList() {
+        diversWithDives = []
         for diver in consolidateDiverList() {
             var diveList: [dives] = []
             for dive in diver.dives {
@@ -242,7 +364,7 @@ struct AddDiversView: View {
                     }
                 }
                 
-                let newDive = dives(name: name, degreeOfDiff: dOD, score: 0, position: positionName)
+                let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0)
                 diveList.append(newDive)
             }
             diversWithDives.append(divers(dives: diveList, diverEntries: diver))
