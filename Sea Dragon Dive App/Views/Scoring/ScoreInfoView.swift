@@ -122,6 +122,7 @@ struct ScoreInfoView: View {
                         .alert("No scores were submitted", isPresented: $dropDiverAlert) {
                             Button("Cancel", role: .cancel) {}
                             Button("Confirm") {
+                                print("aaaaaaaaaaaa")
                                 print("")
                             }
                         } message: {
