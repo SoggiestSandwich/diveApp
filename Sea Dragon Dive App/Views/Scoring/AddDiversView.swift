@@ -104,6 +104,8 @@ struct AddDiversView: View {
                                 eventList.EList = []
                                 eventList.JVList = []
                                 eventList.VList = []
+                                
+                                reviewed = false
                             }
                             else {
                                 //popup saying invalid qr code was scanned
@@ -270,17 +272,17 @@ struct AddDiversView: View {
                 if diver.level == 0 {
                     EList.append(divers(dives: [], diverEntries: diver))
                     EList[EList.count - 1].diverEntries.team = coach.team
-                    EList[EList.count - 1].diverEntries.score = 0
+                    EList[EList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 1 {
                     JVList.append(divers(dives: [], diverEntries: diver))
                     JVList[JVList.count - 1].diverEntries.team = coach.team
-                    JVList[JVList.count - 1].diverEntries.score = 0
+                    JVList[JVList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 2 {
                     VList.append(divers(dives: [], diverEntries: diver))
                     VList[VList.count - 1].diverEntries.team = coach.team
-                    VList[VList.count - 1].diverEntries.score = 0
+                    VList[VList.count - 1].diverEntries.totalScore = 0
                 }
             }
         }
@@ -430,12 +432,15 @@ struct AddDiversView: View {
     
     func deleteEDiver(at offsets: IndexSet) {
         EList.remove(atOffsets: offsets)
+        reviewed = false
     }
     func deleteJVDiver(at offsets: IndexSet) {
         JVList.remove(atOffsets: offsets)
+        reviewed = false
     }
     func deleteVDiver(at offsets: IndexSet) {
         VList.remove(atOffsets: offsets)
+        reviewed = false
     }
     
     func makeFinalDiverList() {
@@ -523,7 +528,7 @@ struct AddDiversView: View {
     
     struct AddDiversView_Previews: PreviewProvider {
         static var previews: some View {
-            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [])))
+            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false)))
         }
     }
 }

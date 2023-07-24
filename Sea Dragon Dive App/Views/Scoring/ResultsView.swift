@@ -12,10 +12,15 @@ struct ResultsView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State var unsortedDiverList: [divers]
+    @State var isPresentingTeamSelector: Bool = false
+    @State var eventList: events
     
     var body: some View {
         NavigationStack {
             VStack {
+                NavigationLink(destination: ScoreInfoView(diverList: unsortedDiverList, lastDiverIndex: unsortedDiverList.count - 1, EList: $eventList.EList, JVList: $eventList.JVList, VList: $eventList.VList, eventList: $eventList)) {
+                        Text("Edit Event")
+                    }
                 List {
                     //list divers in placement order
                     Section(header: Text(setVList().isEmpty ? "" : "Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
@@ -23,33 +28,32 @@ struct ResultsView: View {
                             HStack {
                                 Text("\(diver.skip == true ? "DQ" : "\(String(diver.placement!)).")")
                                     .padding(.trailing)
-                                    .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 Text("\(diver.diverEntries.name)\n\(diver.diverEntries.team ?? "")")
-                                    .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 Spacer()
                                 if diver.placementScore != nil {
                                     Text(diver.placementScore == -1 ? "-" : String(format: "%.2f", diver.placementScore!))
-                                        .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
+                                        .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 }
                             }
-                            .listRowBackground(diver.skip == true ? colorScheme == .dark ? Color.black : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
+                            .listRowBackground(diver.skip == true ? colorScheme == .dark ? Color(red: 1, green: 1, blue: 1, opacity: 0.125) : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
                         }
                     }
                     Section(header: Text(setJVList().isEmpty ? "" : "Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         ForEach(Array(zip(setJVList().indices, setJVList())), id: \.1) { index, diver in
                             HStack {
                                 Text("\(diver.skip == true ? "DQ" : "\(String(diver.placement!)).")")
-                                    .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
-                                    .padding(.trailing)
+                                    .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 Text("\(diver.diverEntries.name)\n\(diver.diverEntries.team ?? "")")
-                                    .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
+                                    .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 Spacer()
                                 if diver.placementScore != nil {
                                     Text(diver.placementScore == -1 ? "-" : String(format: "%.2f", diver.placementScore!))
-                                        .foregroundColor(diver.placement == 1 ? Color.black : colorScheme == .dark ? .white : .black)
+                                        .foregroundColor(diver.placement == 1 ? diver.skip == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
                                 }
                             }
-                            .listRowBackground(diver.skip == true ? colorScheme == .dark ? Color.black : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
+                            .listRowBackground(diver.skip == true ? colorScheme == .dark ? Color(red: 1, green: 1, blue: 1, opacity: 0.125) : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
                         }
                     }
                     
@@ -69,7 +73,7 @@ struct ResultsView: View {
                 }
             }
             Button {
-                
+                isPresentingTeamSelector = true
             } label: {
                 Text("Create QR Code")
                     .font(.title2.bold())
@@ -81,10 +85,13 @@ struct ResultsView: View {
                     )
             }
         }
+        .sheet(isPresented: $isPresentingTeamSelector) {
+            TeamSelevtorView(diverList: unsortedDiverList)
+        }
         .onAppear {
             for diver in 0..<unsortedDiverList.count {
                 if unsortedDiverList[diver].skip != true {
-                        unsortedDiverList[diver].placementScore = unsortedDiverList[diver].diverEntries.score
+                        unsortedDiverList[diver].placementScore = unsortedDiverList[diver].diverEntries.totalScore
                 }
                 else {
                     unsortedDiverList[diver].placementScore = -1
@@ -154,13 +161,13 @@ struct ResultsView: View {
 struct ResultsView_Previews: PreviewProvider {
     static var previews: some View {
         ResultsView(unsortedDiverList: [
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawington", team: "Kaw Kawing Ton High", score: 150)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakaw", team: "Kaw Kaw High", score: 150)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawella", team: "Kaw Kaw Ella High", score: 139.25)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawnda", team: "Kaw Kaw Ella High", score: 98.43), skip: true),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakawington", team: "Kaw Kawing Ton High", score: 102)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakaw", team: "Kaw Kaw High", score: 104.2)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakawington", team: "Kaw Kawing Ton High", score: 102)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", score: 150), skip: true)])
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 150)),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150)),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawella", team: "Kaw Kaw Ella High", totalScore: 139.25)),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 2, name: "Kakawnda", team: "Kaw Kaw Ella High", totalScore: 98.43), skip: true),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102), skip: true),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakaw", team: "Kaw Kaw High", totalScore: 104.2), skip: true),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102)),
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], eventList: events(date: "", EList: [], JVList: [], VList: [], finished: true))
     }
 }

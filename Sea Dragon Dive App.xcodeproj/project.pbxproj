@@ -17,6 +17,8 @@
 		161FF7692A6722590096F2C8 /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161FF7682A6722590096F2C8 /* Events.swift */; };
 		162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */; };
 		1670F2352A682FF80061750B /* FileManager+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2342A682FF80061750B /* FileManager+Extension.swift */; };
+		1670F2372A69E3D70061750B /* TeamSelevtorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2362A69E3D70061750B /* TeamSelevtorView.swift */; };
+		1670F2392A69EBDE0061750B /* ResultsQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2382A69EBDE0061750B /* ResultsQRView.swift */; };
 		16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */; };
 		16C049E62A3BA6AE003C623D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E52A3BA6AE003C623D /* Assets.xcassets */; };
 		16C049E92A3BA6AE003C623D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E82A3BA6AE003C623D /* Preview Assets.xcassets */; };
@@ -42,6 +44,8 @@
 		161FF7682A6722590096F2C8 /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
 		162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreInfoView.swift; sourceTree = "<group>"; };
 		1670F2342A682FF80061750B /* FileManager+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+Extension.swift"; sourceTree = "<group>"; };
+		1670F2362A69E3D70061750B /* TeamSelevtorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeamSelevtorView.swift; sourceTree = "<group>"; };
+		1670F2382A69EBDE0061750B /* ResultsQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsQRView.swift; sourceTree = "<group>"; };
 		16C049DE2A3BA6AD003C623D /* Sea Dragon Dive App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sea Dragon Dive App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sea_Dragon_Dive_AppApp.swift; sourceTree = "<group>"; };
 		16C049E52A3BA6AE003C623D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -78,6 +82,8 @@
 				16C04A012A3D138D003C623D /* ScoreSelectorView.swift */,
 				161FF7622A5F52440096F2C8 /* EventProgressView.swift */,
 				161FF7602A58A7CE0096F2C8 /* ResultsView.swift */,
+				1670F2362A69E3D70061750B /* TeamSelevtorView.swift */,
+				1670F2382A69EBDE0061750B /* ResultsQRView.swift */,
 			);
 			path = Scoring;
 			sourceTree = "<group>";
@@ -235,6 +241,7 @@
 				161FF7612A58A7CE0096F2C8 /* ResultsView.swift in Sources */,
 				16C04A042A40B642003C623D /* ScoreView.swift in Sources */,
 				161FF7632A5F52440096F2C8 /* EventProgressView.swift in Sources */,
+				1670F2392A69EBDE0061750B /* ResultsQRView.swift in Sources */,
 				16C04A022A3D138D003C623D /* ScoreSelectorView.swift in Sources */,
 				161FF75F2A5772FD0096F2C8 /* Divers.swift in Sources */,
 				16C049EB2A3BA6AE003C623D /* Persistence.swift in Sources */,
@@ -243,6 +250,7 @@
 				162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */,
 				16C049FA2A3BC968003C623D /* AddDiversView.swift in Sources */,
 				161FF7122A4DD4770096F2C8 /* CoachAndDiverEntries.swift in Sources */,
+				1670F2372A69E3D70061750B /* TeamSelevtorView.swift in Sources */,
 				161FF7692A6722590096F2C8 /* Events.swift in Sources */,
 				16C04A142A44D01B003C623D /* Scores.swift in Sources */,
 				16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */,

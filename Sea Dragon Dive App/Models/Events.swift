@@ -13,11 +13,13 @@ struct events: Codable, Identifiable {
     var EList: [divers]
     var JVList: [divers]
     var VList: [divers]
+    var finished: Bool
     
-    init(date: String, EList: [divers], JVList: [divers], VList: [divers]) {
+    init(date: String, EList: [divers], JVList: [divers], VList: [divers], finished: Bool) {
         self.date = date
         self.EList = EList
         self.JVList = JVList
         self.VList = VList
+        self.finished = finished
     }
  }

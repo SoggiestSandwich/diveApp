@@ -18,7 +18,12 @@ struct EventSelectionView: View {
             VStack {
                 List {
                     ForEach(Array(zip(eventStore.eventList.indices, eventStore.eventList)), id: \.0) { index, event in
-                        NavigationLink(event.date, destination: AddDiversView(eventList: $eventStore.eventList[index]))
+                        if eventStore.eventList[index].finished {
+                            NavigationLink(event.date, destination: ResultsView(unsortedDiverList: makeDiversListResults(index: index), eventList: eventStore.eventList[index]))
+                        }
+                        else {
+                            NavigationLink(event.date, destination: AddDiversView(eventList: $eventStore.eventList[index]))
+                        }
                     }
                     .onDelete(perform: eventStore.deleteEvent)
                 }
@@ -55,7 +60,21 @@ struct EventSelectionView: View {
                 }
             }
         }
-        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: []))
+        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: [], finished: false))
+    }
+    
+    func makeDiversListResults(index: Int) -> [divers] {
+        var diverList: [divers] = []
+        for diver in eventStore.eventList[index].EList {
+            diverList.append(diver)
+        }
+        for diver in eventStore.eventList[index].JVList {
+            diverList.append(diver)
+        }
+        for diver in eventStore.eventList[index].VList {
+            diverList.append(diver)
+        }
+        return diverList
     }
 }
 

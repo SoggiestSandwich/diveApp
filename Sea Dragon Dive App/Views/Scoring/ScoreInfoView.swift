@@ -12,6 +12,8 @@ struct ScoreInfoView: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
+    @EnvironmentObject var eventStore: EventStore
+    
     @State var diverList: [divers]
     @State var lastDiverIndex: Int
     @State var firstDiverIndex: Int = 0
@@ -89,9 +91,9 @@ struct ScoreInfoView: View {
                             .padding(.leading)
                     }
                     Spacer()
-                    if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && allDivesScored() {
+                    if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && allDivesScored() &&  (diverList[currentDiver].dives[currentDive].score.count == 3 || diverList[currentDiver].dives[currentDive].score.count == 5 || diverList[currentDiver].dives[currentDive].score.count == 7) {
                         //finish event
-                        NavigationLink(destination: ResultsView(unsortedDiverList: diverList), isActive: $moveToResults) {
+                        NavigationLink(destination: ResultsView(unsortedDiverList: diverList, eventList: eventList), isActive: $moveToResults) {
                             Text("Finish Event")
                                 .padding(.bottom)
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -104,6 +106,8 @@ struct ScoreInfoView: View {
                                 .padding(.trailing)
                                 .onTapGesture {
                                     diverList[currentDiver].dives[currentDive].scored = true
+                                    eventList.finished = true
+                                    saveEventData()
                                     moveToResults = true
                                 }
                         }
@@ -111,8 +115,17 @@ struct ScoreInfoView: View {
                     else {
                         Button {
                             findLastDiverIndex()
-                            if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count {
+                            if (diverList[currentDiver].dives[currentDive].score.count < 3 && diverList[currentDiver].dives[currentDive].score.count > 0) || (diverList[currentDiver].dives[currentDive].score.count < 5 && diverList[currentDiver].dives[currentDive].score.count > 3) || diverList[currentDiver].dives[currentDive].score.count > 7 {
+                                
+                            }
+                            else if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && !allDivesScored() {
                                 scoredDivesALert = true
+                            }
+                            else if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && allDivesScored() {
+                                diverList[currentDiver].skip = true
+                                eventList.finished = true
+                                saveEventData()
+                                dropLastDiver = true
                             }
                             else {
                                 //toggles to next diver or sends notification that this is the last dive?
@@ -174,8 +187,12 @@ struct ScoreInfoView: View {
                             Text("would you like to continue and drop this diver?")
                         }
                         .alert("No scores were submitted", isPresented: $dropLastDiver) {
-                            Button("Cancel", role: .cancel) {diverList[currentDiver].skip = false}
-                            NavigationLink(destination: ResultsView(unsortedDiverList: diverList)) {
+                            Button("Cancel", role: .cancel) {
+                                diverList[currentDiver].skip = false
+                                eventList.finished = false
+                                saveEventData()
+                            }
+                            NavigationLink(destination: ResultsView(unsortedDiverList: diverList, eventList: eventList)) {
                                 Text("Confirm")
                             }
                         } message: {
@@ -396,7 +413,7 @@ struct ScoreInfoView: View {
                 while !diverList[currentDiver].dives[diver].score.isEmpty {
                     diverList[currentDiver].dives[diver].score.remove(at: 0)
                 }
-                diverList[currentDiver].diverEntries.score! -= diverList[currentDiver].dives[diver].roundScore
+                diverList[currentDiver].diverEntries.totalScore! -= diverList[currentDiver].dives[diver].roundScore
                 diverList[currentDiver].dives[diver].roundScore = 0
             }
         }
@@ -405,17 +422,35 @@ struct ScoreInfoView: View {
     func allDivesScored() -> Bool {
         for diver in diverList {
             for dive in diver.dives {
-                if dive.score.isEmpty && diver.skip != true {
+                if dive.score.isEmpty && diver.skip != true && dive != diver.dives[diver.dives.count - 1] {
                     return false
                 }
             }
         }
         return true
     }
+    func saveEventData() {
+        for diver in diverList {
+            if diver.diverEntries.level == 0 {
+                eventList.EList.append(diver)
+            }
+            else if diver.diverEntries.level == 1 {
+                eventList.JVList.append(diver)
+            }
+            else if diver.diverEntries.level == 2 {
+                eventList.VList.append(diver)
+            }
+        }
+        eventStore.saveEvent()
+        
+        eventList.EList = []
+        eventList.JVList = []
+        eventList.VList = []
+    }
 }
 
 struct ScoreInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreInfoView(diverList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"))], lastDiverIndex: 1, EList: .constant([]), JVList: .constant([]), VList: .constant([]), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [])))
+        ScoreInfoView(diverList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"))], lastDiverIndex: 1, EList: .constant([]), JVList: .constant([]), VList: .constant([]), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false)))
     }
 }

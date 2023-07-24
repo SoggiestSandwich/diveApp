@@ -18,5 +18,5 @@ struct diverEntry: Codable, Hashable {
     var level: Int
     let name: String
     var team: String?
-    var score: Double?
+    var totalScore: Double?
 }

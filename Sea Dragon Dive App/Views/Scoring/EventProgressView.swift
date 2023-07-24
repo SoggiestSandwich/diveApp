@@ -105,6 +105,10 @@ struct EventProgressView: View {
                     )
             }
         }
+        .onAppear {
+            findLastDiverIndex()
+            findFirstDiverIndex()
+        }
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing){
