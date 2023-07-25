@@ -30,7 +30,6 @@ struct ScoreSelectorView: View {
                 VStack {
                     Text("Judges' Scores:")
                         .font(.title2.bold())
-                        .frame(maxWidth: .infinity, alignment: .center)
                         .padding(-10)
                         .padding(.bottom)
                     //scores
@@ -44,7 +43,7 @@ struct ScoreSelectorView: View {
                 VStack {
                     //expand overlay over text
                     Image(systemName: "trash")
-                        .interpolation(.none).resizable().frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.055 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.06 : 35, alignment: .bottomTrailing)
+                        .interpolation(.none).resizable().frame(width: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.055 : 30, height: verticalSizeClass == .regular ? UIScreen.main.bounds.size.height * 0.06 : 35)
                         .overlay(GeometryReader { geo in
                             Color.clear
                                 .onChange(of: findTrash) { halfAdded in

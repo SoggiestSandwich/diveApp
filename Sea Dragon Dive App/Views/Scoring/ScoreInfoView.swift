@@ -212,7 +212,6 @@ struct ScoreInfoView: View {
                     .font(.title2.bold())
                     .foregroundColor(diverList[currentDiver].skip == true ? .red : colorScheme == .dark ? .white : .black)
                 Text("\(diverList[currentDiver].diverEntries.team ?? "")\nDive \(currentDive + 1) - \(diverList[currentDiver].dives[currentDive].name) - \(diverList[currentDiver].dives[currentDive].position)\nDegree of Difficulty: \(String(diverList[currentDiver].dives[currentDive].degreeOfDiff))")
-                    .frame(alignment: .center)
                     .padding(.horizontal)
                     .font(.system(size: verticalSizeClass == .regular ? 20 : 15))
                 

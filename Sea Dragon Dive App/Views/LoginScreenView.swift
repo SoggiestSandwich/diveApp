@@ -74,6 +74,7 @@ struct LoginScreenView: View {
                         Text("Done")
                             .frame(maxWidth: .infinity, alignment: .center)
                     }
+                    .disabled(selection == 0 ? true : selection == 1 ? username != "" && userSchool != "" ? false : true : false)
                     .bold()
                     .padding(5)
                     //.shadow(color: .black.opacity(1),radius: 1, x: 3, y: 3)
@@ -86,6 +87,7 @@ struct LoginScreenView: View {
     @ViewBuilder
     func getDestination() -> some View {
         switch selection {
+        case 1: DiverHomeView(username: username)
         case 3: EventSelectionView()
             
         default: EmptyView()

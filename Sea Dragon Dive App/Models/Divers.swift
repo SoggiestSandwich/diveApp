@@ -13,9 +13,10 @@ struct divers: Hashable, Comparable, Codable {
     var placementScore: Double?
     var placement: Int?
     var skip: Bool?
+    var date: String?
     
     static func == (lhs: divers, rhs: divers) -> Bool {
-        return lhs.dives == rhs.dives && lhs.diverEntries == rhs.diverEntries && lhs.placement == rhs.placement && lhs.skip == rhs.skip && lhs.placementScore == rhs.placementScore
+        return lhs.dives == rhs.dives && lhs.diverEntries == rhs.diverEntries && lhs.placement == rhs.placement && lhs.skip == rhs.skip && lhs.placementScore == rhs.placementScore && lhs.date == rhs.date
     }
     static func < (lhs: divers, rhs: divers) -> Bool {
         lhs.placementScore ?? -1 > rhs.placementScore ?? -1
@@ -26,6 +27,7 @@ struct divers: Hashable, Comparable, Codable {
         hasher.combine(placement)
         hasher.combine(skip)
         hasher.combine(placementScore)
+        hasher.combine(date)
     }
     
 }
