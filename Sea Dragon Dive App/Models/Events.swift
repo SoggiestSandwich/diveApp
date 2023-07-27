@@ -14,12 +14,14 @@ struct events: Codable, Identifiable {
     var JVList: [divers]
     var VList: [divers]
     var finished: Bool
+    var judgeCount: Int
     
-    init(date: String, EList: [divers], JVList: [divers], VList: [divers], finished: Bool) {
+    init(date: String, EList: [divers], JVList: [divers], VList: [divers], finished: Bool, judgeCount: Int) {
         self.date = date
         self.EList = EList
         self.JVList = JVList
         self.VList = VList
         self.finished = finished
+        self.judgeCount = judgeCount
     }
  }

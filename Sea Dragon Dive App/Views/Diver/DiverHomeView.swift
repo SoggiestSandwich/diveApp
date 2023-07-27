@@ -89,11 +89,11 @@ struct DiverHomeView: View {
                 }
                 List {
                     ForEach(Array(zip(entryList.indices, entryList)), id: \.0) { index, entry in
-                        NavigationLink(destination: DiveEntryView()) {
+                        NavigationLink(destination: DiveEntryView(entryIndex: index, username: username, entryList: $entryList)) {
                                 Text(entry.diverEntries.name)
                         }
                     }
-                    NavigationLink(destination: DiveEntryView()) {}
+                    NavigationLink(destination: DiveEntryView(entryIndex: entryList.count, username: username, entryList: $entryList)) {}
                         .opacity(0)
                         .padding(10)
                         .overlay(

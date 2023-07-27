@@ -133,6 +133,7 @@ struct AddDiversView: View {
                         }
                         .onDelete(perform: deleteEDiver)
                         .onMove { (indexSet, index) in
+                            reviewed = false
                             self.EList.move(fromOffsets: indexSet, toOffset: index)
                         }
                     }
@@ -528,7 +529,7 @@ struct AddDiversView: View {
     
     struct AddDiversView_Previews: PreviewProvider {
         static var previews: some View {
-            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false)))
+            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3)))
         }
     }
 }

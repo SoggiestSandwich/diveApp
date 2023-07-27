@@ -43,7 +43,6 @@ struct ScoreInfoView: View {
                             
                         }
                         else if currentDiver - 1 > -1 {
-                            currentIndex = 0
                             currentDiver -= 1
                             while diverList[currentDiver].dives[currentDive].score.isEmpty && diverList[currentDiver].skip == true {
                                 if currentDiver > 0 {
@@ -52,14 +51,13 @@ struct ScoreInfoView: View {
                                 else {
                                     currentDiver = diverList.count - 1
                                     currentDive = currentDive - 1
-                                    currentIndex = 0
                                 }
                             }
+                            currentIndex = diverList[currentDiver].dives[currentDive].score.count
                         }
                         else {
                             currentDiver = diverList.count - 1
                             currentDive = currentDive - 1
-                            currentIndex = 0
                             while diverList[currentDiver].dives[currentDive].score.isEmpty && diverList[currentDiver].skip == true {
                                 if currentDiver - 1 > 0 {
                                     currentDiver -= 1
@@ -67,9 +65,9 @@ struct ScoreInfoView: View {
                                 else {
                                     currentDiver = diverList.count - 1
                                     currentDive = currentDive - 1
-                                    currentIndex = 0
                                 }
                             }
+                            currentIndex = diverList[currentDiver].dives[currentDive].score.count
                         }
                         halfAdded = true
                     } label: {
@@ -91,7 +89,7 @@ struct ScoreInfoView: View {
                             .padding(.leading)
                     }
                     Spacer()
-                    if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && allDivesScored() &&  (diverList[currentDiver].dives[currentDive].score.count == 3 || diverList[currentDiver].dives[currentDive].score.count == 5 || diverList[currentDiver].dives[currentDive].score.count == 7) {
+                    if currentDiver + 1 == lastDiverIndex && currentDive + 1 == diverList[currentDiver].dives.count && allDivesScored() &&  (diverList[currentDiver].dives[currentDive].score.count == eventList.judgeCount) {
                         //finish event
                         NavigationLink(destination: ResultsView(unsortedDiverList: diverList, eventList: eventList), isActive: $moveToResults) {
                             Text("Finish Event")
@@ -129,7 +127,7 @@ struct ScoreInfoView: View {
                             }
                             else {
                                 //toggles to next diver or sends notification that this is the last dive?
-                                if diverList[currentDiver].dives[currentDive].score.count > 2 && diverList[currentDiver].dives[currentDive].score.count != 4 && diverList[currentDiver].dives[currentDive].score.count != 6 {
+                                if diverList[currentDiver].dives[currentDive].score.count == eventList.judgeCount {
                                     toggleNextDiver()
                                 }
                                 else if diverList[currentDiver].dives[currentDive].score.count == 0 {
@@ -220,6 +218,7 @@ struct ScoreInfoView: View {
                 ScoreSelectorView(halfAdded: $halfAdded, currentIndex: $currentIndex, currentDiver: $currentDiver, diverList: $diverList, currentDive: $currentDive, eventList: $eventList)
             }
         }
+        .onAppear { currentIndex = diverList[currentDiver].dives[currentDive].score.count }
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -348,7 +347,6 @@ struct ScoreInfoView: View {
         }
         if currentDiver + 1 < diverList.count {
             currentDiver = currentDiver + 1
-            currentIndex = 0
             while diverList[currentDiver].skip == true && diverList[currentDiver].dives[currentDive].score.isEmpty {
                 if currentDiver + 1 < diverList.count {
                     currentDiver += 1
@@ -356,14 +354,13 @@ struct ScoreInfoView: View {
                 else {
                     currentDiver = 0
                     currentDive = currentDive + 1
-                    currentIndex = 0
                 }
             }
+            currentIndex = diverList[currentDiver].dives[currentDive].score.count
         }
         else {
             currentDiver = 0
             currentDive = currentDive + 1
-            currentIndex = 0
             while diverList[currentDiver].skip == true && diverList[currentDiver].dives[currentDive].score.isEmpty {
                 if currentDiver + 1 < diverList.count {
                     currentDiver += 1
@@ -371,9 +368,9 @@ struct ScoreInfoView: View {
                 else {
                     currentDiver = 0
                     currentDive = currentDive + 1
-                    currentIndex = 0
                 }
             }
+            currentIndex = diverList[currentDiver].dives[currentDive].score.count
         }
     }
     
@@ -396,7 +393,7 @@ struct ScoreInfoView: View {
         var breakLoop = false
         for diver in 0..<diverList.count {
             if !breakLoop {
-                if diverList[diver].skip == true {
+                if diverList[diver].skip == true && diverList[diver].dives[0].score.isEmpty {
                     firstDiverIndex += 1
                 }
                 else {
@@ -408,12 +405,16 @@ struct ScoreInfoView: View {
     
     func clearFutureScores() {
         for diver in 0..<diverList[currentDiver].dives.count {
-            if diver > currentDive && !diverList[currentDiver].dives[diver].score.isEmpty{
+            if diver == currentDive {
+                diverList[currentDiver].dives[diver].scored = false
+            }
+            else if diver > currentDive && !diverList[currentDiver].dives[diver].score.isEmpty {
                 while !diverList[currentDiver].dives[diver].score.isEmpty {
                     diverList[currentDiver].dives[diver].score.remove(at: 0)
                 }
                 diverList[currentDiver].diverEntries.totalScore! -= diverList[currentDiver].dives[diver].roundScore
                 diverList[currentDiver].dives[diver].roundScore = 0
+                diverList[currentDiver].dives[diver].scored = false
             }
         }
     }
@@ -450,6 +451,6 @@ struct ScoreInfoView: View {
 
 struct ScoreInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreInfoView(diverList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"))], lastDiverIndex: 1, EList: .constant([]), JVList: .constant([]), VList: .constant([]), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false)))
+        ScoreInfoView(diverList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"))], lastDiverIndex: 1, EList: .constant([]), JVList: .constant([]), VList: .constant([]), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3)))
     }
 }

@@ -78,12 +78,12 @@ struct ScoreSelectorView: View {
                 ForEach(1...12, id: \.self) { number in
                     if number < 10 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount && diverList[currentDiver].skip != true {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: Double(number), index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
+                                halfAdded = false
                             }
-                            halfAdded = false
                             SetRoundScore()
                             saveEventData()
                         } label: {
@@ -100,7 +100,7 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 10 {
                         Button {
-                            if !halfAdded {
+                            if !halfAdded && !diverList[currentDiver].dives[currentDive].score.isEmpty {
                                 if diverList[currentDiver].dives[currentDive].score[diverList[currentDiver].dives[currentDive].score.count - 1].score < 10 {
                                     diverList[currentDiver].dives[currentDive].score[currentIndex - 1] = scores(score: diverList[currentDiver].dives[currentDive].score[currentIndex - 1].score + 0.5, index: currentIndex)
                                 }
@@ -122,7 +122,7 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 11 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 0, index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
@@ -144,7 +144,7 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 12 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < 7 {
+                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 10, index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
@@ -228,12 +228,17 @@ struct ScoreSelectorView: View {
     }
     
     func scoreMoved(location: CGPoint, score: Double) -> DragState {
-        findTrash = findTrash + 1
-        let match = buttonFrames.firstIndex(where: {
-            $0.contains(location)
-        })
-        if match != nil {
-            return .good
+        if diverList[currentDiver].skip != true {
+            findTrash = findTrash + 1
+            let match = buttonFrames.firstIndex(where: {
+                $0.contains(location)
+            })
+            if match != nil {
+                return .good
+            }
+            else {
+                return .unknown
+            }
         }
         else {
             return .unknown
@@ -255,6 +260,7 @@ struct ScoreSelectorView: View {
                 diverList[currentDiver].dives[currentDive].score[i].index = i + 1
                 i = i + 1
             }
+            halfAdded = false
         }
         saveEventData()
     }
@@ -281,6 +287,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false)))
+        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3)))
     }
 }

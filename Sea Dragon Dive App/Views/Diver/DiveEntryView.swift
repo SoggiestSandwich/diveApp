@@ -9,9 +9,18 @@ import SwiftUI
 
 struct DiveEntryView: View {
     @Environment(\.colorScheme) var colorScheme
-    @State var date: String = ""
+    
+    @State var date: Date = Date()
     @State var location: String = ""
     @State var diveList: [dives] = []
+    @State var level: Int = -1
+    @State var diveCount: Int = 0
+    @State var diveSelector = false
+    
+    @State var entryIndex: Int
+    @State var username: String
+    
+    @Binding var entryList: [divers]
     
     var body: some View {
         NavigationStack {
@@ -20,10 +29,10 @@ struct DiveEntryView: View {
                     Text("Date")
                     Spacer()
                     //make date picker
-                    Text(date)
+                    DatePicker("", selection: $date, displayedComponents: [.date])
                 }
                 .padding(.horizontal)
-                .padding()
+                .offset(y: UIScreen.main.bounds.height * 0.008)
                 Divider()
                     .background(Color.black)
                     .overlay(
@@ -36,6 +45,8 @@ struct DiveEntryView: View {
                     TextField("Enter Location", text: $location)
                         .multilineTextAlignment(.trailing)
                 }
+                .offset(y: -UIScreen.main.bounds.height * 0.005)
+                .padding(.vertical)
                 .padding(.horizontal)
             }
             .overlay(
@@ -49,6 +60,16 @@ struct DiveEntryView: View {
                     .font(.caption.bold())
                     .padding(5)
                     .padding(.horizontal)
+                    .overlay(
+                        Rectangle()
+                            .fill(level == 0 ? .blue : .clear)
+                            .opacity(0.5)
+                            .frame(width: UIScreen.main.bounds.width * 0.23, height: UIScreen.main.bounds.height * 0.034)
+                            .offset(x: UIScreen.main.bounds.width * 0.01)
+                    )
+                    .onTapGesture {
+                        level = 0
+                    }
                 Divider()
                     .frame(height: 30)
                     .overlay(
@@ -59,6 +80,15 @@ struct DiveEntryView: View {
                     .font(.caption.bold())
                     .padding(5)
                     .padding(.horizontal)
+                    .overlay(
+                        Rectangle()
+                            .fill(level == 1 ? .blue : .clear)
+                            .opacity(0.5)
+                            .frame(width: UIScreen.main.bounds.width * 0.355, height: UIScreen.main.bounds.height * 0.034)
+                    )
+                    .onTapGesture {
+                        level = 1
+                    }
                 Divider()
                     .frame(height: 30)
                     .overlay(
@@ -69,6 +99,16 @@ struct DiveEntryView: View {
                     .font(.caption.bold())
                     .padding(5)
                     .padding(.horizontal)
+                    .overlay(
+                        Rectangle()
+                            .fill(level == 2 ? .blue : .clear)
+                            .opacity(0.5)
+                            .frame(width: UIScreen.main.bounds.width * 0.274, height: UIScreen.main.bounds.height * 0.034)
+                            .offset(x: -UIScreen.main.bounds.width * 0.01)
+                    )
+                    .onTapGesture {
+                        level = 2
+                    }
             }
             .overlay(
                     Rectangle()
@@ -81,6 +121,16 @@ struct DiveEntryView: View {
                     .padding(5)
                     .padding(.horizontal)
                     .padding(.horizontal)
+                    .overlay(
+                        Rectangle()
+                            .fill(diveCount == 6 ? .blue : .clear)
+                            .opacity(0.5)
+                            .frame(width: UIScreen.main.bounds.width * 0.35, height: UIScreen.main.bounds.height * 0.034)
+                            .offset(x: UIScreen.main.bounds.width * 0.01)
+                    )
+                    .onTapGesture {
+                        diveCount = 6
+                    }
                 Divider()
                     .frame(height: 30)
                     .overlay(
@@ -92,6 +142,16 @@ struct DiveEntryView: View {
                     .padding(5)
                     .padding(.horizontal)
                     .padding(.horizontal)
+                    .overlay(
+                        Rectangle()
+                            .fill(diveCount == 11 ? .blue : .clear)
+                            .opacity(0.5)
+                            .frame(width: UIScreen.main.bounds.width * 0.395, height: UIScreen.main.bounds.height * 0.034)
+                            .offset(x: -UIScreen.main.bounds.width * 0.01)
+                    )
+                    .onTapGesture {
+                        diveCount = 11
+                    }
             }
             .overlay(
                     Rectangle()
@@ -99,7 +159,7 @@ struct DiveEntryView: View {
             )
             //finish entry button
             Button {
-                
+                print(diveList.count)
             } label: {
                 HStack {
                     Image(systemName: "signature")
@@ -111,19 +171,21 @@ struct DiveEntryView: View {
                     Rectangle()
                         .stroke(lineWidth: 2)
                 )
-                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .foregroundColor(location == "" || diveList.count != diveCount || level > 2 || level < 0 || diveList.count == 0 ? colorScheme == .dark ? .white : .gray : .black)
                 .padding()
             }
+            .disabled(location == "" || diveList.count != diveCount || level > 2 || level < 0 || diveList.count == 0)
             //add divers buttons
             HStack {
                 Button {
-                    
+                    entryList.append(divers(dives: [], diverEntries: diverEntry(dives: [], level: level, name: username)))
+                    diveSelector = true
                 } label: {
                     HStack {
                         Image(systemName: "plus.circle")
                         Text("Add Dives")
                             .font(.body.bold())
-                    }
+                }
                     .padding()
                     .overlay(
                         Rectangle()
@@ -155,17 +217,33 @@ struct DiveEntryView: View {
             }
             .padding(.horizontal)
             List {
-                ForEach(diveList, id: \.hashValue) { dive in
-                    Text("\(dive.code ?? "") \(dive.name), \(dive.position) (\(String(dive.degreeOfDiff)))")
+                if !diveList.isEmpty {
+                    ForEach(Array(zip(diveList.indices, diveList)), id: \.0) { index, dive in
+                        Text("\(index + 1). \(dive.code ?? "") \(dive.name), \(dive.position) (\(String(dive.degreeOfDiff)))")
+                    }
+                    .onDelete(perform: deleteDive)
+                    .onMove { (indexSet, index) in
+                        self.diveList.move(fromOffsets: indexSet, toOffset: index)
+                    }
+                }
+                else {
+                    Text("No dives added")
                 }
             }
+            .environment(\.editMode, .constant(.active))
         }
         .navigationTitle("Dive Entry")
+        .sheet(isPresented: $diveSelector) {
+            SelectDivesView(entryList: entryList, diveList: $diveList)
+        }
+    }
+    func deleteDive(at offsets: IndexSet) {
+        diveList.remove(atOffsets: offsets)
     }
 }
 
 struct DiveEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        DiveEntryView()
+        DiveEntryView(entryIndex: 0, username: "Kakaw", entryList: .constant([divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))]))
     }
 }

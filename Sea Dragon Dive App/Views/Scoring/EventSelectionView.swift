@@ -13,6 +13,9 @@ struct EventSelectionView: View {
     
     @EnvironmentObject var eventStore: EventStore
     
+    @State var judgeCount: Int = 0
+    @State var judgeSheet: Bool = false
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -31,7 +34,7 @@ struct EventSelectionView: View {
             }
             Spacer()
             Button("New Dive Event") {
-                addDate()
+                judgeSheet = true
             }
                 .foregroundColor(colorScheme == .dark ? .white : .black)
                 .bold()
@@ -43,9 +46,13 @@ struct EventSelectionView: View {
                         .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
                 )
         }
-        .onAppear {
-            if !eventStore.eventList.isEmpty {
-            }
+        .sheet(isPresented: $judgeSheet) {
+            SelectJudgeCountView(judgeCount: $judgeCount, isShowing: $judgeSheet)
+                .onDisappear {
+                    if judgeCount != 0 {
+                        addDate()
+                    }
+                }
         }
     }
     func addDate() {
@@ -55,12 +62,12 @@ struct EventSelectionView: View {
         if !eventStore.eventList.isEmpty {
             for event in eventStore.eventList {
                 if event.date == dateString {
-                    dateString = Date().formatted(date: .numeric, time: .omitted) + "(\(revision))"
+                    dateString = Date().formatted(date: .numeric, time: .omitted) + " (\(revision))"
                     revision += 1
                 }
             }
         }
-        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: [], finished: false))
+        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: [], finished: false, judgeCount: judgeCount))
     }
     
     func makeDiversListResults(index: Int) -> [divers] {
