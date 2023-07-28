@@ -9,33 +9,41 @@ import SwiftUI
 
 
 struct TeamSelevtorView: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    
     @State var diverList: [divers]
     
     @State var teamList: [String] = []
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(teamList, id: \.hashValue) { team in
-                    NavigationLink(destination: ResultsQRView(team: team, url: createQRDataString(team: team))) {
-                        Text(team)
-                    }
-                }
+            Button {
+                self.presentationMode.wrappedValue.dismiss()
+            } label: {
+                Text("Dismiss")
             }
-            .navigationTitle("Select Team")
-        }
-        .onAppear {
-            for diver in diverList {
-                var breakloop = false
-                for team in teamList {
-                    if !breakloop {
-                        if diver.diverEntries.team == team {
-                            breakloop = true
+            .padding()
+                List {
+                    ForEach(teamList, id: \.hashValue) { team in
+                        NavigationLink(destination: ResultsQRView(team: team, url: createQRDataString(team: team))) {
+                            Text(team)
                         }
                     }
                 }
-                if !breakloop {
-                    teamList.append(diver.diverEntries.team ?? "")
+                .navigationTitle("Select Team")
+            .onAppear {
+                for diver in diverList {
+                    var breakloop = false
+                    for team in teamList {
+                        if !breakloop {
+                            if diver.diverEntries.team == team {
+                                breakloop = true
+                            }
+                        }
+                    }
+                    if !breakloop {
+                        teamList.append(diver.diverEntries.team ?? "")
+                    }
                 }
             }
         }
@@ -43,37 +51,24 @@ struct TeamSelevtorView: View {
     //
     //score(individual)?, skip?
     func createQRDataString(team: String) -> String {
-        var tempDiverList: [divers] = []
-        var allDiversCode: String = "{\"diverEntries\":["
+        var coachList: coachEntry = coachEntry(diverEntries: [], eventDate: "", team: "", version: 0)
+        var num = 0
         for diver in diverList {
             if team == diver.diverEntries.team {
-                tempDiverList.append(diver)
+                coachList.diverEntries.append(diver.diverEntries)
+                coachList.diverEntries[num].fullDives = diver.dives
+                coachList.diverEntries[num].placement = diver.placement ?? 0
+                num += 1
             }
+            coachList.team = team
+            coachList.eventDate = Date().formatted(date: .numeric, time: .omitted)
+            coachList.version = 0
         }
-        for diver in tempDiverList {
-            var diveNames: String = ""
-            var diveScores: String = ""
-            for dive in 0..<diver.diverEntries.dives.count {
-                if dive != diver.diverEntries.dives.count - 1 {
-                    diveNames = diveNames + "\"" + diver.diverEntries.dives[dive] + "\","
-                    diveScores = diveScores + String(format: "%.2f", diver.dives[dive].roundScore) + ","
-                }
-                else {
-                    diveNames = diveNames + "\"" + diver.diverEntries.dives[dive] + "\""
-                    diveScores = diveScores + String(format: "%.2f", diver.dives[dive].roundScore)
-                }
-            }
-            let diversCode: String = "{\"dives\":[\(diveNames)],\"diveScores\":[\(diveScores)],\"level\":\(diver.diverEntries.level),\"name\":\"\(diver.diverEntries.name)\",\"eventScore\":\(String(format: "%.2f", diver.diverEntries.totalScore ?? 0))}"
-            if diver == tempDiverList[tempDiverList.count - 1] {
-                allDiversCode = allDiversCode + diversCode
-            }
-            else {
-                allDiversCode = allDiversCode + diversCode + ","
-            }
-        }
-        allDiversCode = allDiversCode + "],\"team\":\"\(team)\"}"
-
-        return allDiversCode
+        
+        let encoder = JSONEncoder()
+        let data = try? encoder.encode(coachList)
+        print(String(data: data!, encoding: .utf8) ?? "")
+        return String(data: data!, encoding: .utf8) ?? ""
     }
 }
 

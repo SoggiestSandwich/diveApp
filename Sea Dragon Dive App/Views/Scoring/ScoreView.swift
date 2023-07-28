@@ -35,6 +35,8 @@ struct ScoreView: View {
                             .stroke(colorScheme == .dark ? .white : .black, lineWidth: 2)
                     )
                     .shadow(color: dragState == .good ? .red : .clear, radius: 10)
+                    .shadow(color: dragState == .good ? .red : .clear, radius: 10)
+                    .shadow(color: dragState == .good ? .red : .clear, radius: 10)
                     .offset(x: offset.width, y: offset.height)
                     .gesture(
                         DragGesture(coordinateSpace: .global)

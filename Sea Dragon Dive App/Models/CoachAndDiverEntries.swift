@@ -7,16 +7,29 @@
 
 import Foundation
 
-struct coachEntry: Codable {
-    let diverEntries: [diverEntry]
-    let eventDate, team: String
-    let version: Int
-}
+struct coachEntry: Codable, Hashable {
+    var diverEntries: [diverEntry]
+    var eventDate, team: String
+    var version: Int
+    var location: String?
+    var finished: Bool?
+    
+    init(diverEntries: [diverEntry], eventDate: String, team: String, version: Int) {
+        self.diverEntries = diverEntries
+        self.eventDate = eventDate
+        self.team = team
+        self.version = version
+    }
 
+}
 struct diverEntry: Codable, Hashable {
-    let dives: [String]
+    var dives: [String]
     var level: Int
     let name: String
     var team: String?
     var totalScore: Double?
+    var dq: Bool?
+    var diveCount: Int?
+    var fullDives: [dives]?
+    var placement: Int?
 }

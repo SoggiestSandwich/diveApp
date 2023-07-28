@@ -23,18 +23,18 @@ struct AddDiversView: View {
     @State private var value = ""
     @State private var scannedCode: String = ""
     @State private var coachList: [coachEntry] = []
-    @State private var JVList: [divers] = []
-    @State private var VList: [divers] = []
-    @State private var EList: [divers] = []
     @State private var allDivers: [diverEntry] = []
     @State private var diversWithDives: [divers] = []
     @State private var editingList = true
     @State private var showPopUp = false
     @State private var showAlert = false
-    @State private var reviewed = false
     @State private var teamsArray: [String] = []
+    @State private var failedScanAlert: Bool = false
+    @State private var diverInfoSheet: Bool = false
+    @State private var sentDiver: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))
     
     @Binding var eventList: events
+    @Binding var path: [String]
     
     struct Codes: Identifiable {
         let name: String
@@ -47,7 +47,6 @@ struct AddDiversView: View {
             completion: { result in
                 if case let .success(code) = result {
                     self.scannedCode = code.string
-                    self.isPresentingScanner = false
                     
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
@@ -57,35 +56,38 @@ struct AddDiversView: View {
                         if entries != nil {
                             coachList = []
                             if checkCodeValidity(entry: entries!) {
+                                if !eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty {
+                                    makeTeamsArray()
+                                }
                                 for team in teamsArray {
                                     if team == entries?.team {
-                                        if !EList.isEmpty {
+                                        if !eventList.EList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < EList.count {
-                                                if EList[loops].diverEntries.team == team {
-                                                    EList.remove(at: loops)
+                                            while loops < eventList.EList.count {
+                                                if eventList.EList[loops].diverEntries.team == team {
+                                                    eventList.EList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
                                                 }
                                             }
                                         }
-                                        if !JVList.isEmpty {
+                                        if !eventList.JVList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < JVList.count {
-                                                if JVList[loops].diverEntries.team == team {
-                                                    JVList.remove(at: loops)
+                                            while loops < eventList.JVList.count {
+                                                if eventList.JVList[loops].diverEntries.team == team {
+                                                    eventList.JVList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
                                                 }
                                             }
                                         }
-                                        if !VList.isEmpty {
+                                        if !eventList.VList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < VList.count {
-                                                if VList[loops].diverEntries.team == team {
-                                                    VList.remove(at: loops)
+                                            while loops < eventList.VList.count {
+                                                if eventList.VList[loops].diverEntries.team == team {
+                                                    eventList.VList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
@@ -95,74 +97,137 @@ struct AddDiversView: View {
                                     }
                                 }
                                 coachList.append(entries!)
+                                validateNewDivers()
                                 sortDivers()
-                            
-                                eventList.EList = EList
-                                eventList.JVList = JVList
-                                eventList.VList = VList
-                                eventStore.saveEvent()
-                                eventList.EList = []
-                                eventList.JVList = []
-                                eventList.VList = []
                                 
-                                reviewed = false
+                                eventStore.saveEvent()
+                                
+                                eventList.reviewed = false
+                                self.isPresentingScanner = false
                             }
                             else {
                                 //popup saying invalid qr code was scanned
+                                failedScanAlert = true
                             }
                         }
                         else {
                             //popup saying invalid qr code was scanned
+                            failedScanAlert = true
                         }
                     }
                 }
             }
         )
+        .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
+            Button("OK", role: .cancel) {
+                self.isPresentingScanner = false
+            }
+        } message: {
+            Text("Could not find the needed data in the scanned QR Code")
+        }
     }
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                Text(!EList.isEmpty || !JVList.isEmpty || !VList.isEmpty ? "" : "No Divers Added")
-                    .font(.largeTitle.bold())
-                
-                List {
-                    Section(header: Text(!EList.isEmpty ? "Exhibition" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        ForEach(Array(zip(EList.indices, EList)), id: \.0) { index, diver in
-                            Text("\(index + 1). \(diver.diverEntries.name)\n\(diver.diverEntries.team!)")
+        VStack {
+            Text(!eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty ? "" : "No Divers Added")
+                .font(.largeTitle.bold())
+            
+            List {
+                Section(header: Text(!eventList.EList.isEmpty ? "Exhibition" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(eventList.EList.indices, eventList.EList)), id: \.0) { index, diver in
+                        Button {
+                            sentDiver = diver
+                            diverInfoSheet = true
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text("\(index + 1). \(diver.diverEntries.name)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text("\(diver.diverEntries.team!)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text(diver.diverEntries.dq == true ? "Invalid Entry" : "")
+                                    .foregroundColor(.purple)
+                            }
                         }
-                        .onDelete(perform: deleteEDiver)
-                        .onMove { (indexSet, index) in
-                            reviewed = false
-                            self.EList.move(fromOffsets: indexSet, toOffset: index)
+                        .sheet(isPresented: $diverInfoSheet) {
+                            diverInfoView(diverList: $sentDiver)
                         }
                     }
-                    Section(header: Text(!JVList.isEmpty ? "Junior Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        ForEach(Array(zip(JVList.indices, JVList)), id: \.1) { index, diver in
-                            Text("\(index + EList.count + 1). \(diver.diverEntries.name)\n\(diver.diverEntries.team!)")
-                        }
-                        .onDelete(perform: deleteJVDiver)
-                        .onMove { (indexSet, index) in
-                            self.JVList.move(fromOffsets: indexSet, toOffset: index)
-                        }
-                    }
-                    Section(header: Text(!VList.isEmpty ? "Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        ForEach(Array(zip(VList.indices, VList)), id: \.1) { index, diver in
-                            Text("\(index + EList.count + JVList.count + 1). \(diver.diverEntries.name)\n\(diver.diverEntries.team!)")
-                        }
-                        .onDelete(perform: deleteVDiver)
-                        .onMove { (indexSet, index) in
-                            self.VList.move(fromOffsets: indexSet, toOffset: index)
-                        }
+                    .onDelete(perform: deleteEDiver)
+                    .onMove { (indexSet, index) in
+                        eventList.reviewed = false
+                        self.eventList.EList.move(fromOffsets: indexSet, toOffset: index)
+                        eventStore.saveEvent()
                     }
                 }
-                .environment(\.editMode, editingList ? .constant(.active) : .constant(.inactive))
-                Spacer()
-                Button {
-                    //opens qr scanner to scan in divers
-                    self.isPresentingScanner = true
-                } label: {
-                    Text("Add Divers")
+                Section(header: Text(!eventList.JVList.isEmpty ? "Junior Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(eventList.JVList.indices, eventList.JVList)), id: \.1) { index, diver in
+                        Button {
+                            sentDiver = diver
+                            diverInfoSheet = true
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text("\(index + 1 + eventList.EList.count). \(diver.diverEntries.name)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text("\(diver.diverEntries.team!)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text(diver.diverEntries.dq == true ? "Invalid Entry" : "")
+                                    .foregroundColor(.purple)
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteJVDiver)
+                    .onMove { (indexSet, index) in
+                        self.eventList.JVList.move(fromOffsets: indexSet, toOffset: index)
+                    }
+                }
+                Section(header: Text(!eventList.VList.isEmpty ? "Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(eventList.VList.indices, eventList.VList)), id: \.1) { index, diver in
+                        Button {
+                            sentDiver = diver
+                            diverInfoSheet = true
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text("\(index + 1 + eventList.EList.count + eventList.JVList.count). \(diver.diverEntries.name)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text("\(diver.diverEntries.team!)")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                                Text(diver.diverEntries.dq == true ? "Invalid Entry" : "")
+                                    .foregroundColor(.purple)
+                            }
+                        }
+                    }
+                    .onDelete(perform: deleteVDiver)
+                    .onMove { (indexSet, index) in
+                        self.eventList.VList.move(fromOffsets: indexSet, toOffset: index)
+                    }
+                }
+            }
+            
+            .environment(\.editMode, editingList ? .constant(.active) : .constant(.inactive))
+            Spacer()
+            Button {
+                //opens qr scanner to scan in divers
+                self.isPresentingScanner = true
+            } label: {
+                Text("Add Divers")
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
+                    .bold()
+                    .padding(15)
+                    .padding(.horizontal)
+                    .padding(.horizontal)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                    )
+            }
+            .sheet(isPresented: $isPresentingScanner) {
+                self.ScannerSheet
+            }
+            
+            //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
+            if eventList.reviewed {
+                NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, eventList: $eventList, path: $path)) {
+                    Text("Start Event")
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                         .bold()
                         .padding(15)
@@ -171,71 +236,56 @@ struct AddDiversView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 20)
                                 .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                            
                         )
                 }
-                .sheet(isPresented: $isPresentingScanner) {
-                    self.ScannerSheet
+            }
+            else {
+                Button {
+                    if !consolidateDiverList().isEmpty {
+                        //add all aspects to divers struct
+                        makeFinalDiverList()
+                        showPopUp = true
+                    }
+                    else {
+                        showAlert = true
+                    }
+                } label: {
+                    Text("Official Review")
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .bold()
+                        .padding(15)
+                        .padding(.horizontal)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                            
+                        )
                 }
-                
-                //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
-                if reviewed {
-                    NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, EList: $EList, JVList: $JVList, VList: $VList, eventList: $eventList)) {
-                        Text("Start Event")
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
-                            .bold()
-                            .padding(15)
-                            .padding(.horizontal)
-                            .padding(.horizontal)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
-                                
-                            )
+                .alert("Official's Approval Required", isPresented: $showPopUp) {
+                    Button("Cancel", role: .cancel) {}
+                    Button("Confirm") {
+                        eventList.reviewed = true
+                        eventStore.saveEvent()
                     }
+                } message: {
+                    Text("Please hand this device to an official for review. press confirm to continue")
                 }
-                else {
-                    Button {
-                        if !consolidateDiverList().isEmpty {
-                            //add all aspects to divers struct
-                            makeFinalDiverList()
-                            showPopUp = true
-                        }
-                        else {
-                            showAlert = true
-                        }
-                    } label: {
-                        Text("Official Review")
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
-                            .bold()
-                            .padding(15)
-                            .padding(.horizontal)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
-                                
-                            )
-                    }
-                    .alert("Official's Approval Required", isPresented: $showPopUp) {
-                        Button("Cancel", role: .cancel) {}
-                        Button("Confirm") {
-                            reviewed = true
-                        }
-                    } message: {
-                        Text("Please hand this device to an official for review. press confirm to continue")
-                    }
-                    .alert("You must enter divers before starting an event", isPresented: $showAlert) {
-                        Button("OK", role: .cancel) {}
-                    }
+                .alert("You must enter divers before starting an event", isPresented: $showAlert) {
+                    Button("OK", role: .cancel) {}
                 }
+            }
+        }
+        .onAppear {
+            if !eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty {
+                makeFinalDiverList()
             }
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    eventList.EList = EList
-                    eventList.JVList = JVList
-                    eventList.VList = VList
+                    eventStore.saveEvent()
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
                     HStack {
@@ -245,90 +295,74 @@ struct AddDiversView: View {
                 }
             }
         }
-        .onAppear {
-                if !eventList.EList.isEmpty {
-                    while !eventList.EList.isEmpty {
-                        EList.append(eventList.EList[0])
-                        eventList.EList.removeFirst()
-                    }
-                }
-                if !eventList.JVList.isEmpty {
-                    while !eventList.JVList.isEmpty {
-                        JVList.append(eventList.JVList[0])
-                        eventList.JVList.removeFirst()
-                    }
-                }
-                if !eventList.VList.isEmpty {
-                    while !eventList.VList.isEmpty {
-                        VList.append(eventList.VList[0])
-                        eventList.VList.removeFirst()
-                    }
-                }
-            reviewed = false   }
     }
     
     func sortDivers() {
         for coach in coachList {
             for diver in coach.diverEntries {
                 if diver.level == 0 {
-                    EList.append(divers(dives: [], diverEntries: diver))
-                    EList[EList.count - 1].diverEntries.team = coach.team
-                    EList[EList.count - 1].diverEntries.totalScore = 0
+                    eventList.EList.append(divers(dives: [], diverEntries: diver))
+                    eventList.EList[eventList.EList.count - 1].diverEntries.team = coach.team
+                    eventList.EList[eventList.EList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 1 {
-                    JVList.append(divers(dives: [], diverEntries: diver))
-                    JVList[JVList.count - 1].diverEntries.team = coach.team
-                    JVList[JVList.count - 1].diverEntries.totalScore = 0
+                    eventList.JVList.append(divers(dives: [], diverEntries: diver))
+                    eventList.JVList[eventList.JVList.count - 1].diverEntries.team = coach.team
+                    eventList.JVList[eventList.JVList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 2 {
-                    VList.append(divers(dives: [], diverEntries: diver))
-                    VList[VList.count - 1].diverEntries.team = coach.team
-                    VList[VList.count - 1].diverEntries.totalScore = 0
+                    eventList.VList.append(divers(dives: [], diverEntries: diver))
+                    eventList.VList[eventList.VList.count - 1].diverEntries.team = coach.team
+                    eventList.VList[eventList.VList.count - 1].diverEntries.totalScore = 0
                 }
             }
         }
         //create array of every team
-        for diver in EList {
-            var addTeam = true
-            for tempTeam in teamsArray {
-                if diver.diverEntries.team == tempTeam {
-                    addTeam = false
-                }
-            }
-            if addTeam == true {
-                teamsArray.append(diver.diverEntries.team!)
-            }
-        }
-        for diver in JVList {
-            var addTeam = true
-            for tempTeam in teamsArray {
-                if diver.diverEntries.team == tempTeam {
-                    addTeam = false
-                }
-            }
-            if addTeam == true {
-                teamsArray.append(diver.diverEntries.team!)
-            }
-        }
-        for diver in VList {
-            var addTeam = true
-            for tempTeam in teamsArray {
-                if diver.diverEntries.team == tempTeam {
-                    addTeam = false
-                }
-            }
-            if addTeam == true {
-                teamsArray.append(diver.diverEntries.team!)
-            }
-        }
-        if !EList.isEmpty {
+        makeTeamsArray()
+        if !eventList.EList.isEmpty {
             sortEListByTeam()
         }
-        if !JVList.isEmpty {
+        if !eventList.JVList.isEmpty {
             sortJVListByTeam()
         }
-        if !VList.isEmpty {
+        if !eventList.VList.isEmpty {
             sortVListByTeam()
+        }
+    }
+    
+    func makeTeamsArray() {
+        for diver in eventList.EList {
+            var addTeam = true
+            for tempTeam in teamsArray {
+                if diver.diverEntries.team == tempTeam {
+                    addTeam = false
+                }
+            }
+            if addTeam == true {
+                teamsArray.append(diver.diverEntries.team!)
+            }
+        }
+        for diver in eventList.JVList {
+            var addTeam = true
+            for tempTeam in teamsArray {
+                if diver.diverEntries.team == tempTeam {
+                    addTeam = false
+                }
+            }
+            if addTeam == true {
+                teamsArray.append(diver.diverEntries.team!)
+            }
+        }
+        for diver in eventList.VList {
+            var addTeam = true
+            for tempTeam in teamsArray {
+                if diver.diverEntries.team == tempTeam {
+                    addTeam = false
+                }
+            }
+            if addTeam == true {
+                teamsArray.append(diver.diverEntries.team!)
+            }
         }
     }
     
@@ -336,13 +370,13 @@ struct AddDiversView: View {
         var index: Int = 0
         var tempEList: [divers] = []
         
-        while !EList.isEmpty {
+        while !eventList.EList.isEmpty {
             var breakLoop = false
-            for diver in 0..<EList.count {
+            for diver in 0..<eventList.EList.count {
                 if breakLoop == false {
-                    if EList[diver].diverEntries.team == teamsArray[index] {
-                        tempEList.append(EList[diver])
-                        EList.remove(at: diver)
+                    if eventList.EList[diver].diverEntries.team == teamsArray[index] {
+                        tempEList.append(eventList.EList[diver])
+                        eventList.EList.remove(at: diver)
                         breakLoop = true
                     }
                 }
@@ -355,7 +389,7 @@ struct AddDiversView: View {
             }
         }
         while !tempEList.isEmpty {
-            EList.append(tempEList[tempEList.count - 1])
+            eventList.EList.append(tempEList[tempEList.count - 1])
             tempEList.remove(at: tempEList.count - 1)
         }
     }
@@ -364,13 +398,13 @@ struct AddDiversView: View {
         var index: Int = 0
         var tempJVList: [divers] = []
         
-        while !JVList.isEmpty {
+        while !eventList.JVList.isEmpty {
             var breakLoop = false
-            for diver in 0..<JVList.count {
+            for diver in 0..<eventList.JVList.count {
                 if !breakLoop {
-                    if JVList[diver].diverEntries.team == teamsArray[index] {
-                        tempJVList.append(JVList[diver])
-                        JVList.remove(at: diver)
+                    if eventList.JVList[diver].diverEntries.team == teamsArray[index] {
+                        tempJVList.append(eventList.JVList[diver])
+                        eventList.JVList.remove(at: diver)
                         breakLoop = true
                     }
                 }
@@ -383,7 +417,7 @@ struct AddDiversView: View {
             }
         }
         while !tempJVList.isEmpty {
-            JVList.append(tempJVList[tempJVList.count - 1])
+            eventList.JVList.append(tempJVList[tempJVList.count - 1])
             tempJVList.remove(at: tempJVList.count - 1)
         }
     }
@@ -393,13 +427,13 @@ struct AddDiversView: View {
         var index: Int = 0
         var tempVList: [divers] = []
         
-        while !VList.isEmpty {
+        while !eventList.VList.isEmpty {
             var breakLoop = false
-            for diver in 0..<VList.count {
+            for diver in 0..<eventList.VList.count {
                 if !breakLoop {
-                    if VList[diver].diverEntries.team == teamsArray[index] {
-                        tempVList.append(VList[diver])
-                        VList.remove(at: diver)
+                    if eventList.VList[diver].diverEntries.team == teamsArray[index] {
+                        tempVList.append(eventList.VList[diver])
+                        eventList.VList.remove(at: diver)
                         breakLoop = true
                     }
                 }
@@ -412,36 +446,39 @@ struct AddDiversView: View {
             }
         }
         while !tempVList.isEmpty {
-            VList.append(tempVList[tempVList.count - 1])
+            eventList.VList.append(tempVList[tempVList.count - 1])
             tempVList.remove(at: tempVList.count - 1)
         }
     }
     
     func consolidateDiverList() -> [divers] {
         var allDivers: [divers] = []
-        for diver in EList {
+        for diver in eventList.EList {
             allDivers.append(diver)
         }
-        for diver in JVList {
+        for diver in eventList.JVList {
             allDivers.append(diver)
         }
-        for diver in VList {
+        for diver in eventList.VList {
             allDivers.append(diver)
         }
         return allDivers
     }
     
     func deleteEDiver(at offsets: IndexSet) {
-        EList.remove(atOffsets: offsets)
-        reviewed = false
+        eventList.EList.remove(atOffsets: offsets)
+        eventList.reviewed = false
+        eventStore.saveEvent()
     }
     func deleteJVDiver(at offsets: IndexSet) {
-        JVList.remove(atOffsets: offsets)
-        reviewed = false
+        eventList.JVList.remove(atOffsets: offsets)
+        eventList.reviewed = false
+        eventStore.saveEvent()
     }
     func deleteVDiver(at offsets: IndexSet) {
-        VList.remove(atOffsets: offsets)
-        reviewed = false
+        eventList.VList.remove(atOffsets: offsets)
+        eventList.reviewed = false
+        eventStore.saveEvent()
     }
     
     func makeFinalDiverList() {
@@ -527,9 +564,104 @@ struct AddDiversView: View {
         return valid
     }
     
+    func validateNewDivers() {
+        var skipFirstDive = true
+        var uniqueCategories: [Int] = []
+        var uniqueCategoryCount: Int = 0
+        for diver in 0..<coachList[0].diverEntries.count {
+            if coachList[0].diverEntries[diver].dives.count == 6 {
+                //check for dive of the week
+                var tempDiveCode = coachList[0].diverEntries[diver].dives[0]
+                tempDiveCode.removeLast()
+                if findDiveOfTheWeek().contains(Int(tempDiveCode)!) {
+                    
+                }
+                else {
+                    //DQ
+                    coachList[0].diverEntries[diver].dq = true
+                }
+                if !skipFirstDive {
+                    for dive in coachList[0].diverEntries[diver].dives {
+                        var tempDiveCode = dive
+                        tempDiveCode.removeLast()
+                        if Int(tempDiveCode)! < 200 {
+                            if uniqueCategories.contains(1) {
+                                uniqueCategoryCount += 1
+                            }
+                            uniqueCategories.append(1)
+                        }
+                        else if Int(tempDiveCode)! < 300 {
+                            if uniqueCategories.contains(2) {
+                                uniqueCategoryCount += 1
+                            }
+                            uniqueCategories.append(2)
+                        }
+                        else if Int(tempDiveCode)! < 400 {
+                            if uniqueCategories.contains(3) {
+                                uniqueCategoryCount += 1
+                            }
+                            uniqueCategories.append(3)
+                        }
+                        else if Int(tempDiveCode)! < 500 {
+                            if uniqueCategories.contains(4) {
+                                uniqueCategoryCount += 1
+                            }
+                            uniqueCategories.append(4)
+                        }
+                        else if Int(tempDiveCode)! < 6000 {
+                            if uniqueCategories.contains(5) {
+                                uniqueCategoryCount += 1
+                            }
+                            uniqueCategories.append(5)
+                        }
+                    }
+                    if uniqueCategoryCount >= 4 {
+                        
+                    }
+                    else {
+                        //DQ for not having 4 categories
+                        coachList[0].diverEntries[diver].dq = true
+                    }
+                }
+            }
+            else if coachList[0].diverEntries[diver].dives.count == 11 {
+                
+            }
+            skipFirstDive = false
+        }
+    }
+    
+    func findDiveOfTheWeek() -> ClosedRange<Int> {
+        var tempDate = Date()
+        var dateComponents = DateComponents()
+        dateComponents.month = 0
+        dateComponents.day = -1
+        dateComponents.year = 0
+        while tempDate.formatted(date: .numeric, time: .omitted) != "8/13/2023" {
+            if tempDate.formatted(date: .numeric, time: .omitted) == "8/14/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/23/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/20/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/29/2024" {
+                return 100...200
+            }
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/21/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/30/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/27/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/1/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "2/5/2024" {
+                return 200...300
+            }
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/28/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/2/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/8/2024" {
+                return 400...500
+            }
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/9/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/15/2024" {
+                return 5000...6000
+            }
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/16/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/22/2024" {
+                return 300...400
+            }
+            tempDate = Calendar.current.date(byAdding: dateComponents, to: tempDate)!
+        }
+        
+        return 0...1
+    }
+    
     struct AddDiversView_Previews: PreviewProvider {
         static var previews: some View {
-            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3)))
+            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, reviewed: false)), path: .constant([]))
         }
     }
 }

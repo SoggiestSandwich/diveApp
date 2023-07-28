@@ -11,14 +11,13 @@ class EventStore: ObservableObject {
     @Published var eventList: [events] = []
     
     init() {
-        print(FileManager.docDirURL.path)
         if FileManager().docExist(named: fileName) {
             loadEvent()
         }
     }
     
     func addEvent(_ event: events) {
-        eventList.append(event)
+        eventList.insert(event, at: 0)
         saveEvent()
     }
     func deleteEvent(at indexSet: IndexSet) {

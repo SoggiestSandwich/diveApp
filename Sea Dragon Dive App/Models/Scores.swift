@@ -7,14 +7,13 @@
 
 import Foundation
 
-struct scores: Identifiable, Hashable, Codable {
+struct scores: Hashable, Codable, Identifiable {
+    var id = UUID()
     var score: Double
     var index: Int
-    let id: UUID
     
-    init(score: Double, index: Int, id: UUID = UUID()) {
+    init(score: Double, index: Int) {
         self.score = score
         self.index = index
-        self.id = id
     }
 }
