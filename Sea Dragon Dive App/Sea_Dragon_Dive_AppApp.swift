@@ -96,6 +96,7 @@ struct Sea_Dragon_Dive_AppApp: App {
             LoginScreenView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .environmentObject(EventStore())
+                .environmentObject(DiverStore())
         }
     }
 }

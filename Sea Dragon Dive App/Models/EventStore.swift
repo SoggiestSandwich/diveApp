@@ -11,7 +11,6 @@ class EventStore: ObservableObject {
     @Published var eventList: [events] = []
     
     init() {
-        print(FileManager.docDirURL.path)
         if FileManager().docExist(named: fileName) {
             loadEvent()
         }

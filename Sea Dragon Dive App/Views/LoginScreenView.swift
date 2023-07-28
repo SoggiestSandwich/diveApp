@@ -87,7 +87,7 @@ struct LoginScreenView: View {
     @ViewBuilder
     func getDestination() -> some View {
         switch selection {
-        case 1: DiverHomeView(username: username)
+        case 1: DiverHomeView(username: username, userSchool: userSchool)
         case 3: EventSelectionView()
             
         default: EmptyView()

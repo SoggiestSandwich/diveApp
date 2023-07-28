@@ -11,10 +11,12 @@ struct DiverHomeView: View {
     @Environment(\.verticalSizeClass) var verticalSizeClass
     @Environment(\.colorScheme) var colorScheme
     
+    @EnvironmentObject var diverStore: DiverStore
+    
     @State var username: String
+    @State var userSchool: String
     @State var top6DiveScore: Double = 0
     @State var top11DiveScore: Double = 0
-    @State var entryList: [divers] = []
     @State var eventList: [events] = []
     
     var body: some View {
@@ -84,33 +86,63 @@ struct DiverHomeView: View {
                         .padding(.horizontal)
                     Spacer()
                 }
-                if entryList.isEmpty {
+                if diverStore.entryList.isEmpty {
                     Text("No current dive entries")
                 }
                 List {
-                    ForEach(Array(zip(entryList.indices, entryList)), id: \.0) { index, entry in
-                        NavigationLink(destination: DiveEntryView(entryIndex: index, username: username, entryList: $entryList)) {
-                                Text(entry.diverEntries.name)
-                        }
-                    }
-                    NavigationLink(destination: DiveEntryView(entryIndex: entryList.count, username: username, entryList: $entryList)) {}
-                        .opacity(0)
-                        .padding(10)
-                        .overlay(
-                            Rectangle()
-                                .stroke(Color.black, lineWidth: 2)
-                                .padding(.horizontal)
-                                .padding(.horizontal)
-                                .padding(.horizontal)
-                                .padding(.horizontal)
-                        )
-                        .overlay(
-                            HStack {
-                                Image(systemName: "plus.circle")
-                                Text("Create a Dive Entry")
-                                    .font(.body.bold())
+                    if !diverStore.entryList.isEmpty {
+                        ForEach(Array(zip(diverStore.entryList.indices, diverStore.entryList)), id: \.0) { index, entry in
+                            NavigationLink(destination: DiveEntryView(username: username, userSchool: userSchool, entryList: $diverStore.entryList[index])) {
+                                if !diverStore.entryList[index].dives.isEmpty && diverStore.entryList[index].diverEntries.level != -1 && diverStore.entryList[index].location != nil {
+                                    HStack {
+                                        Text(diverStore.entryList[index].date?.formatted(date: .abbreviated, time: .omitted) ?? Date().formatted(date: .abbreviated, time: .omitted))
+                                            .frame(width: 60)
+                                        Divider()
+                                        VStack {
+                                            HStack {
+                                                Image(systemName: "location.fill")
+                                                Text(diverStore.entryList[index].location ?? "")
+                                            }
+                                            Text("\(diverStore.entryList[index].dives.count) dives chosen")
+                                        }
+                                        Spacer()
+                                        Button {
+                                            
+                                        } label: {
+                                            Text("Scan Results After Event")
+                                                .padding(5)
+                                                .multilineTextAlignment(.center)
+                                                .background(
+                                                    RoundedRectangle(cornerRadius: 15)
+                                                        .stroke(lineWidth: 2)
+                                                )
+                                        }
+                                    }
+                                }
+                                else {
+                                    Text("Edit Dive Entry")
+                                }
                             }
-                        )
+                        }
+                        .onDelete(perform: diverStore.deleteDiver)
+                    }
+                    Button {
+                        diverStore.addDiver(divers(dives: [], diverEntries: diverEntry(dives: [], level: -1, name: username)))
+                    } label: {
+                        Rectangle()
+                            .stroke(Color.black, lineWidth: 2)
+                            .padding(.horizontal)
+                            .padding(.horizontal)
+                            .padding(.horizontal)
+                            .padding(.horizontal)
+                            .overlay(
+                                HStack {
+                                    Image(systemName: "plus.circle")
+                                    Text("Create a Dive Entry")
+                                        .font(.body.bold())
+                                }
+                            )
+                    }
                 }
                 .listStyle(InsetListStyle())
                 .scrollContentBackground(.hidden)
@@ -142,6 +174,7 @@ struct DiverHomeView: View {
 
 struct DiverHomeView_Previews: PreviewProvider {
     static var previews: some View {
-        DiverHomeView(username: "Kakaw")
+        DiverHomeView(username: "Kakaw", userSchool: "School")
+            .environmentObject(DiverStore())
     }
 }

@@ -20,7 +20,7 @@ struct SelectDivesView: View {
     @State var expandedGroup: [Bool] = [false, false, false, false, false]
     @State var favoriteList: [String] = []
     
-    @State var entryList: [divers]
+    @State var entryList: divers
     @Binding var diveList: [dives]
     
     var body: some View {
@@ -126,7 +126,9 @@ struct SelectDivesView: View {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
                                                                             
-                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0))
+                                                                            let code = String(fetchedDive.diveNbr) + (fetchedPosition.positionCode ?? "")
+                                                                            
+                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, scored: false, code: code))
                                                                         }
                                                                         else {
                                                                             removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
@@ -135,7 +137,7 @@ struct SelectDivesView: View {
                                                                 VStack {
                                                                     Text("\(fetchedPosition.positionName == "Straight" ? "Str" : fetchedPosition.positionName ?? "") (\(String(fetchedWithPosition.degreeOfDifficulty)))")
                                                                         .font(.caption.bold())
-                                                                    Text("Avg. Score: \(String(averageScore()))")
+                                                                    Text("Avg. Score: (avgScore)")
                                                                         .font(.system(size: 8).bold())
                                                                 }
                                                             }
@@ -206,16 +208,15 @@ struct SelectDivesView: View {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
                                                                             
-                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0))
-                                                                        }
-                                                                        else {
-                                                                            removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
+                                                                            let code = String(fetchedDive.diveNbr) + (fetchedPosition.positionCode ?? "")
+                                                                            
+                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, scored: false, code: code))
                                                                         }
                                                                     }
                                                                 VStack {
                                                                     Text("\(fetchedPosition.positionName == "Straight" ? "Str" : fetchedPosition.positionName ?? "") (\(String(fetchedWithPosition.degreeOfDifficulty)))")
                                                                         .font(.caption.bold())
-                                                                    Text("Avg. Score: \(String(averageScore()))")
+                                                                    Text("Avg. Score: (avgScore)")
                                                                         .font(.system(size: 8).bold())
                                                                 }
                                                             }
@@ -286,16 +287,15 @@ struct SelectDivesView: View {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
                                                                             
-                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0))
-                                                                        }
-                                                                        else {
-                                                                            removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
+                                                                            let code = String(fetchedDive.diveNbr) + (fetchedPosition.positionCode ?? "")
+                                                                            
+                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, scored: false, code: code))
                                                                         }
                                                                     }
                                                                 VStack {
                                                                     Text("\(fetchedPosition.positionName == "Straight" ? "Str" : fetchedPosition.positionName ?? "") (\(String(fetchedWithPosition.degreeOfDifficulty)))")
                                                                         .font(.caption.bold())
-                                                                    Text("Avg. Score: \(String(averageScore()))")
+                                                                    Text("Avg. Score: (avgScore)")
                                                                         .font(.system(size: 8).bold())
                                                                 }
                                                             }
@@ -366,7 +366,9 @@ struct SelectDivesView: View {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
                                                                             
-                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0))
+                                                                            let code = String(fetchedDive.diveNbr) + (fetchedPosition.positionCode ?? "")
+                                                                            
+                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, scored: false, code: code))
                                                                         }
                                                                         else {
                                                                             removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
@@ -375,7 +377,7 @@ struct SelectDivesView: View {
                                                                 VStack {
                                                                     Text("\(fetchedPosition.positionName == "Straight" ? "Str" : fetchedPosition.positionName ?? "") (\(String(fetchedWithPosition.degreeOfDifficulty)))")
                                                                         .font(.caption.bold())
-                                                                    Text("Avg. Score: \(String(averageScore()))")
+                                                                    Text("Avg. Score: (avgScore)")
                                                                         .font(.system(size: 8).bold())
                                                                 }
                                                             }
@@ -446,7 +448,9 @@ struct SelectDivesView: View {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
                                                                             
-                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0))
+                                                                            let code = String(fetchedDive.diveNbr) + (fetchedPosition.positionCode ?? "")
+                                                                            
+                                                                            diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, scored: false, code: code))
                                                                         }
                                                                         else {
                                                                             removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
@@ -455,7 +459,7 @@ struct SelectDivesView: View {
                                                                 VStack {
                                                                     Text("\(fetchedPosition.positionName == "Straight" ? "Str" : fetchedPosition.positionName ?? "") (\(String(fetchedWithPosition.degreeOfDifficulty)))")
                                                                         .font(.caption.bold())
-                                                                    Text("Avg. Score: \(String(averageScore()))")
+                                                                    Text("Avg. Score: (avgScore)")
                                                                         .font(.system(size: 8).bold())
                                                                 }
                                                             }
@@ -512,15 +516,15 @@ struct SelectDivesView: View {
         }
         .navigationTitle("Select Dives")
     }
-    func averageScore() -> Double {
-        //find average
-        var average: Double = 0
-        for entry in entryList {
-            average += entry.diverEntries.totalScore ?? 0
-        }
-        average /= Double(entryList.count)
-        return average
-    }
+//    func averageScore() -> Double {
+//        //find average
+//        var average: Double = 0
+//        for entry in entryList {
+//            average += entry.diverEntries.totalScore ?? 0
+//        }
+//        average /= Double(entryList.count)
+//        return average
+//    }
     func isClicked(name: String, position: String) -> Bool {
         for dive in diveList {
             if dive.name == name && dive.position == position {
@@ -572,6 +576,6 @@ struct SelectDivesView: View {
 
 struct SelectDivesView_Previews: PreviewProvider {
     static var previews: some View {
-        SelectDivesView(entryList: [divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))], diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
+        SelectDivesView(entryList: divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: "")), diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
     }
 }

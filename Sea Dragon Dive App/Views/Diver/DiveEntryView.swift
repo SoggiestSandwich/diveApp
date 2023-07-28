@@ -9,18 +9,25 @@ import SwiftUI
 
 struct DiveEntryView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
-    @State var date: Date = Date()
-    @State var location: String = ""
+    @EnvironmentObject var diverStore: DiverStore
+    
+    @FetchRequest(sortDescriptors: [
+        SortDescriptor(\.diveNbr)
+    ]) var fetchedDives: FetchedResults<Dive>
+    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
+    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
+
     @State var diveList: [dives] = []
-    @State var level: Int = -1
     @State var diveCount: Int = 0
     @State var diveSelector = false
+    @State var signingSheet: Bool = false
     
-    @State var entryIndex: Int
     @State var username: String
+    @State var userSchool: String
     
-    @Binding var entryList: [divers]
+    @Binding var entryList: divers
     
     var body: some View {
         NavigationStack {
@@ -29,7 +36,7 @@ struct DiveEntryView: View {
                     Text("Date")
                     Spacer()
                     //make date picker
-                    DatePicker("", selection: $date, displayedComponents: [.date])
+                    DatePicker("", selection: $entryList.date, displayedComponents: [.date])
                 }
                 .padding(.horizontal)
                 .offset(y: UIScreen.main.bounds.height * 0.008)
@@ -42,7 +49,7 @@ struct DiveEntryView: View {
                 HStack {
                     Text("Location")
                     Spacer()
-                    TextField("Enter Location", text: $location)
+                    TextField("Enter Location", text: $entryList.location)
                         .multilineTextAlignment(.trailing)
                 }
                 .offset(y: -UIScreen.main.bounds.height * 0.005)
@@ -62,13 +69,14 @@ struct DiveEntryView: View {
                     .padding(.horizontal)
                     .overlay(
                         Rectangle()
-                            .fill(level == 0 ? .blue : .clear)
+                            .fill(entryList.level == 0 ? .blue : .clear)
                             .opacity(0.5)
                             .frame(width: UIScreen.main.bounds.width * 0.23, height: UIScreen.main.bounds.height * 0.034)
                             .offset(x: UIScreen.main.bounds.width * 0.01)
                     )
                     .onTapGesture {
-                        level = 0
+                        entryList.level = 0
+                        diverStore.saveDivers()
                     }
                 Divider()
                     .frame(height: 30)
@@ -82,12 +90,13 @@ struct DiveEntryView: View {
                     .padding(.horizontal)
                     .overlay(
                         Rectangle()
-                            .fill(level == 1 ? .blue : .clear)
+                            .fill(entryList.level == 1 ? .blue : .clear)
                             .opacity(0.5)
                             .frame(width: UIScreen.main.bounds.width * 0.355, height: UIScreen.main.bounds.height * 0.034)
                     )
                     .onTapGesture {
-                        level = 1
+                        entryList.level = 1
+                        diverStore.saveDivers()
                     }
                 Divider()
                     .frame(height: 30)
@@ -101,13 +110,14 @@ struct DiveEntryView: View {
                     .padding(.horizontal)
                     .overlay(
                         Rectangle()
-                            .fill(level == 2 ? .blue : .clear)
+                            .fill(entryList.level == 2 ? .blue : .clear)
                             .opacity(0.5)
                             .frame(width: UIScreen.main.bounds.width * 0.274, height: UIScreen.main.bounds.height * 0.034)
                             .offset(x: -UIScreen.main.bounds.width * 0.01)
                     )
                     .onTapGesture {
-                        level = 2
+                        entryList.level = 2
+                        diverStore.saveDivers()
                     }
             }
             .overlay(
@@ -130,6 +140,7 @@ struct DiveEntryView: View {
                     )
                     .onTapGesture {
                         diveCount = 6
+                        diverStore.saveDivers()
                     }
                 Divider()
                     .frame(height: 30)
@@ -151,6 +162,7 @@ struct DiveEntryView: View {
                     )
                     .onTapGesture {
                         diveCount = 11
+                        diverStore.saveDivers()
                     }
             }
             .overlay(
@@ -159,7 +171,9 @@ struct DiveEntryView: View {
             )
             //finish entry button
             Button {
-                print(diveList.count)
+                signingSheet = true
+                encodeDives()
+                diverStore.saveDivers()
             } label: {
                 HStack {
                     Image(systemName: "signature")
@@ -171,15 +185,15 @@ struct DiveEntryView: View {
                     Rectangle()
                         .stroke(lineWidth: 2)
                 )
-                .foregroundColor(location == "" || diveList.count != diveCount || level > 2 || level < 0 || diveList.count == 0 ? colorScheme == .dark ? .white : .gray : .black)
+                .foregroundColor(entryList.location == "" || diveList.count != diveCount || entryList.level > 2 || entryList.level < 0 || diveList.count == 0 ? colorScheme == .dark ? .white : .gray : .black)
                 .padding()
             }
-            .disabled(location == "" || diveList.count != diveCount || level > 2 || level < 0 || diveList.count == 0)
+            .disabled(entryList.location == "" || diveList.count != diveCount || entryList.level > 2 || entryList.level < 0 || diveList.count == 0)
             //add divers buttons
             HStack {
                 Button {
-                    entryList.append(divers(dives: [], diverEntries: diverEntry(dives: [], level: level, name: username)))
                     diveSelector = true
+                    diverStore.saveDivers()
                 } label: {
                     HStack {
                         Image(systemName: "plus.circle")
@@ -195,6 +209,7 @@ struct DiveEntryView: View {
                 }
                 Button {
                     
+                    diverStore.saveDivers()
                 } label: {
                     HStack {
                         Image(systemName: "plus.circle")
@@ -231,19 +246,73 @@ struct DiveEntryView: View {
                 }
             }
             .environment(\.editMode, .constant(.active))
+            if !diveList.isEmpty {
+                Text("Based on your past scores:\nYour predicted score for this set of dives is (average) points\nThe best set of dives would score a predicted (bestDivesScore) points")
+                    .font(.caption)
+                Button {
+                    while !diveList.isEmpty {
+                        diveList.removeFirst()
+                        diverStore.saveDivers()
+                    }
+                } label: {
+                    Text("Reset Dives")
+                }
+            }
+        }
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    diverStore.saveDivers()
+                    self.presentationMode.wrappedValue.dismiss()
+                } label: {
+                    HStack {
+                        Image(systemName: "chevron.backward")
+                        Text("Back")
+                    }
+                }
+            }
         }
         .navigationTitle("Dive Entry")
         .sheet(isPresented: $diveSelector) {
             SelectDivesView(entryList: entryList, diveList: $diveList)
         }
+        .sheet(isPresented: $signingSheet) {
+            SigningView(entry: $entryList)
+        }
     }
     func deleteDive(at offsets: IndexSet) {
         diveList.remove(atOffsets: offsets)
+    }
+    
+//    func findAverageScores() -> Double {
+//        var average: Double = 0
+//        var count: Double = 0
+//        for entry in entryList {
+//            for entryDive in entry.dives {
+//                for dive in diveList {
+//                    if entryDive.name == dive.name && entryDive.position == dive.position {
+//                        average += entryDive.roundScore
+//                        count += 1
+//                    }
+//                }
+//            }
+//        }
+//        if count == 0 {
+//            count = 1
+//        }
+//        return average / count
+//    }
+    
+    func encodeDives() {
+        for dive in diveList {
+            entryList.diverEntries.dives.append(dive.code ?? "")
+        }
     }
 }
 
 struct DiveEntryView_Previews: PreviewProvider {
     static var previews: some View {
-        DiveEntryView(entryIndex: 0, username: "Kakaw", entryList: .constant([divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))]))
+        DiveEntryView(username: "Kakaw", userSchool: "", entryList: .constant(divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))))
     }
 }
