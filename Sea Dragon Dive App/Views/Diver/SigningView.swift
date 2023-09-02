@@ -15,6 +15,7 @@ struct Line {
 
 struct SigningView: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     @State private var currentLine = Line()
     @State private var lines: [Line] = []
@@ -22,9 +23,14 @@ struct SigningView: View {
     @Binding var entry: divers
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                Text("Sign yor dive entry")
+            NavigationStack {
+                Button {
+                    self.presentationMode.wrappedValue.dismiss()
+                } label: {
+                    Text("Dismiss")
+                }
+                .padding()
+                Text("Sign your dive entry")
                     .font(.title.bold())
                     .padding(.top)
                 Text("I agree that I can perform these dives")
@@ -34,7 +40,7 @@ struct SigningView: View {
                         for line in lines {
                             var path = Path()
                             path.addLines(line.points)
-                            context.stroke(path, with: .color(line.color), lineWidth: line.lineWidth)
+                            context.stroke(path, with: .color(colorScheme == .dark ? .white : .black), lineWidth: line.lineWidth)
                         }
                         
                     }.gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
@@ -102,7 +108,6 @@ struct SigningView: View {
                     }
                 }
             }
-        }
     }
     func makeQRCode() -> String {
         var finalCode: String = "{\"dives\":["
