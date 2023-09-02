@@ -9,8 +9,6 @@ import SwiftUI
 
 @main
 struct Sea_Dragon_Dive_AppApp: App {
-    @EnvironmentObject var settingsStore: SettingsStore
-    
     let persistenceController = PersistenceController.shared
     
     init() {
@@ -95,12 +93,10 @@ struct Sea_Dragon_Dive_AppApp: App {
 
     var body: some Scene {
         WindowGroup {
-                LoginScreenView()
-                    .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                    .environmentObject(EventStore())
-                    .environmentObject(DiverStore())
-                    .environmentObject(SettingsStore())
-                    .environmentObject(CoachEntryStore())
+            LoginScreenView()
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environmentObject(EventStore())
+                .environmentObject(DiverStore())
         }
     }
 }

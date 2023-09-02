@@ -8,7 +8,6 @@
 import Foundation
 
 let diverFileName = "Divers.json"
-let favoriteFileName = "Favorite.json"
 
 extension FileManager {
     static var diverDocDirURL: URL {

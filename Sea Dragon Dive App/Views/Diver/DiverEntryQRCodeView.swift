@@ -40,6 +40,6 @@ struct DiverEntryQRCodeView: View {
 
 struct DiverEntryQRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        DiverEntryQRCodeView(url: "https://youtu.be/dQw4w9WgXcQ")
+        DiverEntryQRCodeView(url: "QR Code")
     }
 }
