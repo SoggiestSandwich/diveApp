@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct EventResultsView: View {
+    
+    @Environment(\.verticalSizeClass) var verticalSizeClass
+    
     @State var entryList: divers
     
     var body: some View {
@@ -69,15 +72,27 @@ struct EventResultsView: View {
                         VStack(alignment: .leading) {
                             Text("\(dive.name), \(dive.position) (\(String(format: "%.1f", dive.degreeOfDiff)))")
                                 .font(.body.bold())
-                            HStack {
-                                ForEach(dive.score, id: \.hashValue) { score in
-                                    Text("\(String(score.score))")
+                            VStack {
+                                HStack {
+                                    /*ForEach(dive.score, id: \.hashValue) { score in
+                                        Text("\(String(score.score))")
+                                            .font(.body.bold())
+                                            .padding(.trailing)
+                                    }*/
+                                    
+                                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 50, maximum: 150)), count: verticalSizeClass == .regular ? 3 : 7)) {
+                                        ForEach(dive.score, id: \.hashValue) { score in
+                                            Text("\(String(score.score))")
+                                                .font(.body.bold())
+                                                .padding(.trailing)
+                                            
+                                        }
+                                    }
+                                    
+                                    Spacer()
+                                    Text("Score: \(String(format: "%.2f", dive.roundScore))")
                                         .font(.body.bold())
-                                        .padding(.trailing)
                                 }
-                                Spacer()
-                                Text("Score: \(String(format: "%.2f", dive.roundScore))")
-                                    .font(.body.bold())
                             }
                         }
                     }
@@ -104,6 +119,6 @@ struct EventResultsView: View {
 
 struct EventResultsView_Previews: PreviewProvider {
     static var previews: some View {
-        EventResultsView(entryList: divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0), scores(score: 1, index: 0), scores(score: 1, index: 0)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0), scores(score: 1, index: 0), scores(score: 1, index: 0)], position: "Free", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "", totalScore: 0), placement: 420, date: Date(), location: "Location"))
+        EventResultsView(entryList: divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4), scores(score: 10.0, index: 5), scores(score: 10.0, index: 6)], position: "Free", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "", totalScore: 0), placement: 420, date: Date(), location: "Location"))
     }
 }

@@ -1,24 +1,22 @@
 //
-//  ResultsQRView.swift
+//  AnnouncersQRCodeView.swift
 //  Sea Dragon Dive App
 //
-//  Created by Jacob Richardt on 7/20/23.
+//  Created by Jacob Richardt on 6/13/24.
 //
 
 import Foundation
 import SwiftUI
 import CoreImage.CIFilterBuiltins
 
-struct ResultsQRView: View {
-    let team: String
-    
+struct AnnouncerQRCodeView: View {
     let context = CIContext()
     let filter = CIFilter.qrCodeGenerator()
     var url: String
     
     var body: some View {
         VStack {
-            Text(team)
+            Text("Show to Announcer")
                 .font(.largeTitle.bold())
             
             Image(uiImage: generateQRCodeImage(url)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
@@ -39,8 +37,8 @@ struct ResultsQRView: View {
     }
 }
 
-struct ResultsQRView_Previews: PreviewProvider {
+struct AnnouncerQRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        ResultsQRView(team: "Team", url: "")
+        AnnouncerQRCodeView(url: "")
     }
 }

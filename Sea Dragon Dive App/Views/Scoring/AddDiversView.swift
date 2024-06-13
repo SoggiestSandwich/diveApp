@@ -32,6 +32,8 @@ struct AddDiversView: View {
     @State private var failedScanAlert: Bool = false
     @State private var diverInfoSheet: Bool = false
     @State private var sentDiver: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))
+    @State private var failedScanMessage: String = "Could not find the needed data in the scanned QR Code\n"
+    @State private var showQRCodeSheet: Bool = false
     
     @Binding var eventList: events
     @Binding var path: [String]
@@ -50,7 +52,18 @@ struct AddDiversView: View {
                     
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
-                        let jsonCode = tempCodes.name.data(using: .utf8)!
+                        let  base64Data = tempCodes.name.data(using: .utf8)
+                        let data = Data(base64Encoded: base64Data!)
+                        //let result = String(data: data!, encoding: .utf8)
+                        let compressedJsonCode = data
+                        //uncompress data
+                        let jsonCode: Data
+                        if compressedJsonCode!.isGzipped {
+                            jsonCode = try! compressedJsonCode!.gunzipped()
+                        }
+                        else {
+                            jsonCode = compressedJsonCode!
+                        }
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         if entries != nil {
@@ -96,6 +109,7 @@ struct AddDiversView: View {
                                         }
                                     }
                                 }
+                                
                                 coachList.append(entries!)
                                 validateNewDivers()
                                 sortDivers()
@@ -120,10 +134,11 @@ struct AddDiversView: View {
         )
         .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
             Button("OK", role: .cancel) {
+                failedScanMessage = "Could not find the needed data in the scanned QR Code\n"
                 self.isPresentingScanner = false
             }
         } message: {
-            Text("Could not find the needed data in the scanned QR Code")
+            Text(failedScanMessage)
         }
     }
     
@@ -205,74 +220,97 @@ struct AddDiversView: View {
             
             .environment(\.editMode, editingList ? .constant(.active) : .constant(.inactive))
             Spacer()
-            Button {
-                //opens qr scanner to scan in divers
-                self.isPresentingScanner = true
-            } label: {
-                Text("Add Divers")
-                    .foregroundColor(colorScheme == .dark ? .white : .black)
-                    .bold()
-                    .padding(15)
-                    .padding(.horizontal)
-                    .padding(.horizontal)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
-                    )
-            }
-            .sheet(isPresented: $isPresentingScanner) {
-                self.ScannerSheet
-            }
-            
-            //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
-            if eventList.reviewed {
-                NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, eventList: $eventList, path: $path)) {
-                    Text("Start Event")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .bold()
-                        .padding(15)
-                        .padding(.horizontal)
-                        .padding(.horizontal)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
-                            
-                        )
-                }
-            }
-            else {
-                Button {
-                    if !consolidateDiverList().isEmpty {
-                        //add all aspects to divers struct
-                        makeFinalDiverList()
-                        showPopUp = true
+            HStack {
+                VStack {
+                    Button {
+                        //opens qr scanner to scan in divers
+                        self.isPresentingScanner = true
+                    } label: {
+                        Text("Add Divers")
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .bold()
+                            .padding(15)
+                            .padding(.horizontal)
+                            .padding(.horizontal)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                            )
+                    }
+                    .sheet(isPresented: $isPresentingScanner) {
+                        self.ScannerSheet
+                    }
+                    
+                    //moves to the score view once divers are entered and confirmed that official has verified it(needs to be added later)
+                    if eventList.reviewed {
+                        NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, eventList: $eventList, path: $path)) {
+                            Text("Start Event")
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .bold()
+                                .padding(15)
+                                .padding(.horizontal)
+                                .padding(.horizontal)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                                    
+                                )
+                        }
                     }
                     else {
-                        showAlert = true
+                        Button {
+                            if !consolidateDiverList().isEmpty {
+                                //add all aspects to divers struct
+                                makeFinalDiverList()
+                                showPopUp = true
+                            }
+                            else {
+                                showAlert = true
+                            }
+                        } label: {
+                            Text("Official Review")
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
+                                .bold()
+                                .padding(15)
+                                .padding(.horizontal)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                                    
+                                )
+                        }
+                        .alert("Official's Approval Required", isPresented: $showPopUp) {
+                            Button("Cancel", role: .cancel) {}
+                            Button("Confirm") {
+                                eventList.reviewed = true
+                                eventStore.saveEvent()
+                            }
+                        } message: {
+                            Text("Please hand this device to an official for review. press confirm to continue")
+                        }
+                        .alert("You must enter divers before starting an event", isPresented: $showAlert) {
+                            Button("OK", role: .cancel) {}
+                        }
                     }
-                } label: {
-                    Text("Official Review")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .bold()
-                        .padding(15)
-                        .padding(.horizontal)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
-                            
-                        )
                 }
-                .alert("Official's Approval Required", isPresented: $showPopUp) {
-                    Button("Cancel", role: .cancel) {}
-                    Button("Confirm") {
-                        eventList.reviewed = true
-                        eventStore.saveEvent()
+                if eventList.reviewed {
+                    Button {
+                        showQRCodeSheet = true
+                    } label: {
+                        Text("Send To Announcer")
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .bold()
+                            .padding(15)
+                            .padding(.horizontal)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
+                                
+                            )
                     }
-                } message: {
-                    Text("Please hand this device to an official for review. press confirm to continue")
-                }
-                .alert("You must enter divers before starting an event", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
+                    .sheet(isPresented: $showQRCodeSheet) {
+                        CoachEntryQRCodeView(url: createdQrCode())
+                    }
                 }
             }
         }
@@ -552,13 +590,22 @@ struct AddDiversView: View {
                     }
                 }
                 if !valid {
+                    failedScanMessage += "A diver includes a nonexistant dive\n"
                     return false
                 }
             }
             
             //check levels
             if diver.level > 3 || diver.level < 0 {
+                failedScanMessage += "A diver has a nonexistant level of competition\n"
                 valid = false
+            }
+            
+            //check dive count
+            if diver.dives.count > eventList.diveCount {
+                //message saying to many dives
+                failedScanMessage += "A diver has too many dives\n"
+                return false
             }
         }
         return valid
@@ -569,6 +616,9 @@ struct AddDiversView: View {
         var uniqueCategories: [Int] = []
         var uniqueCategoryCount: Int = 0
         for diver in 0..<coachList[0].diverEntries.count {
+            if coachList[0].diverEntries[diver].dives.count < eventList.diveCount {
+                coachList[0].diverEntries[diver].dq = true
+            }
             if coachList[0].diverEntries[diver].dives.count == 6 {
                 //check for dive of the week
                 var tempDiveCode = coachList[0].diverEntries[diver].dives[0]
@@ -625,7 +675,260 @@ struct AddDiversView: View {
                 }
             }
             else if coachList[0].diverEntries[diver].dives.count == 11 {
+                coachList[0].diverEntries[diver].fullDives = []
+                var fullDive = dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)
+                for dive in 0..<coachList[0].diverEntries[diver].dives.count {
+                    var number = coachList[0].diverEntries[diver].dives[dive]
+                    number.removeLast()
+                    var letter = coachList[0].diverEntries[diver].dives[dive]
+                    var positionId: Int64 = 0
+                    
+                    while letter.count > 1 {
+                        letter.removeFirst()
+                    }
+                    for fetchedDive in fetchedDives {
+                        if fetchedDive.diveNbr == Int(number)! {
+                            fullDive.name = fetchedDive.diveName ?? ""
+                        }
+                    }
+                    for fetchedPosition in fetchedPositions {
+                        if fetchedPosition.positionCode == letter.uppercased() {
+                            positionId = fetchedPosition.positionId
+                            fullDive.position = fetchedPosition.positionName ?? ""
+                        }
+                    }
+                    for fetchedWithPosition in fetchedWithPositions {
+                        if fetchedWithPosition.positionId == positionId && fetchedWithPosition.diveNbr == Int(number)! {
+                            fullDive.degreeOfDiff = fetchedWithPosition.degreeOfDifficulty
+                        }
+                    }
+                    fullDive.code = coachList[0].diverEntries[diver].dives[dive]
+                    fullDive.volentary = coachList[0].diverEntries[diver].volentary?[dive]
+                    coachList[0].diverEntries[diver].fullDives!.append(fullDive)
+                }
+                var allCategories: [Int] = []
+                var uniqueCategories: Int = 0
+                var totalDOD: Double = 0
+                for dive in coachList[0].diverEntries[diver].fullDives! {
+                    if dive.volentary == true {
+                        var diveNum = dive.code!
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            if !allCategories.contains(1) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(1)
+                            totalDOD += dive.degreeOfDiff
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            if !allCategories.contains(2) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(2)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            if !allCategories.contains(3) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(3)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            if !allCategories.contains(4) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(4)
+                            totalDOD += dive.degreeOfDiff
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            if !allCategories.contains(5) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(5)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                    }
+                }
+                if totalDOD > 9 {
+                    coachList[0].diverEntries[diver].dq = true
+                }
+                if uniqueCategories == 5 {
+                }
+                else {
+                    coachList[0].diverEntries[diver].dq = true
+                }
                 
+                for dive in coachList[0].diverEntries[diver].fullDives! {
+                    if dive.volentary != true {
+                        var diveNum = dive.code!
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            if !allCategories.contains(1) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(1)
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            if !allCategories.contains(2) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(2)
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            if !allCategories.contains(3) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(3)
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            if !allCategories.contains(4) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(4)
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            if !allCategories.contains(5) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(5)
+                            
+                        }
+                    }
+                    if uniqueCategories == 5 {
+                    }
+                    else {
+                        coachList[0].diverEntries[diver].dq = true
+                    }
+                }
+                //check dive order for validation
+                uniqueCategories = 0
+                allCategories.removeAll()
+                for dive in 0...7 {
+                    var diveNum = coachList[0].diverEntries[diver].dives[dive]
+                    diveNum.removeLast()
+                    if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                        if !allCategories.contains(1) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(1)
+                    }
+                    else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                        if !allCategories.contains(2) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(2)
+                        
+                    }
+                    else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                        if !allCategories.contains(3) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(3)
+                        
+                    }
+                    else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                        if !allCategories.contains(4) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(4)
+                    }
+                    else if Int(diveNum)! > 1000 {
+                        if !allCategories.contains(5) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(5)
+                        
+                    }
+                }
+                if uniqueCategories == 5 {
+                    //check for more than 3 or more repeats in the first 8 dives
+                    allCategories.removeAll()
+                    for dive in 0...7 {
+                        var diveNum = coachList[0].diverEntries[diver].dives[dive]
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            allCategories.append(1)
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            allCategories.append(2)
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            allCategories.append(3)
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            allCategories.append(4)
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            allCategories.append(5)
+                        }
+                    }
+                    var breakLoop = false
+                    for num in 1...5 {
+                        if !breakLoop {
+                            var count = 0
+                            for cat in allCategories {
+                                if cat == num {
+                                    count += 1
+                                }
+                            }
+                            if count < 3 {
+                                
+                            }
+                            else {
+                                coachList[0].diverEntries[diver].dq = true
+                                breakLoop = true
+                            }
+                        }
+                    }
+                    //check the volentary to optional ratio
+                    var volentaryCount = 0
+                    for dive in 0...4 {
+                        if coachList[0].diverEntries[diver].fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 2 {
+                        //success
+                    }
+                    else {
+                        coachList[0].diverEntries[diver].dq = true
+                    }
+                    volentaryCount = 0
+                    for dive in 5...7 {
+                        if coachList[0].diverEntries[diver].fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 2 {
+                        //success
+                    }
+                    else {
+                        coachList[0].diverEntries[diver].dq = true
+                    }
+                    volentaryCount = 0
+                    for dive in 8...10 {
+                        if coachList[0].diverEntries[diver].fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 1 {
+                        //success
+                    }
+                    else {
+                        coachList[0].diverEntries[diver].dq = true
+                    }
+                }
+                else {
+                    coachList[0].diverEntries[diver].dq = true
+                }
             }
             skipFirstDive = false
         }
@@ -659,9 +962,25 @@ struct AddDiversView: View {
         return 0...1
     }
     
+    func createdQrCode() -> String {
+        var announcerEvent = announcerEvent(diver: [])
+        for diver in diversWithDives {
+            announcerEvent.diver.append(announcerDiver(name: diver.diverEntries.name, school: diver.diverEntries.team ?? "", dives: []))
+            for dive in diver.diverEntries.dives {
+                announcerEvent.diver[announcerEvent.diver.count - 1].dives.append(dive)
+            }
+        }
+        
+        let encoder = JSONEncoder()
+        let data = try! encoder.encode(announcerEvent)
+        // json compression
+        let optimizedData : Data = try! data.gzipped(level: .bestCompression)
+        return optimizedData.base64EncodedString()
+    }
+    
     struct AddDiversView_Previews: PreviewProvider {
         static var previews: some View {
-            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, reviewed: false)), path: .constant([]))
+            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: false)), path: .constant([]))
         }
     }
 }

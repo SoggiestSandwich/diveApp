@@ -40,6 +40,10 @@ struct DiverEntryQRCodeView: View {
 
 struct DiverEntryQRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        DiverEntryQRCodeView(url: "https://youtu.be/dQw4w9WgXcQ")
+        //QR code can hold
+        //5596 numbers = 1
+        //2331 lowercase letters and commas and qoutation marks and square brackets and curly brackets = 2.4
+        //3391 periods and capital letters and colon and spaces = 1.65
+        DiverEntryQRCodeView(url: "https://youtu.be/dQw4w9WgXcQ?si=poHwJA-FivrKgRrl")
     }
 }

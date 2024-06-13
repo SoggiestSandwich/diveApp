@@ -32,13 +32,13 @@ struct CoachResultsView: View {
     }
     
     func makeQRCode(diver: diverEntry) -> String {
+        /*
         var qrCode: String = "{\"diveResults\":["
-        
         for dive in 0..<diver.dives.count {
             qrCode += "{\"score\":["
-            for score in 0..<diver.fullDives![dive].score.count {
-                qrCode += "\(diver.fullDives![dive].score[score].score)"
-                if score != diver.fullDives![dive].score.count - 1 {
+            for score in 0..<(diver.fullDivesScores?.count ?? 0) {
+                qrCode += "\(diver.fullDivesScores![score])"
+                if score != diver.fullDivesScores!.count - 1 {
                     qrCode += ","
                 }
             }
@@ -49,8 +49,19 @@ struct CoachResultsView: View {
             
         }
         qrCode += "],\"placement\":\(diver.placement ?? 0)}"
+        */
+        var diverResults = resultsList(diveResults: [], placement: diver.placement ?? 0)
+        for dive in 0..<diver.dives.count {
+            diverResults.diveResults.append(diveResults(code: diver.dives[dive], score: diver.fullDivesScores![dive]))
+        }
         
-        return qrCode
+        
+        let encoder = JSONEncoder()
+        let data = try! encoder.encode(diverResults)
+        
+        // json compression
+        let optimizedData : Data = try! data.gzipped(level: .bestCompression)
+        return optimizedData.base64EncodedString()
     }
 }
 

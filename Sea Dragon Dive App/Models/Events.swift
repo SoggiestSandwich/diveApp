@@ -16,15 +16,17 @@ struct events: Codable, Identifiable, Hashable {
     var VList: [divers]
     var finished: Bool
     var judgeCount: Int
+    var diveCount: Int
     var reviewed: Bool
     
-    init(date: String, EList: [divers], JVList: [divers], VList: [divers], finished: Bool, judgeCount: Int, reviewed: Bool) {
+    init(date: String, EList: [divers], JVList: [divers], VList: [divers], finished: Bool, judgeCount: Int, diveCount: Int, reviewed: Bool) {
         self.date = date
         self.EList = EList
         self.JVList = JVList
         self.VList = VList
         self.finished = finished
         self.judgeCount = judgeCount
+        self.diveCount = diveCount
         self.reviewed = reviewed
     }
  }

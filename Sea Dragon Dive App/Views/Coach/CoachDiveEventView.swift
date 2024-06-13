@@ -43,10 +43,23 @@ struct CoachDiveEventView: View {
                     
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
-                        let jsonCode = tempCodes.name.data(using: .utf8)!
+                        let  base64Data = tempCodes.name.data(using: .utf8)
+                        let data = Data(base64Encoded: base64Data!)
+                        //let result = String(data: data!, encoding: .utf8)
+                        let compressedJsonCode = data
+                        //uncompress data
+                        let jsonCode: Data
+                        if compressedJsonCode!.isGzipped {
+                            jsonCode = try! compressedJsonCode!.gunzipped()
+                        }
+                        else {
+                            jsonCode = compressedJsonCode!
+                        }
                         let decoder = JSONDecoder()
-                        let entries = try? decoder.decode(diverEntry.self, from: jsonCode)
+                        var entries = try? decoder.decode(diverEntry.self, from: jsonCode)
                         if entries != nil {
+                            entries!.finishedEntry = true
+                            
                             coachList.diverEntries.append(entries!)
                             coachEntryStore.saveDiverEntry()
                             self.isPresentingScanner = false
@@ -203,6 +216,44 @@ struct CoachDiveEventView: View {
                     .onDelete(perform: deleteDiver)
                     
                 }
+                if hasUnfinishedDivers() {
+                    DisclosureGroup("Unfinished diver entries") {
+                        ForEach(Array(zip(coachList.diverEntries.indices, coachList.diverEntries)), id: \.0) { index, diver in
+                            if diver.finishedEntry == nil || diver.finishedEntry == false {
+                                NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: coachList.eventDate)) {
+                                    HStack {
+                                        Text("\(index + 1)")
+                                            .padding(5)
+                                            .background(
+                                                Circle()
+                                                    .stroke(lineWidth: 2)
+                                            )
+                                        Text(diver.name)
+                                    }
+                                }
+                                .id(UUID())
+                            }
+                        }
+                        .onDelete(perform: deleteDiver)
+                        
+                    }
+                }
+            }
+            Button {
+                coachEntryStore.coachesList[coachListIndex].diverEntries.append(diverEntry(dives: [], level: -1, name: "", finishedEntry: false))
+            } label: {
+                Text("Add Diver")
+                    .padding(7)
+                    .padding(.horizontal)
+                    .padding(.horizontal)
+                    .padding(.horizontal)
+                    .padding(.horizontal)
+                    .padding(.horizontal)
+                    .background(
+                        Rectangle()
+                            .stroke(lineWidth: 2)
+                    )
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
             }
             
             Button {
@@ -224,6 +275,11 @@ struct CoachDiveEventView: View {
                 CoachEntryQRCodeView(url: findQRCode())
             }
         }
+        .onAppear {
+            if coachList.eventDate.isEmpty {
+                coachList.eventDate = Date().formatted(date: .numeric, time: .omitted)
+            }
+        }
         .navigationBarBackButtonHidden(true)
         .task {
             if coachList.location != nil {
@@ -234,13 +290,21 @@ struct CoachDiveEventView: View {
     }
     func findQRCode() -> String {
         let encoder = JSONEncoder()
-        let data = try? encoder.encode(coachList)
-        print(String(data: data!, encoding: .utf8) ?? "")
-        return String(data: data!, encoding: .utf8) ?? ""
+        let data = try! encoder.encode(coachList)
+        let optimizedData : Data = try! data.gzipped(level: .bestCompression)
+        return optimizedData.base64EncodedString()
     }
     func deleteDiver(at offsets: IndexSet) {
         coachList.diverEntries.remove(atOffsets: offsets)
         coachEntryStore.saveDiverEntry()
+    }
+    func hasUnfinishedDivers() -> Bool {
+        for diver in coachList.diverEntries {
+            if diver.finishedEntry == false {
+                return true
+            }
+        }
+        return false
     }
 }
 

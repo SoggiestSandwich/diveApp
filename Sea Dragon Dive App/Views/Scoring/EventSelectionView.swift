@@ -14,7 +14,9 @@ struct EventSelectionView: View {
     @EnvironmentObject var eventStore: EventStore
     
     @State var judgeCount: Int = 0
+    @State var diveCount: Int = 0
     @State var judgeSheet: Bool = false
+    @State var confirmed: Bool = false
     @Binding var path: [String]
     
     var body: some View {
@@ -59,9 +61,9 @@ struct EventSelectionView: View {
                 }
             }
             .sheet(isPresented: $judgeSheet) {
-                SelectJudgeCountView(judgeCount: $judgeCount, isShowing: $judgeSheet)
+                SelectJudgeCountView(judgeCount: $judgeCount, diveCount: $diveCount, isShowing: $judgeSheet, confirmed: $confirmed)
                     .onDisappear {
-                        if judgeCount != 0 {
+                        if judgeCount != 0 && diveCount != 0 && confirmed == true{
                             addDate()
                         }
                     }
@@ -85,7 +87,7 @@ struct EventSelectionView: View {
                 }
             }
         }
-        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: [], finished: false, judgeCount: judgeCount, reviewed: false))
+        eventStore.addEvent(events(date: dateString, EList: [], JVList: [], VList: [], finished: false, judgeCount: judgeCount, diveCount: diveCount, reviewed: false))
     }
     
     func makeDiversListResults(index: Int) -> [divers] {

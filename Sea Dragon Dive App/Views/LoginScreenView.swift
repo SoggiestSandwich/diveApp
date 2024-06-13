@@ -112,6 +112,9 @@ struct LoginScreenView: View {
             else if settingsStore.settingsList.role == 3 {
                 path.append("")
             }
+            else if settingsStore.settingsList.role == 4 {
+                path.append("")
+            }
         }
     }
     
@@ -124,6 +127,7 @@ struct LoginScreenView: View {
                 .onDisappear {
                     backToRoot = false
                 }
+        case 4: AnnouncerDiveEventLineupView(path: $path).environmentObject(AnnouncerEventStore())
             
         default: EmptyView()
         }

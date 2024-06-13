@@ -110,7 +110,7 @@ struct SigningView: View {
             }
     }
     func makeQRCode() -> String {
-        var finalCode: String = "{\"dives\":["
+        /*var finalCode: String = "{\"dives\":["
         for dive in 0..<entry.dives.count {
             if dive == entry.dives.count - 1 {
                 finalCode += "\"\(entry.dives[dive].code ?? "")\""
@@ -120,7 +120,26 @@ struct SigningView: View {
             }
         }
         finalCode += "],\"level\":\(entry.diverEntries.level),\"name\":\"\(entry.diverEntries.name)\"}"
-        return finalCode
+        return finalCode*/
+        
+        var entries = diverEntry(dives: [], level: entry.diverEntries.level, name: entry.diverEntries.name)
+        for dive in 0..<entry.dives.count {
+            entries.dives.append(entry.dives[dive].code ?? "")
+        }
+        entries.volentary = []
+        for dive in 0..<entry.dives.count {
+            entries.volentary!.append(entry.dives[dive].volentary ?? false)
+            
+        }
+        
+        
+        let encoder = JSONEncoder()
+        let data = try! encoder.encode(entries)
+        
+        // json compression
+        let optimizedData : Data = try! data.gzipped(level: .bestCompression)
+        return optimizedData.base64EncodedString()
+        
     }
 }
 

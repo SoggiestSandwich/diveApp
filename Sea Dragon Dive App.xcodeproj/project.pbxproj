@@ -26,6 +26,13 @@
 		1670F2442A7323380061750B /* SigningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2432A7323380061750B /* SigningView.swift */; };
 		1670F2462A742C1C0061750B /* DiverEntryQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2452A742C1B0061750B /* DiverEntryQRCodeView.swift */; };
 		1670F2482A7457C60061750B /* DiversStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1670F2472A7457C60061750B /* DiversStore.swift */; };
+		1682623F2C10C4D300FE27A6 /* Gzip in Frameworks */ = {isa = PBXBuildFile; productRef = 1682623E2C10C4D300FE27A6 /* Gzip */; };
+		168262482C1B635000FE27A6 /* AnnouncerEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168262472C1B635000FE27A6 /* AnnouncerEvent.swift */; };
+		1682624C2C1B64CB00FE27A6 /* AnnouncerEventStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1682624B2C1B64CB00FE27A6 /* AnnouncerEventStore.swift */; };
+		1682624E2C1B678000FE27A6 /* AnnouncerDiveEventLineupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1682624D2C1B678000FE27A6 /* AnnouncerDiveEventLineupView.swift */; };
+		168262502C1B790D00FE27A6 /* AnnouncerEventFileManager+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1682624F2C1B790D00FE27A6 /* AnnouncerEventFileManager+Extension.swift */; };
+		168262522C1B8E1000FE27A6 /* AnnouncersQRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168262512C1B8E1000FE27A6 /* AnnouncersQRCodeView.swift */; };
+		168262542C1BA2A800FE27A6 /* AnnounceDiveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168262532C1BA2A800FE27A6 /* AnnounceDiveView.swift */; };
 		16C049E22A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */; };
 		16C049E62A3BA6AE003C623D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E52A3BA6AE003C623D /* Assets.xcassets */; };
 		16C049E92A3BA6AE003C623D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16C049E82A3BA6AE003C623D /* Preview Assets.xcassets */; };
@@ -60,6 +67,7 @@
 		16CDE9D82A96A1190078E885 /* CoachResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CDE9D72A96A1190078E885 /* CoachResultsView.swift */; };
 		16CDE9DC2A97BB280078E885 /* CoachToDiverQRView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CDE9DB2A97BB280078E885 /* CoachToDiverQRView.swift */; };
 		16CDE9DE2A9946100078E885 /* DiverDiveSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16CDE9DD2A9946100078E885 /* DiverDiveSelector.swift */; };
+		16F53BFD2C0E4DE5002F20A8 /* VarsityResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16F53BFC2C0E4DE5002F20A8 /* VarsityResultsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +90,12 @@
 		1670F2432A7323380061750B /* SigningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SigningView.swift; sourceTree = "<group>"; };
 		1670F2452A742C1B0061750B /* DiverEntryQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiverEntryQRCodeView.swift; sourceTree = "<group>"; };
 		1670F2472A7457C60061750B /* DiversStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiversStore.swift; sourceTree = "<group>"; };
+		168262472C1B635000FE27A6 /* AnnouncerEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncerEvent.swift; sourceTree = "<group>"; };
+		1682624B2C1B64CB00FE27A6 /* AnnouncerEventStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncerEventStore.swift; sourceTree = "<group>"; };
+		1682624D2C1B678000FE27A6 /* AnnouncerDiveEventLineupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncerDiveEventLineupView.swift; sourceTree = "<group>"; };
+		1682624F2C1B790D00FE27A6 /* AnnouncerEventFileManager+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnnouncerEventFileManager+Extension.swift"; sourceTree = "<group>"; };
+		168262512C1B8E1000FE27A6 /* AnnouncersQRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncersQRCodeView.swift; sourceTree = "<group>"; };
+		168262532C1BA2A800FE27A6 /* AnnounceDiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnounceDiveView.swift; sourceTree = "<group>"; };
 		16C049DE2A3BA6AD003C623D /* Sea Dragon Dive App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sea Dragon Dive App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		16C049E12A3BA6AD003C623D /* Sea_Dragon_Dive_AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sea_Dragon_Dive_AppApp.swift; sourceTree = "<group>"; };
 		16C049E52A3BA6AE003C623D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -116,6 +130,7 @@
 		16CDE9D72A96A1190078E885 /* CoachResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachResultsView.swift; sourceTree = "<group>"; };
 		16CDE9DB2A97BB280078E885 /* CoachToDiverQRView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachToDiverQRView.swift; sourceTree = "<group>"; };
 		16CDE9DD2A9946100078E885 /* DiverDiveSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiverDiveSelector.swift; sourceTree = "<group>"; };
+		16F53BFC2C0E4DE5002F20A8 /* VarsityResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VarsityResultsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +138,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1682623F2C10C4D300FE27A6 /* Gzip in Frameworks */,
 				16C04A072A423412003C623D /* CodeScanner in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -136,6 +152,7 @@
 				161FF7642A670EEF0096F2C8 /* EventSelectionView.swift */,
 				1670F23F2A7064580061750B /* SelectJudgeCountView.swift */,
 				16C049F92A3BC968003C623D /* AddDiversView.swift */,
+				168262512C1B8E1000FE27A6 /* AnnouncersQRCodeView.swift */,
 				16CDE9C42A8AB6440078E885 /* diverInfoView.swift */,
 				16C04A032A40B642003C623D /* ScoreView.swift */,
 				162852A12A4A2BBA00DD559B /* ScoreInfoView.swift */,
@@ -144,6 +161,7 @@
 				161FF7602A58A7CE0096F2C8 /* ResultsView.swift */,
 				1670F2362A69E3D70061750B /* TeamSelevtorView.swift */,
 				1670F2382A69EBDE0061750B /* ResultsQRView.swift */,
+				16F53BFC2C0E4DE5002F20A8 /* VarsityResultsView.swift */,
 			);
 			path = Scoring;
 			sourceTree = "<group>";
@@ -155,6 +173,7 @@
 				16CDE9A72A7470690078E885 /* DiverFileManager+Extension.swift */,
 				16CDE9B62A7D5ABB0078E885 /* SettingsFileManager+Extension.swift */,
 				16CDE9CD2A8D58EE0078E885 /* DiverEntryFileManager+Extension.swift */,
+				1682624F2C1B790D00FE27A6 /* AnnouncerEventFileManager+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -172,6 +191,15 @@
 				1670F2452A742C1B0061750B /* DiverEntryQRCodeView.swift */,
 			);
 			path = Diver;
+			sourceTree = "<group>";
+		};
+		168262442C1A2B4C00FE27A6 /* Announcer */ = {
+			isa = PBXGroup;
+			children = (
+				1682624D2C1B678000FE27A6 /* AnnouncerDiveEventLineupView.swift */,
+				168262532C1BA2A800FE27A6 /* AnnounceDiveView.swift */,
+			);
+			path = Announcer;
 			sourceTree = "<group>";
 		};
 		16C049D52A3BA6AD003C623D = {
@@ -219,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				16C049F42A3BA6F1003C623D /* LoginScreenView.swift */,
+				168262442C1A2B4C00FE27A6 /* Announcer */,
 				1670F23A2A6EF8C50061750B /* Diver */,
 				16CDE9C62A8C19270078E885 /* Coach */,
 				161FF7142A4E22890096F2C8 /* Scoring */,
@@ -242,6 +271,8 @@
 				16CDE9BA2A7D5B740078E885 /* SettingsStore.swift */,
 				16CDE9C02A83EC620078E885 /* DiveResults.swift */,
 				16CDE9C22A86CBFC0078E885 /* AdaptiveStack.swift */,
+				168262472C1B635000FE27A6 /* AnnouncerEvent.swift */,
+				1682624B2C1B64CB00FE27A6 /* AnnouncerEventStore.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -279,6 +310,7 @@
 			name = "Sea Dragon Dive App";
 			packageProductDependencies = (
 				16C04A062A423412003C623D /* CodeScanner */,
+				1682623E2C10C4D300FE27A6 /* Gzip */,
 			);
 			productName = "Sea Dragon Dive App";
 			productReference = 16C049DE2A3BA6AD003C623D /* Sea Dragon Dive App.app */;
@@ -310,6 +342,7 @@
 			mainGroup = 16C049D52A3BA6AD003C623D;
 			packageReferences = (
 				16C04A052A423412003C623D /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				1682623D2C10C4D300FE27A6 /* XCRemoteSwiftPackageReference "GzipSwift" */,
 			);
 			productRefGroup = 16C049DF2A3BA6AD003C623D /* Products */;
 			projectDirPath = "";
@@ -341,18 +374,22 @@
 			files = (
 				161FF7652A670EEF0096F2C8 /* EventSelectionView.swift in Sources */,
 				16C049F52A3BA6F1003C623D /* LoginScreenView.swift in Sources */,
+				168262542C1BA2A800FE27A6 /* AnnounceDiveView.swift in Sources */,
 				16CDE9B72A7D5ABB0078E885 /* SettingsFileManager+Extension.swift in Sources */,
 				16C049EE2A3BA6AE003C623D /* Sea_Dragon_Dive_App.xcdatamodeld in Sources */,
 				161FF7612A58A7CE0096F2C8 /* ResultsView.swift in Sources */,
 				16CDE9B52A7AF9E50078E885 /* BestDiveInfoView.swift in Sources */,
 				16C04A042A40B642003C623D /* ScoreView.swift in Sources */,
 				161FF7632A5F52440096F2C8 /* EventProgressView.swift in Sources */,
+				168262522C1B8E1000FE27A6 /* AnnouncersQRCodeView.swift in Sources */,
 				16CDE9D82A96A1190078E885 /* CoachResultsView.swift in Sources */,
 				16CDE9BB2A7D5B740078E885 /* SettingsStore.swift in Sources */,
 				1670F2462A742C1C0061750B /* DiverEntryQRCodeView.swift in Sources */,
+				1682624C2C1B64CB00FE27A6 /* AnnouncerEventStore.swift in Sources */,
 				16CDE9B92A7D5B150078E885 /* Settings.swift in Sources */,
 				16CDE9C52A8AB6440078E885 /* diverInfoView.swift in Sources */,
 				1670F2392A69EBDE0061750B /* ResultsQRView.swift in Sources */,
+				16F53BFD2C0E4DE5002F20A8 /* VarsityResultsView.swift in Sources */,
 				1670F23E2A6F187C0061750B /* DiveEntryView.swift in Sources */,
 				16C04A022A3D138D003C623D /* ScoreSelectorView.swift in Sources */,
 				16CDE9B22A7AE1C60078E885 /* BestDivesView.swift in Sources */,
@@ -369,15 +406,18 @@
 				16C04A0E2A424EFA003C623D /* Dives.swift in Sources */,
 				1670F2482A7457C60061750B /* DiversStore.swift in Sources */,
 				16CDE9C12A83EC620078E885 /* DiveResults.swift in Sources */,
+				168262502C1B790D00FE27A6 /* AnnouncerEventFileManager+Extension.swift in Sources */,
 				161FF7672A671FA90096F2C8 /* EventStore.swift in Sources */,
 				16CDE9D42A8ECCAA0078E885 /* DiverEditorView.swift in Sources */,
 				16CDE9CC2A8D57400078E885 /* CoachEntryStore.swift in Sources */,
 				1670F2422A7161CC0061750B /* SelectDivesView.swift in Sources */,
 				162852A22A4A2BBA00DD559B /* ScoreInfoView.swift in Sources */,
+				168262482C1B635000FE27A6 /* AnnouncerEvent.swift in Sources */,
 				16C049FA2A3BC968003C623D /* AddDiversView.swift in Sources */,
 				16CDE9A82A7470690078E885 /* DiverFileManager+Extension.swift in Sources */,
 				161FF7122A4DD4770096F2C8 /* CoachAndDiverEntries.swift in Sources */,
 				16CDE9D22A8D833C0078E885 /* CoachEntryQRCodeView.swift in Sources */,
+				1682624E2C1B678000FE27A6 /* AnnouncerDiveEventLineupView.swift in Sources */,
 				1670F2372A69E3D70061750B /* TeamSelevtorView.swift in Sources */,
 				161FF7692A6722590096F2C8 /* Events.swift in Sources */,
 				16CDE9B02A7AC6F90078E885 /* EventResultsView.swift in Sources */,
@@ -599,6 +639,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		1682623D2C10C4D300FE27A6 /* XCRemoteSwiftPackageReference "GzipSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/1024jp/GzipSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.1;
+			};
+		};
 		16C04A052A423412003C623D /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/twostraws/CodeScanner";
@@ -610,6 +658,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1682623E2C10C4D300FE27A6 /* Gzip */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1682623D2C10C4D300FE27A6 /* XCRemoteSwiftPackageReference "GzipSwift" */;
+			productName = Gzip;
+		};
 		16C04A062A423412003C623D /* CodeScanner */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 16C04A052A423412003C623D /* XCRemoteSwiftPackageReference "CodeScanner" */;

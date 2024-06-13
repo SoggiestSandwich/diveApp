@@ -8,10 +8,10 @@
 import Foundation
 
 struct dives: Hashable, Codable {
-    let name: String
+    var name: String
     var degreeOfDiff: Double
-    var score: [scores]
-    let position: String
+    var score: [scores] //
+    var position: String
     var roundScore: Double
     var scored: Bool?
     var code: String?

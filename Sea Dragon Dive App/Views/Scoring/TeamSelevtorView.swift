@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Gzip
 
 
 struct TeamSelevtorView: View {
@@ -55,9 +56,20 @@ struct TeamSelevtorView: View {
         var num = 0
         for diver in diverList {
             if team == diver.diverEntries.team {
-                coachList.diverEntries.append(diver.diverEntries)
-                coachList.diverEntries[num].fullDives = diver.dives
+                coachList.diverEntries.append(diverEntry(dives: diver.diverEntries.dives, level: diver.diverEntries.level, name: diver.diverEntries.name, dq: diver.diverEntries.dq))
+                coachList.diverEntries[num].fullDivesScores = []
+                var index = 0
+                for dive in diver.dives {
+                    index+=1
+                    var tempScoreList = [0.0, 0.0, 0.0]
+                    tempScoreList = []
+                    for score in dive.score {
+                        tempScoreList.append(score.score)
+                    }
+                    coachList.diverEntries[num].fullDivesScores?.append(tempScoreList)
+                }
                 coachList.diverEntries[num].placement = diver.placement ?? 0
+                coachList.diverEntries[num].totalScore = diver.diverEntries.totalScore
                 num += 1
             }
             coachList.team = team
@@ -66,9 +78,10 @@ struct TeamSelevtorView: View {
         }
         
         let encoder = JSONEncoder()
-        let data = try? encoder.encode(coachList)
-        print(String(data: data!, encoding: .utf8) ?? "")
-        return String(data: data!, encoding: .utf8) ?? ""
+        let data = try! encoder.encode(coachList)
+        // json compression
+        let optimizedData : Data = try! data.gzipped(level: .bestCompression)
+        return optimizedData.base64EncodedString()
     }
 }
 

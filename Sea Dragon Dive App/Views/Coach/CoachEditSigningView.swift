@@ -14,6 +14,9 @@ struct CoachEditSigningView: View {
     @State private var currentLine = Line()
     @State private var lines: [Line] = []
     
+    @Binding var selectedCoachEntryIndex: Int
+    @Binding var selectedDiverEntryIndex: Int
+    
     @EnvironmentObject var coachEntryStore: CoachEntryStore
     
     var body: some View {
@@ -87,6 +90,9 @@ struct CoachEditSigningView: View {
                     }
                     else {
                         Button {
+                            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].finishedEntry = true
+                            //validateEntry()
+                            coachEntryStore.saveDiverEntry()
                             self.presentationMode.wrappedValue.dismiss()
                         } label: {
                                 Text("Done")
@@ -109,6 +115,6 @@ struct CoachEditSigningView: View {
 
 struct CoachEditSigningView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachEditSigningView()
+        CoachEditSigningView(selectedCoachEntryIndex: .constant(0), selectedDiverEntryIndex: .constant(0))
     }
 }

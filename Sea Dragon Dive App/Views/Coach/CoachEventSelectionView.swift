@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CodeScanner
+import Gzip
 
 struct CoachEventSelectionView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -35,11 +36,24 @@ struct CoachEventSelectionView: View {
                     
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
-                        let jsonCode = tempCodes.name.data(using: .utf8)!
+                        let  base64Data = tempCodes.name.data(using: .utf8)
+                        let data = Data(base64Encoded: base64Data!)
+                        //let result = String(data: data!, encoding: .utf8)
+                        let compressedJsonCode = data
+                        //uncompress data
+                        let jsonCode: Data
+                        if compressedJsonCode!.isGzipped {
+                            jsonCode = try! compressedJsonCode!.gunzipped()
+                        }
+                        else {
+                            jsonCode = compressedJsonCode!
+                        }
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         if entries != nil {
+                            let tempLocation = coachEntryStore.coachesList[selectedCoachEntryIndex].location
                             coachEntryStore.coachesList[selectedCoachEntryIndex] = entries!
+                            coachEntryStore.coachesList[selectedCoachEntryIndex].location = tempLocation
                             coachEntryStore.coachesList[selectedCoachEntryIndex].finished = true
                             coachEntryStore.saveDiverEntry()
                             

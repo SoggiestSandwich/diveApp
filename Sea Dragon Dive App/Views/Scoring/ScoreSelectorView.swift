@@ -288,6 +288,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, reviewed: true)))
+        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: true)))
     }
 }

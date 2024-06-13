@@ -27,19 +27,20 @@ struct EventProgressView: View {
     var body: some View {
             VStack {
                 List {
-                    ForEach(Array(zip(diverList[0].dives.indices, diverList[0].dives)), id: \.0) { index, dive in
+                    ForEach(Array(zip(diverList[findDiverWithDiveCount()].dives.indices, diverList[findDiverWithDiveCount()].dives)), id: \.0) { index, dive in
                         DisclosureGroup("Round \(index + 1)") {
                             ForEach(Array(zip(diverList.indices, diverList)), id: \.0) { diverIndex, diver in
-                                HStack {
-                                    Button {
-                                        selectedDive = index
-                                        selectedDiver = diverIndex
-                                    } label : {
-                                        Text("\(diverIndex + 1). \(diver.diverEntries.name)\n\(diver.diverEntries.team ?? "")")
-                                            .foregroundColor(diver.skip == true ? .red : colorScheme == .dark ? .white : .black)
-                                    }
-                                    Spacer()
-                                    if diver.dives[index].scored == true {
+                                if index < diver.dives.count {
+                                    HStack {
+                                        Button {
+                                            selectedDive = index
+                                            selectedDiver = diverIndex
+                                        } label : {
+                                            Text("\(diverIndex + 1). \(diver.diverEntries.name)\n\(diver.diverEntries.team ?? "")")
+                                                .foregroundColor(diver.skip == true ? .red : colorScheme == .dark ? .white : .black)
+                                        }
+                                        Spacer()
+                                        if diver.dives[index].scored == true {
                                             Image(systemName: "checkmark.square")
                                                 .interpolation(.none).resizable().frame(width: 30, height: 30, alignment: .bottomTrailing)
                                                 .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -51,19 +52,19 @@ struct EventProgressView: View {
                                                     findFirstDiverIndex()
                                                     saveEventData()
                                                 }
-                                    }
-                                    else if diver.skip == true {
+                                        }
+                                        else if diver.skip == true {
                                             Image(systemName: "xmark.circle.fill")
                                                 .interpolation(.none).resizable().frame(width: 30, height: 30, alignment: .bottomTrailing)
                                                 .onTapGesture {
-                                                        diverList[diverIndex].skip = false
-                                                        findLastDiverIndex()
-                                                        findFirstDiverIndex()
+                                                    diverList[diverIndex].skip = false
+                                                    findLastDiverIndex()
+                                                    findFirstDiverIndex()
                                                     saveEventData()
                                                 }
                                                 .foregroundColor(.red)
-                                    }
-                                    else {
+                                        }
+                                        else {
                                             Image(systemName: "square")
                                                 .interpolation(.none).resizable().frame(width: 30, height: 30, alignment: .bottomTrailing)
                                                 .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -75,9 +76,10 @@ struct EventProgressView: View {
                                                     findFirstDiverIndex()
                                                     saveEventData()
                                                 }
+                                        }
                                     }
+                                    .listRowBackground(selectedDive == index && selectedDiver == diverIndex ? .blue : colorScheme == .dark ? Color.black : Color.white)
                                 }
-                                .listRowBackground(selectedDive == index && selectedDiver == diverIndex ? .blue : colorScheme == .dark ? Color.black : Color.white)
                             }
                         }
                     }
@@ -178,10 +180,25 @@ struct EventProgressView: View {
         }
         eventStore.saveEvent()
     }
+    
+    func findDiverWithDiveCount() -> Int {
+        var mostDives = 0
+        var mostDivesIndex = 0
+        for diver in 0..<diverList.count {
+            if diverList[diver].dives.count == eventList.diveCount {
+                return diver
+            }
+            if diverList[diver].dives.count > mostDives {
+                mostDives = diverList[diver].dives.count
+                mostDivesIndex = diver
+            }
+        }
+        return mostDivesIndex
+    }
 }
 
 struct EventProgressView_Previews: PreviewProvider {
     static var previews: some View {
-        EventProgressView(diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [scores(score: 0, index: 0), scores(score: 1, index: 1), scores(score: 2, index: 2)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"), skip: false)]), currentDiver: .constant(0), currentDive: .constant(0), lastDiverIndex: .constant(0), firstDiverIndex: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 0, reviewed: true)))
+        EventProgressView(diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1, score: [scores(score: 0, index: 0), scores(score: 1, index: 1), scores(score: 2, index: 2)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName"), skip: false)]), currentDiver: .constant(0), currentDive: .constant(0), lastDiverIndex: .constant(0), firstDiverIndex: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 0, diveCount: 6, reviewed: true)))
     }
 }

@@ -9,12 +9,24 @@ import SwiftUI
 import CodeScanner
 
 struct DiverHomeView: View {
+    //fetches from the database
+    @FetchRequest(sortDescriptors: [
+        SortDescriptor(\.diveNbr)
+    ]) var fetchedDives: FetchedResults<Dive>
+    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
+    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
+    
+    //detects device orientation
     @Environment(\.verticalSizeClass) var verticalSizeClass
+    //detects if dark mode or not
     @Environment(\.colorScheme) var colorScheme
+    //used to go back to login screen
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
+    //persistent data for the diver
     @EnvironmentObject var diverStore: DiverStore
     
+    //state variables
     @State var username: String
     @State var userSchool: String
     @State private var isPresentingScanner = false
@@ -23,14 +35,18 @@ struct DiverHomeView: View {
     @State private var scannedCode: String = ""
     @State private var failedScanAlert: Bool = false
     @State private var nonMatchingScan: Bool = false
+    @State private var misMatchDiveAlert: Bool = false
     @State private var selectedEntry: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))
     @State private var selectedEntryIndex: Int = -1
+    @State private var entries: resultsList? = nil
     
+    //simple struct for holding the string from qr codes
     struct Codes: Identifiable {
         let name: String
         let id = UUID()
     }
     
+    //sheet using a view that reads qr codes
     var ScannerSheet : some View {
         CodeScannerView(
             codeTypes: [.qr],
@@ -41,40 +57,28 @@ struct DiverHomeView: View {
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
                         nonMatchingScan = false
-                        let jsonCode = tempCodes.name.data(using: .utf8)!
+                        let  base64Data = tempCodes.name.data(using: .utf8)
+                        let data = Data(base64Encoded: base64Data!)
+                        //let result = String(data: data!, encoding: .utf8)
+                        let compressedJsonCode = data
+                        //uncompress data
+                        let jsonCode: Data
+                        if compressedJsonCode!.isGzipped {
+                            jsonCode = try! compressedJsonCode!.gunzipped()
+                        }
+                        else {
+                            jsonCode = compressedJsonCode!
+                        }
                         let decoder = JSONDecoder()
-                        let entries = try? decoder.decode(resultsList.self, from: jsonCode)
+                        entries = try? decoder.decode(resultsList.self, from: jsonCode)
+                        print(entries ?? "PAIN")
                         if entries != nil {
                             //create new entry with scanned results or edit old entry
+                            
                             for dive in 0..<selectedEntry.dives.count {
-                                    if selectedEntry.dives[dive].code! != entries!.diveResults[dive].code && !nonMatchingScan {
-                                        failedScanAlert = true
-                                        nonMatchingScan = true
-                                    }
+                                if selectedEntry.dives[dive].code! != entries!.diveResults[dive].code && !nonMatchingScan {
+                                    misMatchDiveAlert = true
                                 }
-                                if !nonMatchingScan {
-                                    selectedEntry.placement = entries!.placement
-                                    selectedEntry.finished = true
-                                    selectedEntry.diverEntries.totalScore = 0
-                                    for dive in 0..<selectedEntry.dives.count {
-                                        for score in entries!.diveResults[dive].score {
-                                            var count = 0
-                                            selectedEntry.dives[dive].score.append(scores(score: score, index: count))
-                                            count += 1
-                                        }
-                                        for score in entries!.diveResults[dive].score {
-                                            selectedEntry.dives[dive].roundScore += score * selectedEntry.dives[dive].degreeOfDiff
-                                        }
-                                        selectedEntry.diverEntries.totalScore! += selectedEntry.dives[dive].roundScore
-                                        
-                                    }
-                                    diverStore.entryList[selectedEntryIndex] = selectedEntry
-                                    diverStore.saveDivers()
-                                    self.isPresentingScanner = false
-                                }
-                            else {
-                                print("dives didn't match")
-                                failedScanAlert = true
                             }
                         }
                         else {
@@ -89,6 +93,18 @@ struct DiverHomeView: View {
             Button("OK", role: .cancel) {self.isPresentingScanner = false}
         } message: {
             Text("Could not find the needed data in the scanned QR Code")
+        }
+        .alert("Dives Don't Match", isPresented: $misMatchDiveAlert) {
+            Button("Cancel", role: .cancel) {
+                nonMatchingScan = true
+                self.isPresentingScanner = false
+            }
+            Button("Continue") {
+                addScores(entries: entries!)
+                nonMatchingScan = false
+            }
+        } message: {
+            Text("One or more dives do not match between the scanned code and the entered dives would you like to continue and replace old dives?")
         }
     }
     
@@ -293,6 +309,85 @@ struct DiverHomeView: View {
             }
         }
         return highestScore
+    }
+    func addScores(entries: resultsList) {
+        for result in 0..<entries.diveResults.count {
+            if entries.diveResults[result].code != selectedEntry.dives[result].code {
+                var diveNbr = entries.diveResults[result].code
+                diveNbr.removeLast()
+                for fetchedDive in fetchedDives {
+                    if Int(diveNbr)! == fetchedDive.diveNbr {
+                        selectedEntry.dives[result].name = fetchedDive.diveName ?? ""
+                        var divePos = entries.diveResults[result].code
+                        while divePos.count > 1 {
+                            divePos.removeFirst()
+                        }
+                        for fetchedPosition in fetchedPositions {
+                            if divePos == fetchedPosition.positionCode {
+                                selectedEntry.dives[result].position = fetchedPosition.positionName ?? ""
+                                for fetchedWithPosition in fetchedWithPositions {
+                                    if fetchedDive.diveNbr == fetchedWithPosition.diveNbr && fetchedPosition.positionId == fetchedWithPosition.positionId {
+                                        selectedEntry.dives[result].degreeOfDiff = fetchedWithPosition.degreeOfDifficulty
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        selectedEntry.placement = entries.placement
+        selectedEntry.finished = true
+        selectedEntry.diverEntries.totalScore = 0
+        for dive in 0..<selectedEntry.dives.count {
+            for score in entries.diveResults[dive].score {
+                var count = 0
+                selectedEntry.dives[dive].score.append(scores(score: score, index: count))
+                count += 1
+            }
+            for score in entries.diveResults[dive].score {
+                selectedEntry.dives[dive].roundScore += score
+            }
+            var lowestIndex = -1
+            var greatestIndex = -1
+            if entries.diveResults[dive].score.count > 3 {
+                var greatestScore = -1.0
+                var lowestScore = 11.0
+                for score in entries.diveResults[dive].score {
+                    if score > greatestScore {
+                        greatestScore = score
+                        greatestIndex = score.hashValue
+                    }
+                    if score < lowestScore {
+                        lowestScore = score
+                        lowestIndex = score.hashValue
+                    }
+                }
+                selectedEntry.dives[dive].roundScore -= greatestScore + lowestScore
+                selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
+            }
+            if entries.diveResults[dive].score.count > 5 {
+                var greatestScore = -1.0
+                var lowestScore = 11.0
+                for score in entries.diveResults[dive].score {
+                    if score > greatestScore && score.hashValue != greatestIndex {
+                        greatestScore = score
+                    }
+                    if score < lowestScore && score.hashValue != lowestIndex {
+                        lowestScore = score
+                    }
+                }
+                selectedEntry.dives[dive].roundScore -= greatestScore + lowestScore
+                selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
+            }
+            
+            selectedEntry.diverEntries.totalScore! += selectedEntry.dives[dive].roundScore
+            
+        }
+        diverStore.entryList[selectedEntryIndex] = selectedEntry
+        diverStore.saveDivers()
+        self.isPresentingScanner = false
     }
 }
 

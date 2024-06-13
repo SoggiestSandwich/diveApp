@@ -8,7 +8,7 @@
 import Foundation
 
 struct resultsList: Codable {
-    let diveResults: [diveResults]
+    var diveResults: [diveResults]
     let placement: Int
 }
 

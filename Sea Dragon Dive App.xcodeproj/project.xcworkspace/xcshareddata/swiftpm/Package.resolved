@@ -1,4 +1,5 @@
 {
+  "originHash" : "ba5605a0c069a314590517ce0a46555cf3b9db637e0a7cd63b5dddc5e1158b95",
   "pins" : [
     {
       "identity" : "codescanner",
@@ -8,7 +9,16 @@
         "revision" : "4b2f9c57d03bfe94e6b45572e0c908c1433c32b2",
         "version" : "2.3.2"
       }
+    },
+    {
+      "identity" : "gzipswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/1024jp/GzipSwift",
+      "state" : {
+        "revision" : "731037f6cc2be2ec01562f6597c1d0aa3fe6fd05",
+        "version" : "6.0.1"
+      }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

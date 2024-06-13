@@ -810,7 +810,7 @@ struct DiveEntryView: View {
                     //success
                 }
                 else {
-                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the last three dives"
+                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of one in the last three dives"
                 }
             }
             else {

@@ -17,7 +17,7 @@ class CoachEntryStore: ObservableObject {
     }
     
     func addDiverEntry(_ coachEntry: coachEntry) {
-        coachesList.append(coachEntry)
+        coachesList.insert(coachEntry, at: 0)
         saveDiverEntry()
     }
     func deleteDiverEntry(at indexSet: IndexSet) {
