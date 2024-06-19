@@ -17,6 +17,17 @@ struct diverInfoView: View {
     @Binding var diverList: divers
     @State private var dOfTheWeekError: String = ""
     @State private var catCountError: String = ""
+    @State private var volDiveGreaterNineError: String = ""
+    @State private var volDiveCategoryError: String = ""
+    @State private var nonVolDiveCategoryError: String = ""
+    @State private var catCountFirstEigtError: String = ""
+    @State private var repeatDiveInFirstEightError: String = ""
+    @State private var twoVolZeroFourError: String = ""
+    @State private var twoVolFiveSevenError: String = ""
+    @State private var oneVolEightTenError: String = ""
+    @State private var notEnoughDivesError: String = ""
+    
+    @State var diveCount: Int
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -55,6 +66,42 @@ struct diverInfoView: View {
                 }
                 if catCountError != "" {
                     Text(catCountError)
+                        .foregroundColor(.red)
+                }
+                if volDiveGreaterNineError != "" {
+                    Text(volDiveGreaterNineError)
+                        .foregroundColor(.red)
+                }
+                if volDiveCategoryError != "" {
+                    Text(volDiveCategoryError)
+                        .foregroundColor(.red)
+                }
+                if catCountFirstEigtError != "" {
+                    Text(catCountFirstEigtError)
+                        .foregroundColor(.red)
+                }
+                if repeatDiveInFirstEightError != "" {
+                    Text(repeatDiveInFirstEightError)
+                        .foregroundColor(.red)
+                }
+                if twoVolZeroFourError != "" {
+                    Text(twoVolZeroFourError)
+                        .foregroundColor(.red)
+                }
+                if twoVolFiveSevenError != "" {
+                    Text(twoVolFiveSevenError)
+                        .foregroundColor(.red)
+                }
+                if oneVolEightTenError != "" {
+                    Text(oneVolEightTenError)
+                        .foregroundColor(.red)
+                }
+                if nonVolDiveCategoryError != "" {
+                    Text(nonVolDiveCategoryError)
+                        .foregroundColor(.red)
+                }
+                if notEnoughDivesError != "" {
+                    Text(notEnoughDivesError)
                         .foregroundColor(.red)
                 }
             }
@@ -105,6 +152,9 @@ struct diverInfoView: View {
         var skipFirstDive = true
         var uniqueCategories: [Int] = []
         var uniqueCategoryCount: Int = 0
+        if diverList.diverEntries.dives.count < diveCount {
+            notEnoughDivesError = "Has \(diverList.diverEntries.dives.count) out of \(diveCount) dives"
+        }
             if diverList.dives.count == 6 {
                 //check for dive of the week
                 var tempDiveCode = diverList.diverEntries.dives[0]
@@ -161,7 +211,229 @@ struct diverInfoView: View {
                 }
             }
             else if diverList.dives.count == 11 {
+                var allCategories: [Int] = []
+                var uniqueCategories: Int = 0
+                var totalDOD: Double = 0
+                for dive in diverList.diverEntries.fullDives! {
+                    if dive.volentary == true {
+                        var diveNum = dive.code!
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            if !allCategories.contains(1) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(1)
+                            totalDOD += dive.degreeOfDiff
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            if !allCategories.contains(2) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(2)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            if !allCategories.contains(3) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(3)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            if !allCategories.contains(4) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(4)
+                            totalDOD += dive.degreeOfDiff
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            if !allCategories.contains(5) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(5)
+                            totalDOD += dive.degreeOfDiff
+                            
+                        }
+                    }
+                }
+                if totalDOD > 9 {
+                    volDiveGreaterNineError = "Volentary dives degree of difficulty is greater than 9"
+                }
+                if uniqueCategories == 5 {
+                }
+                else {
+                    volDiveCategoryError = "Only has \(uniqueCategories) out of 5 categories in volentary dives"
+                }
                 
+                for dive in diverList.diverEntries.fullDives! {
+                    if dive.volentary != true {
+                        var diveNum = dive.code!
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            if !allCategories.contains(1) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(1)
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            if !allCategories.contains(2) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(2)
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            if !allCategories.contains(3) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(3)
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            if !allCategories.contains(4) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(4)
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            if !allCategories.contains(5) {
+                                uniqueCategories += 1
+                            }
+                            allCategories.append(5)
+                            
+                        }
+                    }
+                    if uniqueCategories == 5 {
+                    }
+                    else {
+                        nonVolDiveCategoryError = "Only has \(uniqueCategories) out of 5 unique categories in non-volentary dive"
+                    }
+                }
+                //check dive order for validation
+                uniqueCategories = 0
+                allCategories.removeAll()
+                for dive in 0...7 {
+                    var diveNum = diverList.diverEntries.dives[dive]
+                    diveNum.removeLast()
+                    if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                        if !allCategories.contains(1) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(1)
+                    }
+                    else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                        if !allCategories.contains(2) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(2)
+                        
+                    }
+                    else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                        if !allCategories.contains(3) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(3)
+                        
+                    }
+                    else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                        if !allCategories.contains(4) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(4)
+                    }
+                    else if Int(diveNum)! > 1000 {
+                        if !allCategories.contains(5) {
+                            uniqueCategories += 1
+                        }
+                        allCategories.append(5)
+                        
+                    }
+                }
+                if uniqueCategories == 5 {
+                    //check for more than 3 or more repeats in the first 8 dives
+                    allCategories.removeAll()
+                    for dive in 0...7 {
+                        var diveNum = diverList.diverEntries.dives[dive]
+                        diveNum.removeLast()
+                        if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
+                            allCategories.append(1)
+                        }
+                        else if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
+                            allCategories.append(2)
+                            
+                        }
+                        else if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
+                            allCategories.append(3)
+                            
+                        }
+                        else if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
+                            allCategories.append(4)
+                        }
+                        else if Int(diveNum)! > 1000 {
+                            allCategories.append(5)
+                        }
+                    }
+                    var breakLoop = false
+                    for num in 1...5 {
+                        if !breakLoop {
+                            var count = 0
+                            for cat in allCategories {
+                                if cat == num {
+                                    count += 1
+                                }
+                            }
+                            if count < 3 {
+                                
+                            }
+                            else {
+                                repeatDiveInFirstEightError = "A category is repeated three time or more in the first 8 dives"
+                                breakLoop = true
+                            }
+                        }
+                    }
+                    //check the volentary to optional ratio
+                    var volentaryCount = 0
+                    for dive in 0...4 {
+                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 2 {
+                        //success
+                    }
+                    else {
+                        twoVolZeroFourError = "Has \(volentaryCount) out of 2 volentary dives in the first 5 dives"
+                    }
+                    volentaryCount = 0
+                    for dive in 5...7 {
+                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 2 {
+                        //success
+                    }
+                    else {
+                        twoVolFiveSevenError = "Has \(volentaryCount) out of 2 volentary dives in dives 5 through 8"
+                    }
+                    volentaryCount = 0
+                    for dive in 8...10 {
+                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                            volentaryCount += 1
+                        }
+                    }
+                    if volentaryCount == 1 {
+                        //success
+                    }
+                    else {
+                        oneVolEightTenError = "Has \(volentaryCount) out of 2 volentary dives in dives 9 through 11"
+                    }
+                }
+                else {
+                    catCountFirstEigtError = "Does not have all 5 unique categories in the first eight dives"
+                }
             }
             skipFirstDive = false
     }
@@ -169,24 +441,23 @@ struct diverInfoView: View {
         var tempDate = Date()
         var dateComponents = DateComponents()
         dateComponents.month = 0
-        dateComponents.day = -10
+        dateComponents.day = -1
         dateComponents.year = 0
-        while tempDate > Calendar.current.date(byAdding: dateComponents, to: tempDate)! {
-            dateComponents.day = 0
-            if tempDate.formatted(date: .numeric, time: .omitted) == "8/14/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/23/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/20/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/29/2024" {
+        while tempDate.formatted(date: .numeric, time: .omitted) != "8/14/2023" {
+            if tempDate.formatted(date: .numeric, time: .omitted) == "8/14/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/23/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/20/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/29/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "8/19/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "9/23/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "10/28/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "11/25/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "12/30/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "2/3/2025" {
                 return 100...200
             }
-            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/21/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/30/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/27/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/1/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "2/5/2024" {
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/21/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "9/25/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/30/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "11/27/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/1/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "2/5/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "8/26/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "9/30/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "11/4/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "12/2/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "1/6/2025" || tempDate.formatted(date: .numeric, time: .omitted) == "2/10/2025" {
                 return 200...300
             }
-            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/28/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/2/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/8/2024" {
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "8/28/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/2/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/8/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "9/2/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "10/7/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "12/9/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "1/13/2025" {
                 return 400...500
             }
-            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/9/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/15/2024" {
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/4/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/9/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/15/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "9/9/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "10/14/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "12/16/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "1/20/2025" {
                 return 5000...6000
             }
-            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/16/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/22/2024" {
-                return 300...400
+            else if tempDate.formatted(date: .numeric, time: .omitted) == "9/11/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "10/16/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "12/18/2023" || tempDate.formatted(date: .numeric, time: .omitted) == "1/22/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "9/16/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "10/21/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "12/23/2024" || tempDate.formatted(date: .numeric, time: .omitted) == "1/27/2025" {
+                return 200...400
             }
             tempDate = Calendar.current.date(byAdding: dateComponents, to: tempDate)!
         }
@@ -197,6 +468,6 @@ struct diverInfoView: View {
 
 struct diverInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        diverInfoView(diverList: .constant(divers(dives: [dives(name: "dive1", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive2", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive3", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive4", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive5", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive6", degreeOfDiff: 1, score: [], position: "position", roundScore: 0)], diverEntries: diverEntry(dives: ["code", "code", "code", "code", "code", "code"], level: 0, name: "name", team: "Team"))))
+        diverInfoView(diverList: .constant(divers(dives: [dives(name: "dive1", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive2", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive3", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive4", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive5", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive6", degreeOfDiff: 1, score: [], position: "position", roundScore: 0)], diverEntries: diverEntry(dives: ["code", "code", "code", "code", "code", "code"], level: 0, name: "name", team: "Team"))), diveCount: 6)
     }
 }

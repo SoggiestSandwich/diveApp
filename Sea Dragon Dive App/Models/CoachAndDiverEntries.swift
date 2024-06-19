@@ -25,14 +25,14 @@ struct coachEntry: Codable, Hashable {
 struct diverEntry: Codable, Hashable {
     var dives: [String]
     var level: Int
-    var name: String //
+    var name: String
     var finishedEntry: Bool?
     var team: String?
     var totalScore: Double?
-    var dq: Bool? //
+    var dq: Bool?
     var diveCount: Int?
     var fullDives: [dives]?
-    var fullDivesScores: [[Double]]? //
-    var placement: Int? //
+    var fullDivesScores: [[Double]]?
+    var placement: Int? 
     var volentary: [Bool]?
 }

@@ -7,15 +7,16 @@
 
 import Foundation
 
+//holds everything a diver needs
 struct divers: Hashable, Comparable, Codable {
-    var dives: [dives]
-    var diverEntries: diverEntry
-    var placementScore: Double?
-    var placement: Int?
-    var skip: Bool?
-    var date: Date?
-    var location: String?
-    var finished: Bool?
+    var dives: [dives] //holds the entire list of dives for an event
+    var diverEntries: diverEntry //used to gain the attributes in diverEntry (name, team, etc.)
+    var placementScore: Double? //holds the score of non-dq'ed divers for events for determining placements at the end of scoring
+    var placement: Int? //holds what place the diver got in the event
+    var skip: Bool? //marks if a diver has been dropped in scoring and should be skipped when moving to the next diver
+    var date: Date? //the date of the event the diver participated in
+    var location: String? //the location of the the event that the diver participated in
+    var finished: Bool? //marks if the diver is finished
     var dq: Bool?
     var diveCount: Int?
     

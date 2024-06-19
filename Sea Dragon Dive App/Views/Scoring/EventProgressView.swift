@@ -61,6 +61,12 @@ struct EventProgressView: View {
                                                     findLastDiverIndex()
                                                     findFirstDiverIndex()
                                                     saveEventData()
+                                                    eventList.diveCount = 0
+                                                    for diver in diverList {
+                                                        if diver.dives.count > eventList.diveCount && diver.skip != true {
+                                                            eventList.diveCount = diver.dives.count
+                                                        }
+                                                    }
                                                 }
                                                 .foregroundColor(.red)
                                         }
@@ -117,6 +123,12 @@ struct EventProgressView: View {
                 diverList[currentDiver].dives[currentDive].scored = false
                 diverList[currentDiver].skip = true
                 saveEventData()
+                eventList.diveCount = 0
+                for diver in diverList {
+                    if diver.dives.count > eventList.diveCount && diver.skip != true {
+                        eventList.diveCount = diver.dives.count
+                    }
+                }
             }
         }
         .onAppear {

@@ -128,7 +128,7 @@ struct ScoreInfoView: View {
                                 dropLastDiver = true
                             }
                             else {
-                                //toggles to next diver or sends notification that this is the last dive?
+                                //toggles to  diver or sends notification that this is the last dive?
                                 if diverList[currentDiver].dives[currentDive].score.count == eventList.judgeCount {
                                     toggleNextDiver()
                                 }
@@ -182,6 +182,12 @@ struct ScoreInfoView: View {
                                 findLastDiverIndex()
                                 findFirstDiverIndex()
                                 toggleNextDiver()
+                                eventList.diveCount = 0
+                                for diver in diverList {
+                                    if diver.dives.count > eventList.diveCount && diver.skip != true {
+                                        eventList.diveCount = diver.dives.count
+                                    }
+                                }
                             }
                         } message: {
                             Text("would you like to continue and drop this diver?")
@@ -245,6 +251,12 @@ struct ScoreInfoView: View {
             }
         }
         .onAppear {
+            eventList.diveCount = 0
+            for diver in diverList {
+                if diver.dives.count > eventList.diveCount && diver.skip != true {
+                    eventList.diveCount = diver.dives.count
+                }
+            }
             currentIndex = diverList[currentDiver].dives[currentDive].score.count
         }
         .navigationBarBackButtonHidden(true)
@@ -272,7 +284,7 @@ struct ScoreInfoView: View {
         var num: Int = 1
         var keepLooping = true
         if currentDiver < diverList.count - 1 {
-            while diverList[currentDiver + num].dives.count < eventList.diveCount || diverList[currentDiver + num].skip == true && diverList[currentDiver + num].dives[currentDive].score.isEmpty && keepLooping {
+            while diverList[currentDiver + num].dives.count < currentDive + 1 || diverList[currentDiver + num].skip == true && diverList[currentDiver + num].dives[currentDive].score.isEmpty && keepLooping {
                 keepLooping = false
                 for diver in diverList {
                     if diver.skip != true {
@@ -291,7 +303,7 @@ struct ScoreInfoView: View {
         else if currentDiver == diverList.count - 1 && currentDive != eventList.diveCount - 1 {
             //make it look at next dive
             num = -currentDiver
-            while diverList[currentDiver + num].dives.count < eventList.diveCount || diverList[currentDiver + num].skip == true && diverList[currentDiver + num].dives[currentDive + 1].score.isEmpty && keepLooping {
+            while diverList[currentDiver + num].dives.count < currentDive + 1 || diverList[currentDiver + num].skip == true && diverList[currentDiver + num].dives[currentDive + 1].score.isEmpty && keepLooping {
                 keepLooping = false
                 for diver in diverList {
                     if diver.skip != true {
@@ -330,7 +342,7 @@ struct ScoreInfoView: View {
             }
             else if currentDiver == firstDiverIndex && currentDive != 0 {
                 num = (diverList.count - 1) - currentDiver
-                while diverList[currentDiver + num].dives.count <= currentDive - 1 || diverList[currentDiver + num].dives[currentDive - 1].score.isEmpty && diverList[currentDiver + num].skip == true{
+                while diverList[currentDiver + num].dives.count <= currentDive || diverList[currentDiver + num].dives[currentDive - 1].score.isEmpty && diverList[currentDiver + num].skip == true{
                     if currentDiver + num > -1 {
                         num -= 1
                     }
@@ -372,8 +384,7 @@ struct ScoreInfoView: View {
                 if currentDiver + 1 < diverList.count {
                     currentDiver += 1
                 }
-                else {
-                    currentDiver = 0
+                else {                    currentDiver = 0
                     currentDive = currentDive + 1
                 }
             }

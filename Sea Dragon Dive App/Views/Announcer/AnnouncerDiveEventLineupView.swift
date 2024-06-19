@@ -11,11 +11,16 @@ import CodeScanner
 struct AnnouncerDiveEventLineupView: View {
     @Environment(\.colorScheme) var colorScheme
     
+    @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
+    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
+    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
+    
     @EnvironmentObject var announcerEventStore: AnnouncerEventStore
     
     @State var failedScanAlert: Bool = false
     @State private var scannedCode: String = ""
     @State var isPresentingScanner = false
+    @State var diverList: [diverEntry] = []
     
     @Binding var path: [String]
 
@@ -50,6 +55,41 @@ struct AnnouncerDiveEventLineupView: View {
                         if entries != nil {
                             announcerEventStore.event = entries!
                             announcerEventStore.saveEvent()
+                            
+                            diverList = []
+                            for diver in 0..<announcerEventStore.event.diver.count {
+                                diverList.append(diverEntry(dives: announcerEventStore.event.diver[diver].dives, level: -1, name: announcerEventStore.event.diver[diver].name, team: announcerEventStore.event.diver[diver].school))
+                                diverList[diver].fullDives = []
+                                for dive in announcerEventStore.event.diver[diver].dives {
+                                    var name: String = ""
+                                    var positionId: Int64 = -1
+                                    var positionName: String = ""
+                                    var dOD: Double = 0.0
+                                    var number = dive
+                                    number.removeLast()
+                                    var letter = dive
+                                    while letter.count > 1 {
+                                        letter.removeFirst()
+                                    }
+                                    for fetchedDive in fetchedDives {
+                                        if fetchedDive.diveNbr == Int(number)! {
+                                            name = fetchedDive.diveName ?? ""
+                                        }
+                                    }
+                                    for fetchedPosition in fetchedPositions {
+                                        if fetchedPosition.positionCode == letter.uppercased() {
+                                            positionId = fetchedPosition.positionId
+                                            positionName = fetchedPosition.positionName ?? ""
+                                        }
+                                    }
+                                    for fetchedWithPosition in fetchedWithPositions {
+                                        if fetchedWithPosition.positionId == positionId && fetchedWithPosition.diveNbr == Int(number)! {
+                                            dOD = fetchedWithPosition.degreeOfDifficulty
+                                        }
+                                    }
+                                    diverList[diver].fullDives?.append(dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0))
+                                }
+                            }
                             
                             self.isPresentingScanner = false
                         }
@@ -112,10 +152,7 @@ struct AnnouncerDiveEventLineupView: View {
                             .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
                     )
             }
-            Button {
-                //starts event
-            } label: {
-                Text("Start Event")
+            NavigationLink("Start Event", destination: AnnounceDiveView(firstDiverIndex: 0, lastDiverIndex: diverList.count - 1, diverList: $diverList))
                     .foregroundColor(announcerEventStore.event.diver.isEmpty ? .gray : colorScheme == .dark ? .white : .black)
                     .bold()
                     .padding(15)
@@ -128,12 +165,49 @@ struct AnnouncerDiveEventLineupView: View {
                         RoundedRectangle(cornerRadius: 20)
                             .stroke(announcerEventStore.event.diver.isEmpty ? .gray : colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
                     )
-            }
             
         }
         .onAppear {
             if announcerEventStore.event.diver.isEmpty {
                 self.isPresentingScanner = true
+            }
+        }
+        .task {
+            if !announcerEventStore.event.diver.isEmpty {
+                diverList = []
+                for diver in 0..<announcerEventStore.event.diver.count {
+                    diverList.append(diverEntry(dives: announcerEventStore.event.diver[diver].dives, level: -1, name: announcerEventStore.event.diver[diver].name, team: announcerEventStore.event.diver[diver].school))
+                    diverList[diver].fullDives = []
+                    for dive in announcerEventStore.event.diver[diver].dives {
+                        var name: String = ""
+                        var positionId: Int64 = -1
+                        var positionName: String = ""
+                        var dOD: Double = 0.0
+                        var number = dive
+                        number.removeLast()
+                        var letter = dive
+                        while letter.count > 1 {
+                            letter.removeFirst()
+                        }
+                        for fetchedDive in fetchedDives {
+                            if fetchedDive.diveNbr == Int(number)! {
+                                name = fetchedDive.diveName ?? ""
+                            }
+                        }
+                        for fetchedPosition in fetchedPositions {
+                            if fetchedPosition.positionCode == letter.uppercased() {
+                                positionId = fetchedPosition.positionId
+                                positionName = fetchedPosition.positionName ?? ""
+                            }
+                        }
+                        for fetchedWithPosition in fetchedWithPositions {
+                            if fetchedWithPosition.positionId == positionId && fetchedWithPosition.diveNbr == Int(number)! {
+                                dOD = fetchedWithPosition.degreeOfDifficulty
+                            }
+                        }
+                        diverList[diver].fullDives?.append(dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0))
+                    }
+                }
             }
         }
         .sheet(isPresented: $isPresentingScanner) {

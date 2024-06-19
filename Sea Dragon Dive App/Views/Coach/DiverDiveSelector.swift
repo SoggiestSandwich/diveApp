@@ -24,6 +24,7 @@ struct DiverDiveSelector: View {
     
     @State var entryList: diverEntry
     @State var coachEntry: coachEntry
+    @State var eventDate: String
     @Binding var diveList: [dives]
     
     var body: some View {
@@ -625,7 +626,7 @@ struct DiverDiveSelector: View {
                 .listStyle(.inset)
         }
         .navigationTitle("Select Dives")
-        .task {    
+        .task {
             setDiveCodes()
         }
     }
@@ -692,29 +693,29 @@ struct DiverDiveSelector: View {
     }
     
     func findDiveOfTheWeek() -> String {
+        print(eventDate)
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "mm/dd/yyyy"
-        print(coachEntry.eventDate)
-        var tempDate = dateFormatter.date(from: coachEntry.eventDate)
+        dateFormatter.dateFormat = "MM/dd/yyyy"
+        var tempDate = dateFormatter.date(from: eventDate)
+        print(tempDate!.formatted(date: .numeric, time: .omitted))
         var dateComponents = DateComponents()
         dateComponents.month = 0
         dateComponents.day = -1
         dateComponents.year = 0
-        while tempDate!.formatted(date: .numeric, time: .omitted) != "8/13/2023" {
-            //print(tempDate!.formatted(date: .numeric, time: .omitted))
-            if tempDate!.formatted(date: .numeric, time: .omitted) == "8/14/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/18/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/23/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/20/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/25/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/29/2024" {
+        while tempDate!.formatted(date: .numeric, time: .omitted) != "8/14/2023" {
+            if tempDate!.formatted(date: .numeric, time: .omitted) == "8/14/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/18/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/23/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/20/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/25/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/29/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "8/19/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/23/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/28/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/25/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/30/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "2/3/2025" {
                 return "Forward"
             }
-            else if tempDate!.formatted(date: .numeric, time: .omitted) == "8/21/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/25/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/30/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/27/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/1/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "2/5/2024" {
+            else if tempDate!.formatted(date: .numeric, time: .omitted) == "8/21/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/25/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/30/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/27/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/1/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "2/5/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "8/26/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/30/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "11/4/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/2/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/6/2025" || tempDate!.formatted(date: .numeric, time: .omitted) == "2/10/2025" {
                 return "Back"
             }
-            else if tempDate!.formatted(date: .numeric, time: .omitted) == "8/28/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/2/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/4/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/8/2024" {
+            else if tempDate!.formatted(date: .numeric, time: .omitted) == "8/28/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/2/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/4/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/8/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/2/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/7/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/9/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/13/2025" {
                 return "Inward"
             }
-            else if tempDate!.formatted(date: .numeric, time: .omitted) == "9/4/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/9/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/11/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/15/2024" {
+            else if tempDate!.formatted(date: .numeric, time: .omitted) == "9/4/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/9/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/11/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/15/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/9/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/14/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/16/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/20/2025" {
                 return "Twisting"
             }
-            else if tempDate!.formatted(date: .numeric, time: .omitted) == "9/11/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/16/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/18/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/22/2024" {
+            else if tempDate!.formatted(date: .numeric, time: .omitted) == "9/11/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/16/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/18/2023" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/22/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "9/16/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "10/21/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "12/23/2024" || tempDate!.formatted(date: .numeric, time: .omitted) == "1/27/2025" {
                 return "Reverse"
             }
             tempDate = Calendar.current.date(byAdding: dateComponents, to: tempDate!)!
@@ -726,6 +727,6 @@ struct DiverDiveSelector: View {
 
 struct DiverDiveSelector_Previews: PreviewProvider {
     static var previews: some View {
-        DiverDiveSelector(entryList: diverEntry(dives: [], level: 0, name: ""), coachEntry: coachEntry(diverEntries: [], eventDate: "", team: "", version: 0), diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
+        DiverDiveSelector(entryList: diverEntry(dives: [], level: 0, name: ""), coachEntry: coachEntry(diverEntries: [], eventDate: "", team: "", version: 0), eventDate: "1/1/2000", diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
     }
 }

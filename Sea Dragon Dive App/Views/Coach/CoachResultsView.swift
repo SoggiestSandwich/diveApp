@@ -32,24 +32,6 @@ struct CoachResultsView: View {
     }
     
     func makeQRCode(diver: diverEntry) -> String {
-        /*
-        var qrCode: String = "{\"diveResults\":["
-        for dive in 0..<diver.dives.count {
-            qrCode += "{\"score\":["
-            for score in 0..<(diver.fullDivesScores?.count ?? 0) {
-                qrCode += "\(diver.fullDivesScores![score])"
-                if score != diver.fullDivesScores!.count - 1 {
-                    qrCode += ","
-                }
-            }
-            qrCode += "],\"code\":\"\(diver.dives[dive])\"}"
-            if dive != diver.dives.count - 1 {
-                qrCode += ","
-            }
-            
-        }
-        qrCode += "],\"placement\":\(diver.placement ?? 0)}"
-        */
         var diverResults = resultsList(diveResults: [], placement: diver.placement ?? 0)
         for dive in 0..<diver.dives.count {
             diverResults.diveResults.append(diveResults(code: diver.dives[dive], score: diver.fullDivesScores![dive]))
