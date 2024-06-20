@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+//struct used to easily go back to the login view
 struct adaptiveStack<Content: View>: View {
     let horizontalStack: Bool
     let content: () -> Content

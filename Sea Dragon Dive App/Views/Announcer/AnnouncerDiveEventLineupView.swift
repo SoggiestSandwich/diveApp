@@ -6,35 +6,37 @@
 //
 
 import SwiftUI
-import CodeScanner
+import CodeScanner //used for reading qr code
 
 struct AnnouncerDiveEventLineupView: View {
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) var colorScheme //detects if in dark mode
     
-    @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
-    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
-    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
+    @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive> //the dive table from the database
+    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position> //the position table from the database
+    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition> //the withPosition table of the database
     
-    @EnvironmentObject var announcerEventStore: AnnouncerEventStore
+    @EnvironmentObject var announcerEventStore: AnnouncerEventStore //the persistant Announcer data
     
-    @State var failedScanAlert: Bool = false
-    @State private var scannedCode: String = ""
-    @State var isPresentingScanner = false
-    @State var diverList: [diverEntry] = []
+    @State var failedScanAlert: Bool = false //used to bring up a failed scan alert
+    @State private var scannedCode: String = "" //the code that is scanned from the qr code
+    @State var isPresentingScanner = false //used to bring up the scanner sheet
+    @State var diverList: [diverEntry] = [] //list of divers in the event that are displayed when scanned in
     
-    @Binding var path: [String]
+    @Binding var path: [String] //the navigation stack's path used to go back to the login view
 
+    //the code scanned in
     struct Codes: Identifiable {
         let name: String
         let id = UUID()
     }
     
+    //the sheet used to scan in qr codes
     var ScannerSheet: some View {
         CodeScannerView(
             codeTypes: [.qr],
             completion: { result in
                 if case let .success(code) = result {
-                    self.scannedCode = code.string
+                    self.scannedCode = code.string //on a successful scan the code is taken into scannedCode
                     
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
@@ -50,16 +52,19 @@ struct AnnouncerDiveEventLineupView: View {
                         else {
                             jsonCode = compressedJsonCode!
                         }
+                        //decodes the json to announcerEvent
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(announcerEvent.self, from: jsonCode)
                         if entries != nil {
                             announcerEventStore.event = entries!
                             announcerEventStore.saveEvent()
                             
+                            //assembles diverlist based off of the announcer event store
                             diverList = []
                             for diver in 0..<announcerEventStore.event.diver.count {
                                 diverList.append(diverEntry(dives: announcerEventStore.event.diver[diver].dives, level: -1, name: announcerEventStore.event.diver[diver].name, team: announcerEventStore.event.diver[diver].school))
                                 diverList[diver].fullDives = []
+                                //finds the dives details based off of the code
                                 for dive in announcerEventStore.event.diver[diver].dives {
                                     var name: String = ""
                                     var positionId: Int64 = -1
@@ -91,7 +96,7 @@ struct AnnouncerDiveEventLineupView: View {
                                 }
                             }
                             
-                            self.isPresentingScanner = false
+                            self.isPresentingScanner = false //closes the qr reader
                         }
                         else {
                             //popup saying invalid qr code was scanned
@@ -110,11 +115,12 @@ struct AnnouncerDiveEventLineupView: View {
         }
     }
     
+    //main view
     var body: some View {
         VStack {
             HStack {
                 Button {
-                    path = []
+                    path = [] //go back to login view
                 } label: {
                     Image(systemName: "gearshape.fill")
                         .interpolation(.none).resizable().frame(width: UIScreen.main.bounds.size.height * 0.03, height: UIScreen.main.bounds.size.height * 0.03)
@@ -169,15 +175,17 @@ struct AnnouncerDiveEventLineupView: View {
         }
         .onAppear {
             if announcerEventStore.event.diver.isEmpty {
-                self.isPresentingScanner = true
+                self.isPresentingScanner = true //opens the scanner if there is not an event when you reach this view
             }
         }
         .task {
+            //assembles a list of divers from the persistant data
             if !announcerEventStore.event.diver.isEmpty {
                 diverList = []
                 for diver in 0..<announcerEventStore.event.diver.count {
                     diverList.append(diverEntry(dives: announcerEventStore.event.diver[diver].dives, level: -1, name: announcerEventStore.event.diver[diver].name, team: announcerEventStore.event.diver[diver].school))
                     diverList[diver].fullDives = []
+                    //assembles the dive details based on the dive codes
                     for dive in announcerEventStore.event.diver[diver].dives {
                         var name: String = ""
                         var positionId: Int64 = -1
@@ -211,9 +219,9 @@ struct AnnouncerDiveEventLineupView: View {
             }
         }
         .sheet(isPresented: $isPresentingScanner) {
-            self.ScannerSheet
+            self.ScannerSheet //qr scanner
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true) //removes default back button
     }
 }
 

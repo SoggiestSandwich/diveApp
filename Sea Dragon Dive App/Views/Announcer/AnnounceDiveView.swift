@@ -8,30 +8,31 @@
 import SwiftUI
 
 struct AnnounceDiveView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme //detects if dark mode
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if vertical layout
+    @Environment(\.presentationMode) var presentationMode //used to create custom back buttons
     
-    @EnvironmentObject var announcerEventStore: AnnouncerEventStore
+    @EnvironmentObject var announcerEventStore: AnnouncerEventStore //announcer's persistant data
     
-    @State var currentDiver: Int = 0
-    @State var currentDive: Int = 0
-    @State var withdrawAlert: Bool = false
-    @State var firstDiverIndex: Int
-    @State var lastDiverIndex: Int
-    @State var diverWithLastDiveIndex: Int = 0
-    @State var diverWithFirstMaxDiveIndex: Int = 0
-    @State var verbosity: Bool = true
-    @State var diveCount: Int = 0
-    @State var lowestDiveCount: Int = 11
+    @State var currentDiver: Int = 0 //index of the diver being displayed
+    @State var currentDive: Int = 0 //index of the dive being displayed
+    @State var withdrawAlert: Bool = false //triggers the withdraw alert
+    @State var firstDiverIndex: Int //tracks the first diver of each round
+    @State var lastDiverIndex: Int //tracks the last diver each round
+    @State var diverWithLastDiveIndex: Int = 0 //tracks the last diver with the most dives
+    @State var diverWithFirstMaxDiveIndex: Int = 0 //tracks the first diver with the most dives
+    @State var verbosity: Bool = true //determines if the whole script is shown
+    @State var diveCount: Int = 0 //the largest amount of dives in the event
+    @State var lowestDiveCount: Int = 11 //the smallest amount of dives in the event
     
-    @Binding var diverList: [diverEntry]
+    @Binding var diverList: [diverEntry] //list of all the divers
     
+    //main view
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 Button {
-                    withdrawAlert = true
+                    withdrawAlert = true //triggers the withdrawn alert
                 } label: {
                     Text("Withdraw")
                         .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -47,14 +48,19 @@ struct AnnounceDiveView: View {
                 .alert("Withdrawn", isPresented: $withdrawAlert) {
                     Button("Cancel", role: .cancel) {}
                     Button("Confirm") {
+                        //sets the diver as dq'ed
                         diverList[currentDiver].dq = true
+                        //if on the last diver moves to the next round
                         if currentDiver != lastDiverIndex {
                             toggleNextDiver()
                         }
+                        //else go to the next round
                         else {
                             toggleNextRound()
                         }
+                        //ensure the first and last diver remain the same or readjust skipping dq'ed dives
                         setFirstAndLastDiverIndex()
+                        //checks the greatest dive count and lowest skipping the dq'ed divers and changes them if it has changed
                         diveCount = 0
                         var first = true
                         for diver in 0..<diverList.count {
@@ -71,6 +77,7 @@ struct AnnounceDiveView: View {
                                 }
                             }
                         }
+                        //lowest
                         lowestDiveCount = 11
                         for diver in 0..<diverList.count {
                             if diverList[diver].dives.count < diveCount && diverList[diver].dq != true {
@@ -84,13 +91,15 @@ struct AnnounceDiveView: View {
                 }
                 Spacer()
                 //verbose switch
-                Toggle("Verbose Script", isOn: $verbosity)
+                Toggle("Verbose Script", isOn: $verbosity) //verbosity switch/toggle
                     .bold()
                     .padding()
             }
             Spacer()
             if verbosity {
+                //verbose script
                 VStack(alignment: .leading) {
+                    //script start
                     Text(currentDiver == firstDiverIndex ? "Starting Round \(currentDive + 1) is" : "Next up is our \(currentDiver + 1)\(currentDiver == 1 ? "nd" : currentDiver == 2 ? "rd" : "th") diver")
                         .font(.title2)
                         .padding()
@@ -135,6 +144,7 @@ struct AnnounceDiveView: View {
                         .padding(.horizontal)
                         .padding(.bottom)
                     if currentDiver == diverList.count - 1 {
+                        //shows when on the last diver of a round
                         Text("This concludes Round \(currentDive + 1)")
                             .font(.title2)
                             .padding(.horizontal)
@@ -143,8 +153,10 @@ struct AnnounceDiveView: View {
                 }
                 .padding(.horizontal)
             }
+            //non-verbose script
             else {
                 VStack(alignment: .leading) {
+                    //script start
                     Text("Round \(currentDive + 1)")
                         .font(.title2)
                         .padding(.horizontal)
@@ -184,18 +196,23 @@ struct AnnounceDiveView: View {
             
             HStack {
                 if currentDiver != firstDiverIndex || currentDive != 0 {
+                    //previous diver/round button that does not appear if on the first diver and first dive
                     Button {
+                        //previous diver
                         if currentDiver > firstDiverIndex && currentDive < lowestDiveCount || diverWithFirstMaxDiveIndex != currentDiver && currentDive >= lowestDiveCount {
                             togglepreviousDiver()
                         }
+                        //previous round
                         else if currentDiver != firstDiverIndex && currentDive < lowestDiveCount || diverWithFirstMaxDiveIndex == currentDiver && currentDive >= lowestDiveCount || currentDive != 0 {
                             togglepreviousRound()
                         }
                         
                     } label: {
+                        //previous diver
                         if currentDiver > firstDiverIndex && currentDive < lowestDiveCount || diverWithFirstMaxDiveIndex != currentDiver && currentDive >= lowestDiveCount {
                             Text("Previous Diver")
                         }
+                        //previous round
                         else if currentDiver != firstDiverIndex && currentDive < lowestDiveCount || diverWithFirstMaxDiveIndex == currentDiver && currentDive >= lowestDiveCount || currentDive != 0 {
                             Text("Previous Round")
                         }
@@ -209,27 +226,34 @@ struct AnnounceDiveView: View {
                     )
                 }
                 Spacer()
+                //next diver/round and finish event button
                 Button {
+                    //next diver
                     if currentDiver < lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount {
                         toggleNextDiver()
                     }
+                    //next round
                     else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
                         toggleNextRound()
                     }
+                    //finish event
                     else {
-                        presentationMode.wrappedValue.dismiss()
+                        presentationMode.wrappedValue.dismiss() //back to last view
                     }
                 } label: {
+                    //next diver
                     if currentDiver < lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount  {
                         VStack {
                             Text("Next Diver")
                         }
                     }
+                    //next round
                     else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
                         VStack {
                             Text("Next Round")
                         }
                     }
+                    //finish event
                     else {
                         Text("Finish Event")
                     }
@@ -245,6 +269,7 @@ struct AnnounceDiveView: View {
             .padding(.horizontal)
         }
         .task {
+            //when entering the view determine the greatest and lowest dive counts
             diveCount = 0
             var first = true
             for diver in 0..<diverList.count {
@@ -253,6 +278,7 @@ struct AnnounceDiveView: View {
                     diverWithLastDiveIndex = diver
                 }
             }
+            //index of the first diver with the greatest amount of dives
             for diver in 0..<diverList.count {
                 if diverList[diver].dives.count == diveCount && diverList[diver].dq != true {
                     if first {
@@ -261,6 +287,7 @@ struct AnnounceDiveView: View {
                     }
                 }
             }
+            //lowest
             lowestDiveCount = 11
             for diver in 0..<diverList.count {
                 if diverList[diver].dives.count < lowestDiveCount && diverList[diver].dq != true {
@@ -272,6 +299,7 @@ struct AnnounceDiveView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
+                //custom back button
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -282,12 +310,14 @@ struct AnnounceDiveView: View {
                 }
             }
             ToolbarItem(placement: .navigationBarTrailing){
+                //sends you to AnnounceEventProgress view
                 NavigationLink(destination: AnnounceEventProgress(diverList: $diverList, currentDiver: $currentDiver, currentDive: $currentDive, lastDiverIndex: $lastDiverIndex, firstDiverIndex: $firstDiverIndex, diveCount: diveCount)) {
                     Text("Dive Event Progress")
                 }
             }
         }
     }
+    //removes the last names by only reading until the first space
     func firstName(fullName: String) -> String {
         var firstName = ""
         for char in fullName {
@@ -300,6 +330,7 @@ struct AnnounceDiveView: View {
         }
         return firstName
     }
+    //increments the current diver by 1 and continues until it is on a legal diver
     func toggleNextDiver() {
         var tempCurrentDiver = currentDiver
         repeat {
@@ -307,6 +338,7 @@ struct AnnounceDiveView: View {
         } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count <= currentDive
         currentDiver = tempCurrentDiver
     }
+    //sets the current diver to the firstDiverIndex then increments until it is on a legal diver and increases the current dive by one
     func toggleNextRound() {
         var tempCurrentDiver = firstDiverIndex
         while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 <= currentDive {
@@ -315,6 +347,7 @@ struct AnnounceDiveView: View {
         currentDive = currentDive + 1
         currentDiver = tempCurrentDiver
     }
+    //decrements the current diver by 1 and continues until it is on a legal diver
     func togglepreviousDiver() {
         var tempCurrentDiver = currentDiver
         repeat {
@@ -322,6 +355,7 @@ struct AnnounceDiveView: View {
         } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count <= currentDive
         currentDiver = tempCurrentDiver
     }
+    //sets the current diver to the lastDiverIndex then decrements until it is on a legal diver and decreases the current dive by one
     func togglepreviousRound() {
         var tempCurrentDiver = lastDiverIndex
         while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 <= currentDive {
@@ -330,13 +364,16 @@ struct AnnounceDiveView: View {
         currentDiver = tempCurrentDiver
         currentDive = currentDive - 1
     }
+    //finds the first and last legal diver of each round
     func setFirstAndLastDiverIndex() {
+        //first
         for diver in 0..<diverList.count{
             if diverList[diver].dq != true {
                 firstDiverIndex = diver
                 break
             }
         }
+        //last
         for diver in 0..<diverList.count{
             if diverList[diverList.count - diver - 1].dq != true {
                 lastDiverIndex = diverList.count - diver - 1

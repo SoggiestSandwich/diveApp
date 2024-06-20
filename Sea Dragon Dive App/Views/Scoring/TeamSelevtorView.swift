@@ -74,7 +74,6 @@ struct TeamSelevtorView: View {
             }
             coachList.team = team
             coachList.eventDate = Date().formatted(date: .numeric, time: .omitted)
-            coachList.version = 0
         }
         
         let encoder = JSONEncoder()

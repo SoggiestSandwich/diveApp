@@ -9,16 +9,17 @@ import SwiftUI
 
 struct LoginScreenView: View {
     
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) var colorScheme //detects whether the device is in dark mode
     
-    @EnvironmentObject var settingsStore: SettingsStore
+    @EnvironmentObject var settingsStore: SettingsStore //accesses the setting's persistant data
     
-    @State var backToRoot: Bool = false
-    @State var path: [String] = []
+    @State var path: [String] = [] //the path array that brings us back to the login screen when = []
     
     var body: some View {
         VStack {
+            //starts the stack of views using path to easily come back to this view
             NavigationStack(path: $path) {
+                //entire view is built on a list which in this case acts as a formatted Vstack
                 List {
                     Text("Settings")
                         .font(.title.bold())
@@ -66,43 +67,46 @@ struct LoginScreenView: View {
                             }
                     }
                     
-                    Text("")
+                    Text("") //empty row
                     HStack {
                         Text("Your Name")
                         TextField("Enter Name", text: $settingsStore.settingsList.name)
                             .onChange(of: settingsStore.settingsList.name) { _ in
+                                //when the name is changed it is saved to settings persistant data
                                 settingsStore.saveSetting()
                             }
-                            .multilineTextAlignment(.trailing)
+                            .multilineTextAlignment(.trailing) //move textfield to the trailing side
                     }
                     HStack {
                         Text("Your School")
                         TextField("Enter School", text: $settingsStore.settingsList.school)
                             .onChange(of: settingsStore.settingsList.school) { _ in
+                                //when the school is changed it is saved to settings persistant data
                                 settingsStore.saveSetting()
                             }
-                            .multilineTextAlignment(.trailing)
+                            .multilineTextAlignment(.trailing) //move textfield to the trailing side
                     }
                     Button {
-                        path.append("")
+                        path.append("") //basically tells the navigation stack that we are stacking on a new view
                     } label: {
                         Text("Done")
                             .frame(maxWidth: .infinity, alignment: .center)
                             .foregroundColor(colorScheme == .dark ? .white : .black)
                     }
-                    .disabled(settingsStore.settingsList.role == 0 ? true : settingsStore.settingsList.role == 1 ? settingsStore.settingsList.name != "" && settingsStore.settingsList.school != "" ? false : true : false)
+                    .disabled(settingsStore.settingsList.role == 0 ? true : settingsStore.settingsList.role == 1 ? settingsStore.settingsList.name != "" && settingsStore.settingsList.school != "" ? false : true : false) //disables the button if any necessary fields are blank
                     .bold()
                     .padding(5)
                     //.shadow(color: .black.opacity(1),radius: 1, x: 3, y: 3)
                     .border(.foreground, width: 2)
                 }
                 .navigationDestination(for: String.self) { _ in
-                    getDestination()
+                    getDestination() //determines what view the app will send you
                 }
             }
-            .navigationBarBackButtonHidden(true)
+            .navigationBarBackButtonHidden(true) //removes the back button since there is nowhere to go back to
         }
         .task {
+            //when the app opens it will read the persistant data and go to the view that was last selected
             if settingsStore.settingsList.role == 1 && settingsStore.settingsList.name != "" && settingsStore.settingsList.school != "" {
                 path.append("")
             }
@@ -119,17 +123,15 @@ struct LoginScreenView: View {
     }
     
     @ViewBuilder
+    //returns the view that corresponds to the selected role or defaults to an empty view
     func getDestination() -> some View {
         switch settingsStore.settingsList.role {
         case 1: DiverHomeView(username: settingsStore.settingsList.name, userSchool: settingsStore.settingsList.school)
         case 2: CoachEventSelectionView(name: settingsStore.settingsList.name, team: settingsStore.settingsList.school, path: $path)
         case 3: EventSelectionView(path: $path)
-                .onDisappear {
-                    backToRoot = false
-                }
         case 4: AnnouncerDiveEventLineupView(path: $path).environmentObject(AnnouncerEventStore())
             
-        default: EmptyView()
+        default: EmptyView() //should be impossible to happen since the button would be disabled
         }
     }
     

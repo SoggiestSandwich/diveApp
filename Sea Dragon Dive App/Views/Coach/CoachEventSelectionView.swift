@@ -136,7 +136,7 @@ struct CoachEventSelectionView: View {
                 }
                 //list of current events
                 Button {
-                    coachEntryStore.addDiverEntry(coachEntry(diverEntries: [], eventDate: "", team: team, version: 0))
+                    coachEntryStore.addCoachEntry(coachEntry(diverEntries: [], eventDate: "", team: team, version: 0))
                     coachEntryStore.saveDiverEntry()
                 } label: {
                     HStack {

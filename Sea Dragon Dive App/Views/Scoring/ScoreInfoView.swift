@@ -141,6 +141,7 @@ struct ScoreInfoView: View {
                                     }
                                     if lastDiver == true {
                                         diverList[currentDiver].skip = true
+                                        saveEventData()
                                         dropLastDiver = true
                                     }
                                     else {

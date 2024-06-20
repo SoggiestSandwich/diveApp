@@ -33,21 +33,6 @@ struct ResultsView: View {
                     //list divers in placement order
                     Section(header: Text(setVList().isEmpty ? "" : "Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         VarsityResultsView(unsortedDiverList: unsortedDiverList, eventList: $eventList, path: $path)
-                        /*ForEach(Array(zip(setVList().indices, setVList())), id: \.1) { index, diver in
-                            HStack {
-                                Text("\(diver.skip == true || diver.diverEntries.dq == true ? "DQ" : "\(String(diver.placement!)).")")
-                                    .padding(.trailing)
-                                    .foregroundColor(diver.placement == 1 ? diver.skip == true || diver.diverEntries.dq == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
-                                Text("\(diver.diverEntries.name)\n\(diver.diverEntries.team ?? "")")
-                                    .foregroundColor(diver.placement == 1 ? diver.skip == true || diver.diverEntries.dq == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
-                                Spacer()
-                                if diver.placementScore != nil {
-                                    Text(diver.placementScore == -1 || diver.diverEntries.dq == true ? "-" : String(format: "%.2f", diver.placementScore!))
-                                        .foregroundColor(diver.placement == 1 ? diver.skip == true || diver.diverEntries.dq == true ? colorScheme == .dark ? .white : .black : .black : colorScheme == .dark ? .white : .black)
-                                }
-                            }
-                            .listRowBackground(diver.skip == true || diver.diverEntries.dq == true ? colorScheme == .dark ? Color(red: 1, green: 1, blue: 1, opacity: 0.125) : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
-                        }*/
                     }
                     Section(header: Text(setJVList().isEmpty ? "" : "Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         ForEach(Array(zip(setJVList().indices, setJVList())), id: \.1) { index, diver in

@@ -8,31 +8,33 @@
 import SwiftUI
 
 struct AnnounceEventProgress: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode //used to make a custom back button
     
-    @EnvironmentObject var eventStore: EventStore
+    @Binding var diverList: [diverEntry] //list of the divers
+    @Binding var currentDiver: Int //index of the current diver to jump to divers
+    @Binding var currentDive: Int //index of the current dive to jump to dives
+    @Binding var lastDiverIndex: Int //index of the last legal diver
+    @Binding var firstDiverIndex: Int //index of the first legal diver
     
-    @Binding var diverList: [diverEntry]
-    @Binding var currentDiver: Int
-    @Binding var currentDive: Int
-    @Binding var lastDiverIndex: Int
-    @Binding var firstDiverIndex: Int
+    @State var diveCount: Int //greatest number of dives
     
-    @State var diveCount: Int
+    @State var selectedDiver: Int = -1 //index of the diver that is currently selected
+    @State var selectedDive: Int = -1 //index of the dive that is currently selected
+    @State var dropAlert: Bool = false //triggers an alert for dropping divers
     
-    @State var selectedDiver: Int = -1
-    @State var selectedDive: Int = -1
-    @State var dropAlert: Bool = false
-    
+    //main view
     var body: some View {
         VStack {
             List {
                 ForEach(Array(zip(diverList[findDiverWithDiveCount()].dives.indices, diverList[findDiverWithDiveCount()].dives)), id: \.0) { index, dive in
+                    //has a dropdown for each dive as displayed by rounds
                     DisclosureGroup("Round \(index + 1)") {
                         ForEach(Array(zip(diverList.indices, diverList)), id: \.0) { diverIndex, diver in
+                            //stops displaying divers after they don't have any more dives
                             if index < diver.dives.count {
                                 HStack {
+                                    //each diver is a button that selects that dive and diver
                                     Button {
                                         selectedDive = index
                                         selectedDiver = diverIndex
@@ -41,6 +43,7 @@ struct AnnounceEventProgress: View {
                                             .foregroundColor(diver.dq == true ? .red : colorScheme == .dark ? .white : .black)
                                     }
                                     Spacer()
+                                    //if the diver is dq'ed an x is shown otherwise a square
                                     if diver.dq == true {
                                         Image(systemName: "xmark.circle.fill")
                                             .interpolation(.none).resizable().frame(width: 30, height: 30, alignment: .bottomTrailing)
@@ -70,6 +73,7 @@ struct AnnounceEventProgress: View {
                     }
                 }
             }
+            //sets the current diver and dive and goes back to the last view
             Button {
                 if selectedDive != -1 && selectedDiver != -1 {
                     currentDive = selectedDive
@@ -91,23 +95,27 @@ struct AnnounceEventProgress: View {
     .alert("Drop this diver?", isPresented: $dropAlert) {
         Button("Cancel", role: .cancel) {}
         Button("Confirm") {
+            //dq's the diver
             diverList[currentDiver].dq = true
         }
     }
     .onAppear {
+        //finds the first and last index of legal divers
         findLastDiverIndex()
         findFirstDiverIndex()
     }
-    .navigationBarBackButtonHidden(true)
+    .navigationBarBackButtonHidden(true) //removes default back button
     .toolbar {
         ToolbarItem(placement: .navigationBarTrailing){
             Button("Scoring") {
+                //takes you back to last view
                 self.presentationMode.wrappedValue.dismiss()
             }
         }
     }
 }
     
+    //finds the last legal diver index
     func findLastDiverIndex() {
         lastDiverIndex = diverList.count
         var breakLoop = false
@@ -122,6 +130,7 @@ struct AnnounceEventProgress: View {
             }
         }
     }
+    //finds the first legal diver index
     func findFirstDiverIndex() {
         firstDiverIndex = 0
         var breakLoop = false
@@ -136,6 +145,7 @@ struct AnnounceEventProgress: View {
             }
         }
     }
+    //finds the largest count of dives and the index of that
     func findDiverWithDiveCount() -> Int {
         var mostDives = 0
         var mostDivesIndex = 0
@@ -155,3 +165,4 @@ struct AnnounceEventProgress: View {
 #Preview {
     AnnounceEventProgress(diverList: .constant([diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName")]), currentDiver: .constant(0), currentDive: .constant(0), lastDiverIndex: .constant(0), firstDiverIndex: .constant(0), diveCount: 2)
 }
+
