@@ -11,7 +11,7 @@ struct AnnounceEventProgress: View {
     @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
     @Environment(\.presentationMode) var presentationMode //used to make a custom back button
     
-    @Binding var diverList: [diverEntry] //list of the divers
+    @Binding var diversList: [diverEntry] //list of the divers
     @Binding var currentDiver: Int //index of the current diver to jump to divers
     @Binding var currentDive: Int //index of the current dive to jump to dives
     @Binding var lastDiverIndex: Int //index of the last legal diver
@@ -27,10 +27,10 @@ struct AnnounceEventProgress: View {
     var body: some View {
         VStack {
             List {
-                ForEach(Array(zip(diverList[findDiverWithDiveCount()].dives.indices, diverList[findDiverWithDiveCount()].dives)), id: \.0) { index, dive in
+                ForEach(Array(zip(diversList[findDiverWithDiveCount()].dives.indices, diversList[findDiverWithDiveCount()].dives)), id: \.0) { index, dive in
                     //has a dropdown for each dive as displayed by rounds
                     DisclosureGroup("Round \(index + 1)") {
-                        ForEach(Array(zip(diverList.indices, diverList)), id: \.0) { diverIndex, diver in
+                        ForEach(Array(zip(diversList.indices, diversList)), id: \.0) { diverIndex, diver in
                             //stops displaying divers after they don't have any more dives
                             if index < diver.dives.count {
                                 HStack {
@@ -48,7 +48,7 @@ struct AnnounceEventProgress: View {
                                         Image(systemName: "xmark.circle.fill")
                                             .interpolation(.none).resizable().frame(width: 30, height: 30, alignment: .bottomTrailing)
                                             .onTapGesture {
-                                                diverList[diverIndex].dq = false
+                                                diversList[diverIndex].dq = false
                                                 findLastDiverIndex()
                                                 findFirstDiverIndex()
                                             }
@@ -96,7 +96,7 @@ struct AnnounceEventProgress: View {
         Button("Cancel", role: .cancel) {}
         Button("Confirm") {
             //dq's the diver
-            diverList[currentDiver].dq = true
+            diversList[currentDiver].dq = true
         }
     }
     .onAppear {
@@ -117,11 +117,11 @@ struct AnnounceEventProgress: View {
     
     //finds the last legal diver index
     func findLastDiverIndex() {
-        lastDiverIndex = diverList.count
+        lastDiverIndex = diversList.count
         var breakLoop = false
-        for diver in 0..<diverList.count {
+        for diver in 0..<diversList.count {
             if !breakLoop {
-                if diverList[diverList.count - (1 + diver)].dq == true {
+                if diversList[diversList.count - (1 + diver)].dq == true {
                     lastDiverIndex -= 1
                 }
                 else {
@@ -134,9 +134,9 @@ struct AnnounceEventProgress: View {
     func findFirstDiverIndex() {
         firstDiverIndex = 0
         var breakLoop = false
-        for diver in 0..<diverList.count {
+        for diver in 0..<diversList.count {
             if !breakLoop {
-                if diverList[diver].dq == true {
+                if diversList[diver].dq == true {
                     firstDiverIndex += 1
                 }
                 else {
@@ -149,12 +149,12 @@ struct AnnounceEventProgress: View {
     func findDiverWithDiveCount() -> Int {
         var mostDives = 0
         var mostDivesIndex = 0
-        for diver in 0..<diverList.count {
-            if diverList[diver].dives.count == diveCount {
+        for diver in 0..<diversList.count {
+            if diversList[diver].dives.count == diveCount {
                 return diver
             }
-            if diverList[diver].dives.count > mostDives {
-                mostDives = diverList[diver].dives.count
+            if diversList[diver].dives.count > mostDives {
+                mostDives = diversList[diver].dives.count
                 mostDivesIndex = diver
             }
         }
@@ -163,6 +163,6 @@ struct AnnounceEventProgress: View {
 }
 
 #Preview {
-    AnnounceEventProgress(diverList: .constant([diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName")]), currentDiver: .constant(0), currentDive: .constant(0), lastDiverIndex: .constant(0), firstDiverIndex: .constant(0), diveCount: 2)
+    AnnounceEventProgress(diversList: .constant([diverEntry(dives: ["test1", "test2"], level: 0, name: "Kakaw", team: "teamName")]), currentDiver: .constant(0), currentDive: .constant(0), lastDiverIndex: .constant(0), firstDiverIndex: .constant(0), diveCount: 2)
 }
 

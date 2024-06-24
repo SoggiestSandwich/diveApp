@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct BestDivesView: View {
-    @EnvironmentObject var diverStore: DiverStore
+    @EnvironmentObject var diverStore: DiverStore //persistant diver data
     
     var body: some View {
+        //list of past dives with their averages
         List {
             ForEach(Array(zip(BestDives().sorted().indices, BestDives().sorted())), id: \.0) { index, dive in
+                //each dive has a link to a detailed view showing all dives of that dive
                 NavigationLink(destination: BestDiveInfoView(entryList: diverStore.entryList, name: dive.name, position: dive.position, degreeOfDiff: dive.degreeOfDifficulty)) {
                     HStack {
                         Text("\(index + 1)")
@@ -33,6 +35,7 @@ struct BestDivesView: View {
         .navigationTitle("My Best Dives")
     }
     
+    //find how many times each dive has been dived from a name and position and returns the total
     func findDivedTimes(name: String, position: String) -> Int {
         var count = 0
         for entry in diverStore.entryList {
@@ -47,6 +50,7 @@ struct BestDivesView: View {
         return count
     }
     
+    //finds the score for each dive with name and  position given to calculate the average
     func findAverage(name: String, position: String) -> Double {
         var average: Double = 0
         var count: Double = 0
@@ -63,13 +67,15 @@ struct BestDivesView: View {
             }
         }
         if count == 0 {
-            count = 1
+            count = 1 //prevent /0 errors
         }
         average /= count
         return average
     }
+    //assembles and returns an array of the unique dives dived and finds their averages so they can be sorted
     func BestDives() -> [uniqueDives] {
         var uniqueDiveList: [uniqueDives] = []
+        //looks at dives to see if it is in the unique dives list
         for entry in diverStore.entryList {
             if entry.finished == true {
                 for dive in entry.dives {
@@ -79,9 +85,11 @@ struct BestDivesView: View {
                             foundDive = true
                         }
                     }
+                    //adds a new dive to the array
                     if !foundDive {
                         uniqueDiveList.append(uniqueDives(name: dive.name, average: dive.roundScore, position: dive.position, degreeOfDifficulty: dive.degreeOfDiff, timesDove: 1, code: dive.code!))
                     }
+                    //recalculates the average with the repeated dive
                     else {
                         for uDive in 0..<uniqueDiveList.count {
                             uniqueDiveList[uDive].average *= uniqueDiveList[uDive].timesDove

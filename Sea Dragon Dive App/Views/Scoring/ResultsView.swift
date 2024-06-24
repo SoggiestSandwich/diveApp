@@ -14,6 +14,7 @@ struct ResultsView: View {
     
     @State var unsortedDiverList: [divers]
     @State var isPresentingTeamSelector: Bool = false
+    @State var sortedList: [divers] = []
     @Binding var eventList: events
     @Binding var path: [String]
     
@@ -67,6 +68,18 @@ struct ResultsView: View {
                 }
             }
             Button {
+                sortedList = []
+                for diver in setEList() {
+                    sortedList.append(diver)
+                }
+                for diver in setJVList() {
+                    sortedList.append(diver)
+                }
+                
+                for diver in setVList() {
+                    sortedList.append(diver)
+                }
+
                 isPresentingTeamSelector = true
             } label: {
                 Text("Create QR Code")
@@ -79,7 +92,7 @@ struct ResultsView: View {
                     )
             }
         .sheet(isPresented: $isPresentingTeamSelector) {
-            TeamSelevtorView(diverList: unsortedDiverList)
+            TeamSelevtorView(diverList: sortedList)
         }
         .onAppear {
             unsortedDiverList = []

@@ -8,33 +8,36 @@
 import SwiftUI
 
 struct SelectDivesView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used to make a custom back button
     
-    @EnvironmentObject var diverStore: DiverStore
+    @EnvironmentObject var diverStore: DiverStore //persistant diver data
     
+    //tables from the database
     @FetchRequest(sortDescriptors: [
         SortDescriptor(\.diveNbr)
     ]) var fetchedDives: FetchedResults<Dive>
     @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
     @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
     
-    @State var selection: Int = 0
-    @State var expandedGroup: [Bool] = [false, false, false, false, false]
-    @State var subExpandedGroup: [Bool] = [false, false, false, false]
+    @State var selection: Int = 0 //represents selection between all dives, recent dives and favorites
+    @State var expandedGroup: [Bool] = [false, false, false, false, false] //array that tells which dropdown is open
+    @State var subExpandedGroup: [Bool] = [false, false, false, false] //arry that tells which dropdown id open within twist dives
     
-    @State var entryList: divers
-    @Binding var diveList: [dives]
-    @Binding var favoriteList: [String]
+    @State var entryList: divers //list of all of the divers entries
+    @Binding var diveList: [dives] //list of dives in the current entry
+    @Binding var favoriteList: [String] //list of all favorited dives
     
     var body: some View {
         VStack {
+            //closes the sheet
             Button {
                 self.presentationMode.wrappedValue.dismiss()
             } label: {
                 Text("Dismiss")
             }
             .padding()
+            //selection bar
             HStack {
                 Text("All Dives")
                     .font(.caption.bold())
@@ -87,19 +90,25 @@ struct SelectDivesView: View {
                     }
             }
             .padding(.vertical)
+            //shows the list of dives if the selection isn't empty
             if selection == 0 || selection == 2 && !favoriteList.isEmpty || selection == 1 && !noRecentDives(lowRange: 0, highRange: 6000) {
                 List {
                     Text("Dive of the Week: \(findDiveOfTheWeek()) Group")
+                    //shows forward dives if there are dives under the selection
                     if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 100, highRange: 200) || selection == 1 && !noRecentDives(lowRange: 100, highRange: 200) {
+                        //forward dives
                         DisclosureGroup(isExpanded: $expandedGroup[0]) {
                             ForEach(fetchedDives) { fetchedDive in
+                                //shows all forward dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 && fetchedDive.diveNbr - 100 < 100 || selection == 2 && fetchedDive.diveNbr - 100 < 100 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
                                     VStack(alignment: .leading) {
+                                        //dive name and heart
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                             Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                 .onTapGesture {
+                                                    //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                     if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                         favoriteList.append(fetchedDive.diveName ?? "")
                                                         diverStore.saveDivers()
@@ -118,6 +127,7 @@ struct SelectDivesView: View {
                                                 }
                                         }
                                         .padding(.trailing)
+                                        //positions for each dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -135,6 +145,7 @@ struct SelectDivesView: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //adds or removes the dive from the list depending on if it is on the list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -171,6 +182,7 @@ struct SelectDivesView: View {
                             HStack {
                                 Text("Forward Dives")
                                     .onTapGesture {
+                                        //closes all other disclosure groups
                                         if expandedGroup[0] == false {
                                             for group in 0..<expandedGroup.count {
                                                 expandedGroup[group] = false
@@ -182,21 +194,27 @@ struct SelectDivesView: View {
                                         }
                                     }
                                 Spacer()
+                                //shows the number of forward dives in the dive list
                                 Text("\(numSelected(minRange: 0, maxRange: 200)) selected")
                                     .font(.caption)
                             }
                         }
                     }
+                    //shows back dives if there are dives under the selection
                     if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 200, highRange: 300) || selection == 1 && !noRecentDives(lowRange: 200, highRange: 300) {
+                        //back dives
                         DisclosureGroup(isExpanded: $expandedGroup[1]) {
                             ForEach(fetchedDives) { fetchedDive in
+                                //shows all back dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
                                     VStack(alignment: .leading) {
+                                        //dive name and heart
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                             Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                 .onTapGesture {
+                                                    //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                     if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                         favoriteList.append(fetchedDive.diveName ?? "")
                                                         diverStore.saveDivers()
@@ -215,6 +233,7 @@ struct SelectDivesView: View {
                                                 }
                                         }
                                         .padding(.trailing)
+                                        //positions for each dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -232,6 +251,7 @@ struct SelectDivesView: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //adds or removes the dive from the list depending on if it is on the list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -268,6 +288,7 @@ struct SelectDivesView: View {
                             HStack {
                                 Text("Back Dives")
                                     .onTapGesture {
+                                        //closes all other disclosure groups
                                         if expandedGroup[1] == false {
                                             for group in 0..<expandedGroup.count {
                                                 expandedGroup[group] = false
@@ -279,21 +300,27 @@ struct SelectDivesView: View {
                                         }
                                     }
                                 Spacer()
+                                //shows the number of back dives in the dive list
                                 Text("\(numSelected(minRange: 200, maxRange: 300)) selected")
                                     .font(.caption)
                             }
                         }
                     }
+                    //shows reverse dives if there are dives under the selection
                     if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 300, highRange: 400) || selection == 1 && !noRecentDives(lowRange: 300, highRange: 400) {
+                        //reverse dives
                         DisclosureGroup(isExpanded: $expandedGroup[2]) {
                             ForEach(fetchedDives) { fetchedDive in
+                                //shows all reverse dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
                                     VStack(alignment: .leading) {
+                                        //dive name and heart
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                             Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                 .onTapGesture {
+                                                    //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                     if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                         favoriteList.append(fetchedDive.diveName ?? "")
                                                         diverStore.saveDivers()
@@ -312,6 +339,7 @@ struct SelectDivesView: View {
                                                 }
                                         }
                                         .padding(.trailing)
+                                        //positions for each dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -329,6 +357,7 @@ struct SelectDivesView: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //adds or removes the dive from the list depending on if it is on the list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -365,6 +394,7 @@ struct SelectDivesView: View {
                             HStack {
                                 Text("Reverse Dives")
                                     .onTapGesture {
+                                        //closes all other disclosure groups
                                         if expandedGroup[2] == false {
                                             for group in 0..<expandedGroup.count {
                                                 expandedGroup[group] = false
@@ -376,21 +406,27 @@ struct SelectDivesView: View {
                                         }
                                     }
                                 Spacer()
+                                //shows the number of reverse dives in the dive list
                                 Text("\(numSelected(minRange: 300, maxRange: 400)) selected")
                                     .font(.caption)
                             }
                         }
                     }
+                    //shows inward dives if there are dives under the selection
                     if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 400, highRange: 500) || selection == 1 && !noRecentDives(lowRange: 400, highRange: 500) {
+                        //inward dives
                         DisclosureGroup(isExpanded: $expandedGroup[3]) {
                             ForEach(fetchedDives) { fetchedDive in
+                                //shows all inward dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 || selection == 2 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
                                     VStack(alignment: .leading) {
+                                        //dive name and heart
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                             Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                 .onTapGesture {
+                                                    //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                     if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                         favoriteList.append(fetchedDive.diveName ?? "")
                                                         diverStore.saveDivers()
@@ -409,6 +445,7 @@ struct SelectDivesView: View {
                                                 }
                                         }
                                         .padding(.trailing)
+                                        //positions for each dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -425,6 +462,7 @@ struct SelectDivesView: View {
                                                                     }
                                                                 }
                                                             }
+                                                            //adds or removes the dive from the list depending on if it is on the list
                                                             .onTapGesture {
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
@@ -462,6 +500,7 @@ struct SelectDivesView: View {
                             HStack {
                                 Text("Inward Dives")
                                     .onTapGesture {
+                                        //closes all other disclosure groups
                                         if expandedGroup[3] == false {
                                             for group in 0..<expandedGroup.count {
                                                 expandedGroup[group] = false
@@ -474,23 +513,30 @@ struct SelectDivesView: View {
                                     }
                                 
                                 Spacer()
+                                //shows the number of inward dives in the dive list
                                 Text("\(numSelected(minRange: 400, maxRange: 500)) selected")
                                     .font(.caption)
                             }
                         }
                     }
+                    //shows twist dives if there are dives under the selection
                     if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 500, highRange: 6000) || selection == 1 && !noRecentDives(lowRange: 500, highRange: 6000) {
+                        //twist dive sub groups
                         DisclosureGroup(isExpanded: $expandedGroup[4]) {
+                            //forward twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[0]) {
+                                //shows all forward twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 1000, highRange: 5200) || selection == 1 && !noRecentDives(lowRange: 1000, highRange: 5200) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if selection == 0 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 || selection == 2 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
                                             VStack(alignment: .leading) {
+                                                //dive name and heart
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                     Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                         .onTapGesture {
+                                                            //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                             if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                                 favoriteList.append(fetchedDive.diveName ?? "")
                                                                 diverStore.saveDivers()
@@ -509,6 +555,7 @@ struct SelectDivesView: View {
                                                         }
                                                 }
                                                 .padding(.trailing)
+                                                //positions for each dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -525,6 +572,7 @@ struct SelectDivesView: View {
                                                                             }
                                                                         }
                                                                     }
+                                                                    //adds or removes the dive from the list depending on if it is on the list
                                                                     .onTapGesture {
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
@@ -563,6 +611,7 @@ struct SelectDivesView: View {
                                 Text("Forward Dives")
                             }
                             .onTapGesture {
+                                //closes all other disclosure groups
                                 if subExpandedGroup[0] == false {
                                     for group in 0..<subExpandedGroup.count {
                                         subExpandedGroup[group] = false
@@ -573,17 +622,20 @@ struct SelectDivesView: View {
                                     subExpandedGroup[0] = false
                                 }
                             }
+                            //back twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[1]) {
-                                
+                                //shows all back twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 5200, highRange: 5300) || selection == 1 && !noRecentDives(lowRange: 5200, highRange: 5300) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if selection == 0 && fetchedDive.diveNbr - 100 > 5100 && fetchedDive.diveNbr < 5300 || selection == 2 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5300 && isFavorited(name: fetchedDive.diveName ?? "") {
                                             VStack(alignment: .leading) {
+                                                //dive name and heart
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                     Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                         .onTapGesture {
+                                                            //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                             if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                                 favoriteList.append(fetchedDive.diveName ?? "")
                                                                 diverStore.saveDivers()
@@ -602,6 +654,7 @@ struct SelectDivesView: View {
                                                         }
                                                 }
                                                 .padding(.trailing)
+                                                //positions for each dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -618,6 +671,7 @@ struct SelectDivesView: View {
                                                                             }
                                                                         }
                                                                     }
+                                                                    //adds or removes the dive from the list depending on if it is on the list
                                                                     .onTapGesture {
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
@@ -656,6 +710,7 @@ struct SelectDivesView: View {
                                 Text("Back Dives")
                             }
                             .onTapGesture {
+                                //closes all other disclosure groups
                                 if subExpandedGroup[1] == false {
                                     for group in 0..<subExpandedGroup.count {
                                         subExpandedGroup[group] = false
@@ -666,17 +721,20 @@ struct SelectDivesView: View {
                                     subExpandedGroup[1] = false
                                 }
                             }
+                            //reverse twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[2]) {
-                                
+                                //shows all reverse twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 5300, highRange: 5400) || selection == 1 && !noRecentDives(lowRange: 5300, highRange: 5400) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if selection == 0 && fetchedDive.diveNbr - 100 > 5200 && fetchedDive.diveNbr < 5400 || selection == 2 && fetchedDive.diveNbr - 100 > 5200 && fetchedDive.diveNbr < 5400 && isFavorited(name: fetchedDive.diveName ?? "") {
                                             VStack(alignment: .leading) {
+                                                //dive name and heart
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                     Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                         .onTapGesture {
+                                                            //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                             if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                                 favoriteList.append(fetchedDive.diveName ?? "")
                                                                 diverStore.saveDivers()
@@ -695,6 +753,7 @@ struct SelectDivesView: View {
                                                         }
                                                 }
                                                 .padding(.trailing)
+                                                //positions for each dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -711,6 +770,7 @@ struct SelectDivesView: View {
                                                                             }
                                                                         }
                                                                     }
+                                                                    //adds or removes the dive from the list depending on if it is on the list
                                                                     .onTapGesture {
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
@@ -749,6 +809,7 @@ struct SelectDivesView: View {
                                 Text("Reverse Dives")
                             }
                             .onTapGesture {
+                                //closes all other disclosure groups
                                 if subExpandedGroup[2] == false {
                                     for group in 0..<subExpandedGroup.count {
                                         subExpandedGroup[group] = false
@@ -759,17 +820,20 @@ struct SelectDivesView: View {
                                     subExpandedGroup[2] = false
                                 }
                             }
+                            //inward twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[3]) {
-                                
+                                //shows all inward twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 5400, highRange: 5500) || selection == 1 && !noRecentDives(lowRange: 5400, highRange: 5500) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if selection == 0 && fetchedDive.diveNbr - 100 > 5300 || selection == 2 && fetchedDive.diveNbr - 100 > 5300 && isFavorited(name: fetchedDive.diveName ?? "") {
                                             VStack(alignment: .leading) {
+                                                //dive name and heart
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                     Image(systemName: isFavorited(name: fetchedDive.diveName ?? "") ? "heart.fill" : "heart")
                                                         .onTapGesture {
+                                                            //adds the selected dive to the favorite dive list or removes it if it is already on the list
                                                             if !isFavorited(name: fetchedDive.diveName ?? "") {
                                                                 favoriteList.append(fetchedDive.diveName ?? "")
                                                                 diverStore.saveDivers()
@@ -788,6 +852,7 @@ struct SelectDivesView: View {
                                                         }
                                                 }
                                                 .padding(.trailing)
+                                                //positions for each dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -804,6 +869,7 @@ struct SelectDivesView: View {
                                                                             }
                                                                         }
                                                                     }
+                                                                    //adds or removes the dive from the list depending on if it is on the list
                                                                     .onTapGesture {
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
@@ -842,6 +908,7 @@ struct SelectDivesView: View {
                                 Text("Inward Dives")
                             }
                             .onTapGesture {
+                                //closes all other disclosure groups
                                 if subExpandedGroup[3] == false {
                                     for group in 0..<subExpandedGroup.count {
                                         subExpandedGroup[group] = false
@@ -867,6 +934,7 @@ struct SelectDivesView: View {
                                         }
                                     }
                                 Spacer()
+                                //shows the number of back dives in the dive list
                                 Text("\(numSelected(minRange: 500, maxRange: 6000)) selected")
                                     .font(.caption)
                             }
@@ -875,11 +943,13 @@ struct SelectDivesView: View {
                 }
                 .listStyle(.inset)
             }
+            //empty favorite list
             else if selection == 2 && favoriteList.isEmpty {
                 Text("No Favorite Dives Yet!").bold()
                     .padding()
                 Text("Tap the \(Image(systemName: "heart")) by a dive in the All Dives list\nto add it here")
                     .multilineTextAlignment(.center)
+                //shows all dives
                 Button {
                     selection = 0
                 } label: {
@@ -894,9 +964,11 @@ struct SelectDivesView: View {
                 .padding()
                 Spacer()
             }
+            //no recent dives
             else if selection == 1 && noRecentDives(lowRange: 0, highRange: 6000) {
                 Text("No Recent Dives Yet!").bold()
                     .padding()
+                //shows all dives
                 Button {
                     selection = 0
                 } label: {
@@ -915,6 +987,7 @@ struct SelectDivesView: View {
         .navigationTitle("Select Dives")
     }
     
+    //finds the average score from dives within the last 3 months
     func averageScore(name: String, position: String) -> Double {
         //find average
         var average: Double = 0
@@ -937,7 +1010,7 @@ struct SelectDivesView: View {
         average /= count
         return average
     }
-    
+    //looks through all other dives of the same category and checks if the entered has a greater average and return true if not it returns false
     func bestScores(name: String, position: String, lowRange: Int, highRange: Int) -> Bool {
         if averageScore(name: name, position: position) == 0 {
             return false
@@ -961,7 +1034,7 @@ struct SelectDivesView: View {
         }
         return true
     }
-    
+    //returns the number of selected dives within the range
     func numSelected(minRange: Int, maxRange: Int) -> Int {
         var count = 0
         for dive in diveList {
@@ -974,7 +1047,7 @@ struct SelectDivesView: View {
         }
         return count
     }
-    
+    //returns true if the entered dive is on the dive list otherwise returns false
     func isClicked(name: String, position: String) -> Bool {
         for dive in diveList {
             if dive.name == name && dive.position == position {
@@ -983,7 +1056,7 @@ struct SelectDivesView: View {
         }
         return false
     }
-    
+    //removes from divelist the entered dive
     func removeSelectedDive(name: String, position: String) {
         var breakLoop = false
         for dive in 0..<diveList.count {
@@ -995,7 +1068,7 @@ struct SelectDivesView: View {
             }
         }
     }
-    
+    //removes dives from divelist that have the same dive name as the entered name
     func removeDivesWithSameName(name: String) {
         var breakLoop = false
         for dive in 0..<diveList.count {
@@ -1007,7 +1080,7 @@ struct SelectDivesView: View {
             }
         }
     }
-    
+    //returns true if the dive entered name is on the favorite list otherwis it returns false
     func isFavorited(name: String) -> Bool {
         if !favoriteList.isEmpty {
             for favorite in favoriteList {
@@ -1018,7 +1091,7 @@ struct SelectDivesView: View {
         }
         return false
     }
-    
+    //returns true if none of the dives within the range are favorited otherwise returns false
     func noFavoritedDives(lowRange: Int, highRange: Int) -> Bool {
         for dive in fetchedDives {
             if isFavorited(name: dive.diveName ?? "") && dive.diveNbr > lowRange && dive.diveNbr < highRange {
@@ -1027,7 +1100,7 @@ struct SelectDivesView: View {
         }
         return true
     }
-    
+    //returns true if a dive of the entered name appears in the last 3 months otherwise returns false
     func isRecent(name: String) -> Bool {
         let calendar = Calendar.current
         let dateRange = calendar.date(byAdding: .weekOfMonth, value: -3, to: Date())!...Date()
@@ -1040,6 +1113,7 @@ struct SelectDivesView: View {
         }
         return false
     }
+    //returns false if a recent dive within in the range is found otherwise returns true
     func noRecentDives(lowRange: Int, highRange: Int) -> Bool {
         for dive in fetchedDives {
             if isRecent(name: dive.diveName ?? "") && dive.diveNbr > lowRange && dive.diveNbr < highRange {
@@ -1048,7 +1122,7 @@ struct SelectDivesView: View {
         }
         return true
     }
-    
+    //returns the dive of the week by going back one day at a time until it his the start of the dive change and returns that name
     func findDiveOfTheWeek() -> String {
         var tempDate = entryList.date ?? Date()
         var dateComponents = DateComponents()

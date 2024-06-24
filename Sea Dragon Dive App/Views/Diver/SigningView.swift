@@ -7,23 +7,25 @@
 
 import SwiftUI
 
+//simple struct for holding the data the signiture
 struct Line {
-    var points = [CGPoint]()
-    var color: Color = .black
-    var lineWidth: Double = 1.0
+    var points = [CGPoint]() //list of the poits in the line
+    var color: Color = .black //color of the line
+    var lineWidth: Double = 1.0 //width of the line
 }
 
 struct SigningView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used to make custom back button
     
-    @State private var currentLine = Line()
-    @State private var lines: [Line] = []
+    @State private var currentLine = Line() //the line that is currently being drawn
+    @State private var lines: [Line] = [] //list of all drawn lines
     
-    @Binding var entry: divers
+    @Binding var entry: divers //the dive entry being confirmed
     
     var body: some View {
             NavigationStack {
+                //dismisses this sheet
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -36,6 +38,7 @@ struct SigningView: View {
                 Text("I agree that I can perform these dives")
                 
                 ZStack {
+                    //canvas that can be written on
                     Canvas { context, size in
                         for line in lines {
                             var path = Path()
@@ -43,7 +46,7 @@ struct SigningView: View {
                             context.stroke(path, with: .color(colorScheme == .dark ? .white : .black), lineWidth: line.lineWidth)
                         }
                         
-                    }.gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                    }.gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local) //as you drag points are added to the current line and when dragging ends the current line is added to the line list and the current line becomes a new line
                         .onChanged({ value in
                             let newPoint = value.location
                             currentLine.points.append(newPoint)
@@ -64,6 +67,7 @@ struct SigningView: View {
                 }
                 
                 HStack {
+                    //removes all lines from the area clearing any writing
                     Button {
                         self.lines.removeAll()
                     } label: {
@@ -78,6 +82,7 @@ struct SigningView: View {
                         )
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                     }
+                    //shows a gray done box that does nothing if there is no writing
                     if self.lines.isEmpty {
                         Text("Done")
                             .padding()
@@ -91,8 +96,9 @@ struct SigningView: View {
                             )
                             .foregroundColor(.gray)
                     }
+                    //shows a navigation link to the qr code view
                     else {
-                        NavigationLink(destination: DiverEntryQRCodeView(url: makeQRCode())) {
+                        NavigationLink(destination: DiverEntryQRCodeView(code: makeQRCode())) {
                                 Text("Done")
                                     .padding()
                                     .padding(.horizontal)
@@ -109,19 +115,9 @@ struct SigningView: View {
                 }
             }
     }
+    //assembles a simplified diverEntry, encrypts it into JSON and then gzip compresses it and returns that as a string
     func makeQRCode() -> String {
-        /*var finalCode: String = "{\"dives\":["
-        for dive in 0..<entry.dives.count {
-            if dive == entry.dives.count - 1 {
-                finalCode += "\"\(entry.dives[dive].code ?? "")\""
-            }
-            else {
-                finalCode += "\"\(entry.dives[dive].code ?? "")\","
-            }
-        }
-        finalCode += "],\"level\":\(entry.diverEntries.level),\"name\":\"\(entry.diverEntries.name)\"}"
-        return finalCode*/
-        
+        //diverEntry assembly
         var entries = diverEntry(dives: [], level: entry.diverEntries.level, name: entry.diverEntries.name)
         for dive in 0..<entry.dives.count {
             entries.dives.append(entry.dives[dive].code ?? "")
@@ -132,7 +128,7 @@ struct SigningView: View {
             
         }
         
-        
+        //json encoding
         let encoder = JSONEncoder()
         let data = try! encoder.encode(entries)
         

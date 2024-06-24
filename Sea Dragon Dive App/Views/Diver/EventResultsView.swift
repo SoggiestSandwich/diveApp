@@ -9,30 +9,30 @@ import SwiftUI
 
 struct EventResultsView: View {
     
-    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is vertical
     
-    @State var entryList: divers
+    @State var entry: divers //the selected entry
     
     var body: some View {
         VStack {
             HStack {
                 Text("Date: ")
                 Spacer()
-                Text(entryList.date!.formatted(date: .abbreviated, time: .omitted))
+                Text(entry.date!.formatted(date: .abbreviated, time: .omitted))
                     .font(.body.bold())
             }
             .padding(.horizontal)
             HStack {
                 Text("Location: ")
                 Spacer()
-                Text(entryList.location!)
+                Text(entry.location!)
                     .font(.body.bold())
             }
             .padding(.horizontal)
             HStack {
                 Text("Competition Level: ")
                 Spacer()
-                Text(entryList.diverEntries.level == 0 ? "Exhibition" : entryList.diverEntries.level == 1 ? "Junior Varsity" : "Varsity")
+                Text(entry.diverEntries.level == 0 ? "Exhibition" : entry.diverEntries.level == 1 ? "Junior Varsity" : "Varsity")
                     .font(.body.bold())
             }
             .padding(.horizontal)
@@ -40,26 +40,30 @@ struct EventResultsView: View {
                 Text("Total Score")
                     .font(.title.bold())
                 Spacer()
-                Text("\(String(format: "%.2f", entryList.diverEntries.totalScore ?? 0))")
+                Text("\(String(format: "%.2f", entry.diverEntries.totalScore ?? 0))")
                     .font(.title2.bold())
                     .padding(.horizontal)
                 VStack {
-                    if entryList.placement ?? 0 <= 0 && entryList.diverEntries.level != 0 {
+                    //shows dq if the entry was dq'ed and was not exhibition
+                    if entry.placement ?? 0 <= 0 && entry.diverEntries.level != 0 {
                         Text("DQ")
                             .bold()
                     }
-                    else if entryList.diverEntries.level == 0 {
+                    //shows nothing if exhibition
+                    else if entry.diverEntries.level == 0 {
                         
                     }
+                    //shows the placement if a legal non-dq'ed dive entry
                     else {
                         Image(systemName: "trophy")
-                        Text(entryList.placement == 1 ? "1st Place" : entryList.placement == 2 ? "2nd Place" : entryList.placement == 3 ? "3rd Place" : "\(entryList.placement ?? 0)th Place")
+                        Text(entry.placement == 1 ? "1st Place" : entry.placement == 2 ? "2nd Place" : entry.placement == 3 ? "3rd Place" : "\(entry.placement ?? 0)th Place")
                     }
                 }
             }
             .padding()
+            //list of dives from the entry
             List {
-                ForEach(Array(zip(entryList.dives.indices, entryList.dives)), id: \.0) { index, dive in
+                ForEach(Array(zip(entry.dives.indices, entry.dives)), id: \.0) { index, dive in
                     HStack {
                         Text("\(index + 1)")
                             .font(.body.bold())
@@ -74,12 +78,7 @@ struct EventResultsView: View {
                                 .font(.body.bold())
                             VStack {
                                 HStack {
-                                    /*ForEach(dive.score, id: \.hashValue) { score in
-                                        Text("\(String(score.score))")
-                                            .font(.body.bold())
-                                            .padding(.trailing)
-                                    }*/
-                                    
+                                    //puts the scores in a grid so that they form new rows every three scores
                                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 50, maximum: 150)), count: verticalSizeClass == .regular ? 3 : 7)) {
                                         ForEach(dive.score, id: \.hashValue) { score in
                                             Text("\(String(score.score))")
@@ -108,10 +107,11 @@ struct EventResultsView: View {
         .navigationTitle("Event Results")
     }
     
+    //calculates the total at each dive by adding all dives before to it
     func findRunningTotal(index: Int) -> Double {
         var runningTotal: Double = 0
         for num in 0..<index + 1 {
-            runningTotal += entryList.dives[num].roundScore
+            runningTotal += entry.dives[num].roundScore
         }
         return runningTotal
     }
@@ -119,6 +119,6 @@ struct EventResultsView: View {
 
 struct EventResultsView_Previews: PreviewProvider {
     static var previews: some View {
-        EventResultsView(entryList: divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4), scores(score: 10.0, index: 5), scores(score: 10.0, index: 6)], position: "Free", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "", totalScore: 0), placement: 420, date: Date(), location: "Location"))
+        EventResultsView(entry: divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2)], position: "Free", roundScore: 3.3), dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 10, index: 0), scores(score: 10, index: 1), scores(score: 10, index: 2), scores(score: 10.0, index: 3), scores(score: 10.0, index: 4), scores(score: 10.0, index: 5), scores(score: 10.0, index: 6)], position: "Free", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "", totalScore: 0), placement: 420, date: Date(), location: "Location"))
     }
 }

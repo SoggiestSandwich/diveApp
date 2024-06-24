@@ -10,9 +10,9 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct DiverEntryQRCodeView: View {
-    let context = CIContext()
-    let filter = CIFilter.qrCodeGenerator()
-    var url: String
+    let context = CIContext() //initializes a CIContext
+    let filter = CIFilter.qrCodeGenerator() //initializes a CIFilter
+    var code: String //the code being turned into a qr code
     
     var body: some View {
         VStack {
@@ -20,11 +20,12 @@ struct DiverEntryQRCodeView: View {
                 .font(.title2.bold())
                 .padding(.top)
             Spacer()
-            Image(uiImage: generateQRCodeImage(url)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
+            //qr image
+            Image(uiImage: generateQRCodeImage(code)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
             Spacer()
         }
     }
-    
+    //takes in a string and returns a qr image for that string
     func generateQRCodeImage(_ url: String) -> UIImage {
         let data = Data(url.utf8)
         filter.setValue(data, forKey: "inputMessage")
@@ -44,6 +45,6 @@ struct DiverEntryQRCodeView_Previews: PreviewProvider {
         //5596 numbers = 1
         //2331 lowercase letters and commas and qoutation marks and square brackets and curly brackets = 2.4
         //3391 periods and capital letters and colon and spaces = 1.65
-        DiverEntryQRCodeView(url: "https://youtu.be/dQw4w9WgXcQ?si=poHwJA-FivrKgRrl")
+        DiverEntryQRCodeView(code: "https://youtu.be/dQw4w9WgXcQ?si=poHwJA-FivrKgRrl")
     }
 }

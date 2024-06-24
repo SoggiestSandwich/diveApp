@@ -71,14 +71,15 @@ struct DiverHomeView: View {
                         }
                         let decoder = JSONDecoder()
                         entries = try? decoder.decode(resultsList.self, from: jsonCode)
-                        print(entries ?? "PAIN")
                         if entries != nil {
                             //create new entry with scanned results or edit old entry
-                            
                             for dive in 0..<selectedEntry.dives.count {
                                 if selectedEntry.dives[dive].code! != entries!.diveResults[dive].code && !nonMatchingScan {
                                     misMatchDiveAlert = true
                                 }
+                            }
+                            if !misMatchDiveAlert {
+                                addScores(entries: entries!)
                             }
                         }
                         else {
@@ -89,16 +90,19 @@ struct DiverHomeView: View {
                 }
             }
         )
+        //invalid qr code alert
         .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
             Button("OK", role: .cancel) {self.isPresentingScanner = false}
         } message: {
             Text("Could not find the needed data in the scanned QR Code")
         }
+        //dive error alert
         .alert("Dives Don't Match", isPresented: $misMatchDiveAlert) {
             Button("Cancel", role: .cancel) {
                 nonMatchingScan = true
                 self.isPresentingScanner = false
             }
+            //replaces the old event with the scanned
             Button("Continue") {
                 addScores(entries: entries!)
                 nonMatchingScan = false
@@ -111,7 +115,7 @@ struct DiverHomeView: View {
     var body: some View {
         VStack {
             HStack {
-                //navigationlink or button?
+                //custom back button
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -144,6 +148,7 @@ struct DiverHomeView: View {
                 Text(String(format: "%.2f", top11DiveScore()))
             }
             .padding(.horizontal)
+            //send to BestDivesView
             NavigationLink(destination: BestDivesView()){
                 HStack {
                     Text("Review My Best Dive Scores")
@@ -156,6 +161,7 @@ struct DiverHomeView: View {
                 .background(colorScheme == .dark ? Color(red: 1, green: 1, blue: 1, opacity: 0.2) : Color(red: 0, green: 0, blue: 0, opacity: 0.1))
                 .padding(5)
             }
+            //allows the vertical arrangement switch to horizontal when the device is turned
             adaptiveStack(horizontalStack: verticalSizeClass == .regular ? false : true) {
                 VStack {
                     HStack {
@@ -167,11 +173,14 @@ struct DiverHomeView: View {
                     if diverStore.entryList.isEmpty {
                         Text("No current dive entries")
                     }
+                    //list of unfinished dive entries
                     List {
                         if !diverStore.entryList.isEmpty{
                             ForEach(Array(zip(diverStore.entryList.indices, diverStore.entryList)), id: \.0) { index, entry in
                                 if entry.finished != true {
-                                    NavigationLink(destination: DiveEntryView(username: username, userSchool: userSchool, entryList: $diverStore.entryList[index])) {
+                                    //each entry is a navigationLink to the DiveEntryView
+                                    NavigationLink(destination: DiveEntryView(entry: $diverStore.entryList[index])) {
+                                        //the the entry is fully filled out it shows entry with a button to scan the results
                                         if !diverStore.entryList[index].dives.isEmpty && diverStore.entryList[index].diverEntries.level != -1 && diverStore.entryList[index].location != nil {
                                             HStack {
                                                 Text(diverStore.entryList[index].date?.formatted(date: .abbreviated, time: .omitted) ?? Date().formatted(date: .abbreviated, time: .omitted))
@@ -182,12 +191,14 @@ struct DiverHomeView: View {
                                                         Image(systemName: "location.fill")
                                                         Text(diverStore.entryList[index].location ?? "")
                                                     }
+                                                    //shows if the entry is valid
                                                     if entry.dq == true {
                                                         Text("Invalid Entry")
                                                             .foregroundColor(Color.purple)
                                                     }
                                                 }
                                                 Spacer()
+                                                //brings up the qr scanner to scan in results
                                                 Button {
                                                     self.isPresentingScanner = true
                                                 } label: {
@@ -206,6 +217,7 @@ struct DiverHomeView: View {
                                                 }
                                             }
                                         }
+                                        //if entry is missing anything  it shows as a new entry
                                         else {
                                             HStack {
                                                 Text("\(Date().formatted(date: .abbreviated, time: .omitted))")
@@ -219,6 +231,7 @@ struct DiverHomeView: View {
                             }
                             .onDelete(perform: diverStore.deleteDiver)
                         }
+                        //adds an empty diver to the persistant diver data
                         Button {
                             diverStore.addDiver(divers(dives: [], diverEntries: diverEntry(dives: [], level: -1, name: username)))
                         } label: {
@@ -247,7 +260,9 @@ struct DiverHomeView: View {
                             .padding(.horizontal)
                         Spacer()
                     }
+                    //list of finished entries
                     List {
+                        //if no entries are finished it shown that there are no past events
                         if diverStore.entryList.isEmpty {
                             Text("No past events")
                                 .font(.body.bold())
@@ -256,7 +271,8 @@ struct DiverHomeView: View {
                         else {
                             ForEach(Array(zip(diverStore.entryList.indices, diverStore.entryList)), id: \.0) { index, entry in
                                 if entry.finished == true {
-                                    NavigationLink(destination: EventResultsView(entryList: entry)) {
+                                    //each finished entry has a navigaionLink to view the results of the event
+                                    NavigationLink(destination: EventResultsView(entry: entry)) {
                                         if !diverStore.entryList[index].dives.isEmpty && diverStore.entryList[index].diverEntries.level != -1 && diverStore.entryList[index].location != nil {
                                             HStack {
                                                 Text(diverStore.entryList[index].date?.formatted(date: .abbreviated, time: .omitted) ?? Date().formatted(date: .abbreviated, time: .omitted))
@@ -285,13 +301,15 @@ struct DiverHomeView: View {
                     .listStyle(InsetListStyle())
                     .scrollContentBackground(.hidden)
                 }
-                .navigationBarBackButtonHidden(true)
+                .navigationBarBackButtonHidden(true) //deletes default back button
+                //qr code scanner sheet
                 .sheet(isPresented: $isPresentingScanner) {
                     self.ScannerSheet
                 }
             }
         }
     }
+    //finds the entry with the greatest total score and returns that score for six dive entries
     func top6DiveScore() -> Double {
         var highestScore: Double = 0
         for entry in diverStore.entryList {
@@ -301,6 +319,7 @@ struct DiverHomeView: View {
         }
         return highestScore
     }
+    //finds the entry with the greatest total score and returns that score for eleven dive entries
     func top11DiveScore() -> Double {
         var highestScore: Double = 0
         for entry in diverStore.entryList {
@@ -310,9 +329,11 @@ struct DiverHomeView: View {
         }
         return highestScore
     }
+    //
     func addScores(entries: resultsList) {
         for result in 0..<entries.diveResults.count {
             if entries.diveResults[result].code != selectedEntry.dives[result].code {
+                //finds and replaces nonmatching dives
                 var diveNbr = entries.diveResults[result].code
                 diveNbr.removeLast()
                 for fetchedDive in fetchedDives {
@@ -336,21 +357,23 @@ struct DiverHomeView: View {
                 }
             }
         }
-        
         selectedEntry.placement = entries.placement
         selectedEntry.finished = true
         selectedEntry.diverEntries.totalScore = 0
         for dive in 0..<selectedEntry.dives.count {
+            //adds the scores from results to the entry
             for score in entries.diveResults[dive].score {
                 var count = 0
                 selectedEntry.dives[dive].score.append(scores(score: score, index: count))
                 count += 1
             }
+            //calculates the round score based on the scores above
             for score in entries.diveResults[dive].score {
                 selectedEntry.dives[dive].roundScore += score
             }
             var lowestIndex = -1
             var greatestIndex = -1
+            //drops greatest and lowest scores if there are 5 and holds their indices
             if entries.diveResults[dive].score.count > 3 {
                 var greatestScore = -1.0
                 var lowestScore = 11.0
@@ -365,8 +388,9 @@ struct DiverHomeView: View {
                     }
                 }
                 selectedEntry.dives[dive].roundScore -= greatestScore + lowestScore
-                selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
             }
+            selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
+            //drops the second highest and second lowest scores if 7 scores
             if entries.diveResults[dive].score.count > 5 {
                 var greatestScore = -1.0
                 var lowestScore = 11.0
@@ -378,16 +402,17 @@ struct DiverHomeView: View {
                         lowestScore = score
                     }
                 }
-                selectedEntry.dives[dive].roundScore -= greatestScore + lowestScore
+                selectedEntry.dives[dive].roundScore -= (greatestScore + lowestScore)
                 selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
             }
-            
+            //add round score to the total
             selectedEntry.diverEntries.totalScore! += selectedEntry.dives[dive].roundScore
             
         }
+        //sets the entry into the persistant data and saves it
         diverStore.entryList[selectedEntryIndex] = selectedEntry
         diverStore.saveDivers()
-        self.isPresentingScanner = false
+        self.isPresentingScanner = false //close qr scanner
     }
 }
 

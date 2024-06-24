@@ -56,7 +56,7 @@ struct TeamSelevtorView: View {
         var num = 0
         for diver in diverList {
             if team == diver.diverEntries.team {
-                coachList.diverEntries.append(diverEntry(dives: diver.diverEntries.dives, level: diver.diverEntries.level, name: diver.diverEntries.name, dq: diver.diverEntries.dq))
+                coachList.diverEntries.append(diverEntry(dives: diver.diverEntries.dives, level: diver.diverEntries.level, name: diver.diverEntries.name, dq: diver.diverEntries.dq, placement: diver.placement))
                 coachList.diverEntries[num].fullDivesScores = []
                 var index = 0
                 for dive in diver.dives {

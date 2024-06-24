@@ -9,15 +9,16 @@ import SwiftUI
 
 struct BestDiveInfoView: View {
     
-    @State var entryList: [divers]
-    @State var name: String
-    @State var position: String
-    @State var degreeOfDiff: Double
+    @State var entryList: [divers] //list of diver entries
+    @State var name: String //dive's name
+    @State var position: String //dive's position
+    @State var degreeOfDiff: Double //dive's degree of difficulty
     
     var body: some View {
             VStack(alignment: .leading) {
                 Text("degree of difficulty: \(String(format: "%.1f", degreeOfDiff))")
                     .padding(.horizontal)
+                //list of each dive dived with the selected name
                 List {
                     ForEach(entryList, id: \.date) { entry in
                         if entry.finished == true {

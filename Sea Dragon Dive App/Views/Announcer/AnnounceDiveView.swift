@@ -295,7 +295,6 @@ struct AnnounceDiveView: View {
                 }
             }
         }
-        .background(diverList[currentDiver].dq == true ? .red : .clear)
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -311,7 +310,7 @@ struct AnnounceDiveView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing){
                 //sends you to AnnounceEventProgress view
-                NavigationLink(destination: AnnounceEventProgress(diverList: $diverList, currentDiver: $currentDiver, currentDive: $currentDive, lastDiverIndex: $lastDiverIndex, firstDiverIndex: $firstDiverIndex, diveCount: diveCount)) {
+                NavigationLink(destination: AnnounceEventProgress(diversList: $diverList, currentDiver: $currentDiver, currentDive: $currentDive, lastDiverIndex: $lastDiverIndex, firstDiverIndex: $firstDiverIndex, diveCount: diveCount)) {
                     Text("Dive Event Progress")
                 }
             }
