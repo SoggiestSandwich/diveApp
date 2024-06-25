@@ -9,23 +9,24 @@ import SwiftUI
 
 struct DiverEditorView: View {
     
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
     
-    @EnvironmentObject var coachEntryStore: CoachEntryStore
+    @EnvironmentObject var coachEntryStore: CoachEntryStore //persistant data for coaches entries
     
+    //fetched tables from the database
     @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
     @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
     @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
     
-    @State var errorMessage: String = ""
-    @State var diveSelector = false
-    @State var selectedCoachEntryIndex: Int
-    @State var selectedDiverEntryIndex: Int
-    @State var eventDate: String
-    @State var signingSheet: Bool = false
-    @State var diveList: [dives] = []
-    @State var name: String = ""
-    @State var location: String = ""
+    @State var errorMessage: String = "" //used to list all validation issues
+    @State var diveSelector = false //used to open the dive selector sheet
+    @State var selectedCoachEntryIndex: Int //the index of the coach entry that is being worked on
+    @State var selectedDiverEntryIndex: Int //the index of the diver in coaches entry being worked on
+    @State var eventDate: String //date of the event
+    @State var signingSheet: Bool = false //opens the signing sheet
+    @State var diveList: [dives] = [] //list of all of the dives for the diver
+    @State var name: String = "" //divers name
+    @State var location: String = "" //location of the event
     
     var body: some View {
         VStack(alignment: .center) {
@@ -58,6 +59,7 @@ struct DiverEditorView: View {
             Text(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name)
                 .font(.title.bold())
             .padding(.horizontal)
+            //level indicators
                 HStack {
                     Text("Varsity")
                         .font(.caption.bold())
@@ -110,7 +112,7 @@ struct DiverEditorView: View {
                         }
                 }
                 .padding(5)
-            //dives picker
+            //dive amount picker
             HStack {
                 Text("Six Dives")
                     .font(.caption.bold())
@@ -158,6 +160,7 @@ struct DiverEditorView: View {
                     Text("Sign and Save changes")
                         .font(.body.bold())
                 }
+                //sheet for diver to sign
                 .sheet(isPresented: $signingSheet) {
                     CoachEditSigningView(selectedCoachEntryIndex: $selectedCoachEntryIndex, selectedDiverEntryIndex: $selectedDiverEntryIndex)
                         .onDisappear {
@@ -172,8 +175,10 @@ struct DiverEditorView: View {
                 .foregroundColor(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
                 .padding()
             }
+            //disables the signing button if the entry is not fully filled out
             .disabled(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0)
             HStack {
+                //opens the dive selector sheet
                 Button {
                     diveSelector = true
                 } label: {
@@ -199,6 +204,7 @@ struct DiverEditorView: View {
                     Spacer()
                 }
                 .padding(.horizontal)
+                //list of the selected dives
                 List {
                     if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
                         ForEach(Array(zip(diveList.indices, diveList)), id: \.0) { index, dive in
@@ -207,7 +213,9 @@ struct DiverEditorView: View {
                                     Text("\(index + 1). \(dive.code ?? "") \(dive.name), \(dive.position) ")
                                     Text("(\(String(dive.degreeOfDiff)))")
                                 }
+                                //shows a volentary button if there are eleven dives
                                 if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount == 11 {
+                                    //set the corresponding dive as volentary
                                     Text("Volentary")
                                         .font(.caption)
                                         .padding(3)
@@ -243,7 +251,9 @@ struct DiverEditorView: View {
                 }
                 .environment(\.editMode, .constant(.active))
                 .padding(.horizontal)
+                //shows a reset button for dives if there are dives in the list
                 if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
+                    //removes all dives from the list and persistant data
                     Button {
                         while !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
                             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.removeFirst()
@@ -256,15 +266,18 @@ struct DiverEditorView: View {
                     }
                 }
             }
+            //dive selector sheet
             .sheet(isPresented: $diveSelector, onDismiss: didDismiss) {
                 DiverDiveSelector(entryList: coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex], coachEntry: coachEntryStore.coachesList[selectedCoachEntryIndex], eventDate: eventDate, diveList: $diveList)
             }
         }
         .task {
+            //find dives and set diveCount on entry
             findDives()
             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount = diveList.count
         }
     }
+    //syncs the persistant data with the dive list
     func didDismiss() {
         coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives = diveList
         
@@ -273,13 +286,14 @@ struct DiverEditorView: View {
         for dive in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives! {
             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.append(dive.code ?? "")
         }
-        findDives()    }
-    
+        findDives()
+    }
+    //removes a dive from divelist at the entered index
     func deleteDive(at offsets: IndexSet) {
         coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.remove(atOffsets: offsets)
         diveList.remove(atOffsets: offsets)
     }
-    
+    //puts the dives from the persistant data into the divelist and fillsn out the full dive details
     func findDives() {
         diveList = []
         for diveCode in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives {
@@ -304,6 +318,7 @@ struct DiverEditorView: View {
             }
         }
     }
+    //returns a list of all ivalid aspects of the divelist //doesn't check volentary and doesn't set degree of difficulty
     func validateEntry() {
         errorMessage = ""
         if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount == 6 {
@@ -314,9 +329,6 @@ struct DiverEditorView: View {
                 diveNum.removeLast()
                 if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                     dOW = true
-//                    if entryList.dives[0].degreeOfDiff > 1.8 {
-//                        entryList.dives[0].degreeOfDiff = 1.8
-//                    }
                 }
                 else {
                     errorMessage += "The dive of the week is not the first dive in your entry. The dive of the week is \(findDiveOfTheWeek())"
@@ -327,9 +339,6 @@ struct DiverEditorView: View {
                 diveNum.removeLast()
                 if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
                     dOW = true
-//                    if entryList.dives[0].degreeOfDiff > 1.8 {
-//                        entryList.dives[0].degreeOfDiff = 1.8
-//                    }
                 }
                 else {
                     errorMessage += "The dive of the week is not the first dive in your entry. The dive of the week is \(findDiveOfTheWeek())"
@@ -725,6 +734,7 @@ struct DiverEditorView: View {
             signingSheet = true
         }
     }
+    //finds the dive of the week by looping back one day at a time then returning the name of the dive with the date it first hits
     func findDiveOfTheWeek() -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/dd/yyyy"
@@ -754,12 +764,5 @@ struct DiverEditorView: View {
         }
         
         return ""
-    }
-}
-//    var dives: [String]
-struct DiverEditorView_Previews: PreviewProvider {
-    static var previews: some View {
-        DiverEditorView(selectedCoachEntryIndex: 0, selectedDiverEntryIndex: 0, eventDate: "")
-            .environmentObject(CoachEntryStore())
     }
 }

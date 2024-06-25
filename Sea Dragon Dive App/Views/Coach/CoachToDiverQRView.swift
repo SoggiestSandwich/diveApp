@@ -11,9 +11,9 @@ import CoreImage.CIFilterBuiltins
 
 struct CoachToDiverQRView: View {
     
-    let context = CIContext()
-    let filter = CIFilter.qrCodeGenerator()
-    var url: String
+    let context = CIContext() //sets a CIContext
+    let filter = CIFilter.qrCodeGenerator() //sets a CIFilter
+    var url: String //code that is turned into a qr code
     
     var body: some View {
         VStack {
@@ -25,6 +25,7 @@ struct CoachToDiverQRView: View {
         }
     }
     
+    //converts the string into a qr code image and returns the image
     func generateQRCodeImage(_ url: String) -> UIImage {
         let data = Data(url.utf8)
         filter.setValue(data, forKey: "inputMessage")

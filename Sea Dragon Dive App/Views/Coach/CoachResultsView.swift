@@ -9,16 +9,18 @@ import SwiftUI
 
 
 struct CoachResultsView: View {
-    @State var coachList: coachEntry
+    @State var entry: coachEntry //coaches selected entry
     
     var body: some View {
         VStack {
             HStack {
-                Text("\(coachList.team)")
+                Text("\(entry.team)")
                     .font(.title.bold())
             }
+            //list of each diver in the entry
             List {
-                ForEach(coachList.diverEntries, id: \.hashValue) { diver in
+                ForEach(entry.diverEntries, id: \.hashValue) { diver in
+                    //goes to a qr code view for the selected divers results
                     NavigationLink(destination: CoachToDiverQRView(url: makeQRCode(diver: diver))) {
                         HStack {
                             Text(diver.name)
@@ -30,7 +32,7 @@ struct CoachResultsView: View {
             }
         }
     }
-    
+    //converts entered string to json and compresses it then returns it in string form
     func makeQRCode(diver: diverEntry) -> String {
         var diverResults = resultsList(diveResults: [], placement: diver.placement ?? 0)
         for dive in 0..<diver.dives.count {
@@ -49,6 +51,6 @@ struct CoachResultsView: View {
 
 struct CoachResultsView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachResultsView(coachList: coachEntry(diverEntries: [diverEntry(dives: [], level: 0, name: "diver", totalScore: 10)], eventDate: "Date", team: "Team", version: 0))
+        CoachResultsView(entry: coachEntry(diverEntries: [diverEntry(dives: [], level: 0, name: "diver", totalScore: 10)], eventDate: "Date", team: "Team", version: 0))
     }
 }

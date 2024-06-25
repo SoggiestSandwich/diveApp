@@ -8,44 +8,50 @@
 import SwiftUI
 
 struct DiverDiveSelector: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used for custom back button
     
-    @EnvironmentObject var coachEntryStore: CoachEntryStore
+    @EnvironmentObject var coachEntryStore: CoachEntryStore //persistant coach entry data
     
+    //tables from the database
     @FetchRequest(sortDescriptors: [
         SortDescriptor(\.diveNbr)
     ]) var fetchedDives: FetchedResults<Dive>
     @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
     @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
     
-    @State var expandedGroup: [Bool] = [false, false, false, false, false]
-    @State var subExpandedGroup: [Bool] = [false, false, false, false]
+    @State var expandedGroup: [Bool] = [false, false, false, false, false] //array that shows which dsclosure groups are open
+    @State var subExpandedGroup: [Bool] = [false, false, false, false] //array that shows which sub disclosure groups are open
     
-    @State var entryList: diverEntry
-    @State var coachEntry: coachEntry
-    @State var eventDate: String
-    @Binding var diveList: [dives]
+    @State var entryList: diverEntry //the diver dives are being added to
+    @State var coachEntry: coachEntry //the coach entry that has the diver entry being added to
+    @State var eventDate: String //date of the event
+    @Binding var diveList: [dives] //list of the diver's dives
     
     var body: some View {
         VStack {
+            //closes the sheet
             Button {
                 self.presentationMode.wrappedValue.dismiss()
             } label: {
                 Text("Dismiss")
             }
             .padding()
+            //list of the dive of the week then every possible dive
                 List {
                     Text("Dive of the Week: \(findDiveOfTheWeek()) Group")
+                    //forward dives
                         DisclosureGroup(isExpanded: $expandedGroup[0]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 if fetchedDive.diveNbr - 100 < 100 {
                                     VStack(alignment: .leading) {
+                                        //dive number and name
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                         }
                                         .padding(.trailing)
+                                        //each position for the dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -59,6 +65,7 @@ struct DiverDiveSelector: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -110,15 +117,18 @@ struct DiverDiveSelector: View {
                                     .font(.caption)
                             }
                         }
+                    //back dives
                         DisclosureGroup(isExpanded: $expandedGroup[1]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 if fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 {
                                     VStack(alignment: .leading) {
+                                        //dive number and name
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                         }
                                         .padding(.trailing)
+                                        //each position for the dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -132,6 +142,7 @@ struct DiverDiveSelector: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -143,14 +154,12 @@ struct DiverDiveSelector: View {
                                                                 else {
                                                                     removeSelectedDive(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "")
                                                                 }
-                                                                //CoachEntryStore.saveDivers()
                                                             }
                                                             .padding(5)
                                                             .background(
                                                                 Rectangle()
                                                                     .fill(.clear)
                                                                     .opacity(0.6)
-                                                                    //.stroke(lineWidth: 2)
                                                             )
                                                             .overlay(
                                                                 Rectangle()
@@ -183,15 +192,18 @@ struct DiverDiveSelector: View {
                                     .font(.caption)
                             }
                         }
+                    //reverse dives
                         DisclosureGroup(isExpanded: $expandedGroup[2]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 if fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 {
                                     VStack(alignment: .leading) {
+                                        //dive number and name
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                         }
                                         .padding(.trailing)
+                                        //each position for the dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -205,6 +217,7 @@ struct DiverDiveSelector: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -256,15 +269,18 @@ struct DiverDiveSelector: View {
                                     .font(.caption)
                             }
                         }
+                    //inward dives
                         DisclosureGroup(isExpanded: $expandedGroup[3]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 if fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 {
                                     VStack(alignment: .leading) {
+                                        //dive number and name
                                         HStack {
                                             Text("\(fetchedDive.diveNbr) \(fetchedDive.diveName ?? "")")
                                             Spacer()
                                         }
                                         .padding(.trailing)
+                                        //each position for the dive
                                         HStack {
                                             ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                 if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -278,6 +294,7 @@ struct DiverDiveSelector: View {
                                                                 }
                                                             }
                                                             .onTapGesture {
+                                                                //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                 if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                     
                                                                     removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -330,16 +347,20 @@ struct DiverDiveSelector: View {
                                     .font(.caption)
                             }
                         }
+                    //twist dives
                         DisclosureGroup(isExpanded: $expandedGroup[4]) {
+                            //forward twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[0]) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 {
                                             VStack(alignment: .leading) {
+                                                //dive number and name
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                 }
                                                 .padding(.trailing)
+                                                //each position for the dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -353,6 +374,7 @@ struct DiverDiveSelector: View {
                                                                         }
                                                                     }
                                                                     .onTapGesture {
+                                                                        //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -399,15 +421,18 @@ struct DiverDiveSelector: View {
                                     subExpandedGroup[0] = false
                                 }
                             }
+                            //back twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[1]) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if fetchedDive.diveNbr - 100 > 5100 && fetchedDive.diveNbr < 5300 {
                                             VStack(alignment: .leading) {
+                                                //dive number and name
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                 }
                                                 .padding(.trailing)
+                                                //each position for the dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -421,6 +446,7 @@ struct DiverDiveSelector: View {
                                                                         }
                                                                     }
                                                                     .onTapGesture {
+                                                                        //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -467,15 +493,18 @@ struct DiverDiveSelector: View {
                                     subExpandedGroup[1] = false
                                 }
                             }
+                            //reverse twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[2]) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if fetchedDive.diveNbr - 100 > 5200 && fetchedDive.diveNbr < 5400 {
                                             VStack(alignment: .leading) {
+                                                //dive number and name
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                 }
                                                 .padding(.trailing)
+                                                //each position for the dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -489,6 +518,7 @@ struct DiverDiveSelector: View {
                                                                         }
                                                                     }
                                                                     .onTapGesture {
+                                                                        //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -535,15 +565,18 @@ struct DiverDiveSelector: View {
                                     subExpandedGroup[2] = false
                                 }
                             }
+                            //inward twist
                             DisclosureGroup(isExpanded: $subExpandedGroup[3]) {
                                     ForEach(fetchedDives) { fetchedDive in
                                         if fetchedDive.diveNbr - 100 > 5300 {
                                             VStack(alignment: .leading) {
+                                                //dive number and name
                                                 HStack {
                                                     Text("\(String(fetchedDive.diveNbr)) \(fetchedDive.diveName ?? "")")
                                                     Spacer()
                                                 }
                                                 .padding(.trailing)
+                                                //each position for the dive
                                                 HStack {
                                                     ForEach(fetchedWithPositions) {fetchedWithPosition in
                                                         if fetchedWithPosition.diveNbr == fetchedDive.diveNbr {
@@ -557,6 +590,7 @@ struct DiverDiveSelector: View {
                                                                         }
                                                                     }
                                                                     .onTapGesture {
+                                                                        //if it hasn't been clicked it removes other dives in the list with the same name add adds it to the dive list otherwise it removes it from the dive list
                                                                         if !isClicked(name: fetchedDive.diveName ?? "", position: fetchedPosition.positionName ?? "") {
                                                                             
                                                                             removeDivesWithSameName(name: fetchedDive.diveName ?? "")
@@ -630,7 +664,7 @@ struct DiverDiveSelector: View {
             setDiveCodes()
         }
     }
-    
+    //uses the dive code to add the full dive to the divelist
     func setDiveCodes() {
         for dive in 0..<diveList.count {
                 for fetchedDive in fetchedDives {
@@ -645,7 +679,7 @@ struct DiverDiveSelector: View {
             }
 
     }
-    
+    //returns the number of dives selected with numbers within the range
     func numSelected(minRange: Int, maxRange: Int) -> Int {
         var count = 0
         for dive in diveList {
@@ -658,7 +692,7 @@ struct DiverDiveSelector: View {
         }
         return count
     }
-    
+    //returns true if a dive in the divelist matches the entered dive otherwise returns false
     func isClicked(name: String, position: String) -> Bool {
         for dive in diveList {
             if dive.name == name && dive.position == position {
@@ -667,7 +701,7 @@ struct DiverDiveSelector: View {
         }
         return false
     }
-    
+    //removes the dive with entered name and position
     func removeSelectedDive(name: String, position: String) {
         var breakLoop = false
         for dive in 0..<diveList.count {
@@ -679,7 +713,7 @@ struct DiverDiveSelector: View {
             }
         }
     }
-    
+    //removes all dives from dive list with the same name as the entered name
     func removeDivesWithSameName(name: String) {
         var breakLoop = false
         for dive in 0..<diveList.count {
@@ -691,7 +725,7 @@ struct DiverDiveSelector: View {
             }
         }
     }
-    
+    //finds the dive of the week by going back one day at a time till the start of a dive of the week and returns that dives naem
     func findDiveOfTheWeek() -> String {
         print(eventDate)
         let dateFormatter = DateFormatter()

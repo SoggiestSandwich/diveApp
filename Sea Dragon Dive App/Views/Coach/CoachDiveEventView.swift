@@ -9,38 +9,38 @@ import SwiftUI
 import CodeScanner
 
 struct CoachDiveEventView: View {
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is vertical
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used to make custom back button
     
-    @EnvironmentObject var coachEntryStore: CoachEntryStore
+    @EnvironmentObject var coachEntryStore: CoachEntryStore //persistant data for coach entries
     
-    @State var failedScanAlert = false
-    @State var isPresentingScanner = false
-    @State private var scannedCode: String = ""
-    @State private var date: Date = Date()
-    @State private var location: String = ""
-    @State private var showQRCodeSheet = false
-    @State var name: String
-    @State var team: String
-    @State var taskComplete: Bool = false
-    @State var coachListIndex: Int
+    @State var failedScanAlert = false //triggers an alert for a failed qr scan
+    @State var isPresentingScanner = false //opens the qr scanner
+    //@State private var scannedCode: String = ""
+    @State private var date: Date = Date() //the events date
+    @State private var location: String = "" //the events location
+    @State private var showQRCodeSheet = false //opens the qr code image view
+    @State var name: String //name of the coach
+    @State var team: String //name of the coaches school/team
+    @State var taskComplete: Bool = false //holds the date picker until the view entry task completes
+    @State var coachListIndex: Int //index of the coach entry selected
     
     
-    @Binding var coachList: coachEntry
+    @Binding var entry: coachEntry //the seleced coach entry
     
+    //simple struct for holding an identifiable qr code string
     struct Codes: Identifiable {
         let name: String
         let id = UUID()
     }
-    
+    //qr scanner
     var ScannerSheet : some View {
         CodeScannerView(
             codeTypes: [.qr],
             completion: { result in
                 if case let .success(code) = result {
-                    self.scannedCode = code.string
-                    
+                    //if it successfully scans it will uncompress the code to json then decode it to a diverEntry
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
                         let  base64Data = tempCodes.name.data(using: .utf8)
@@ -60,7 +60,7 @@ struct CoachDiveEventView: View {
                         if entries != nil {
                             entries!.finishedEntry = true
                             
-                            coachList.diverEntries.append(entries!)
+                            entry.diverEntries.append(entries!) //add the diver entry to the coaches entry
                             coachEntryStore.saveDiverEntry()
                             self.isPresentingScanner = false
                         }
@@ -72,6 +72,7 @@ struct CoachDiveEventView: View {
                 }
             }
         )
+        //alert for a failed qr code scan
         .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
             Button("OK", role: .cancel) {
                 self.isPresentingScanner = false
@@ -80,10 +81,11 @@ struct CoachDiveEventView: View {
             Text("Could not find the needed data in the scanned QR Code")
         }
     }
-    
+    //main view
     var body: some View {
         VStack {
             HStack {
+                //custom back button
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -95,6 +97,7 @@ struct CoachDiveEventView: View {
                     .padding(.trailing)
                     .padding(.trailing)
                 Spacer()
+                //opens the qr scanner
                 Button {
                     self.isPresentingScanner = true
                 } label: {
@@ -121,7 +124,7 @@ struct CoachDiveEventView: View {
                     if taskComplete {
                         DatePicker("", selection: $date, displayedComponents: [.date])
                             .onChange(of: date) { _ in
-                                coachList.eventDate = date.formatted(date: .numeric, time: .omitted)
+                                entry.eventDate = date.formatted(date: .numeric, time: .omitted)
                                 coachEntryStore.saveDiverEntry()
                             }
                     }
@@ -137,9 +140,10 @@ struct CoachDiveEventView: View {
                 HStack {
                     Text("Location")
                     Spacer()
+                    //location textfield
                     TextField("Enter Location", text: $location)
                         .onChange(of: location) { _ in
-                            coachList.location = location
+                            entry.location = location
                             coachEntryStore.saveDiverEntry()
                         }
                         .multilineTextAlignment(.trailing)
@@ -156,11 +160,14 @@ struct CoachDiveEventView: View {
             
             Text("Dive Entries")
                 .font(.title.bold())
+            //list of all of the diver entries separated by their level
             List {
+                //varsity divers
                 DisclosureGroup("Varsity") {
-                    ForEach(Array(zip(coachList.diverEntries.indices, coachList.diverEntries)), id: \.0) { index, diver in
+                    ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 2 {
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: coachList.eventDate)) {
+                            //goes to diver editor
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -176,10 +183,12 @@ struct CoachDiveEventView: View {
                     }
                     .onDelete(perform: deleteDiver)
                 }
+                //junior varsity divers
                 DisclosureGroup("Junior Varsity") {
-                    ForEach(Array(zip(coachList.diverEntries.indices, coachList.diverEntries)), id: \.0) { index, diver in
+                    ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 1 {
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: coachList.eventDate)) {
+                            //goes to diver editor
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -196,10 +205,12 @@ struct CoachDiveEventView: View {
                     .onDelete(perform: deleteDiver)
                     
                 }
+                //exhibition divers
                 DisclosureGroup("Exhibition") {
-                    ForEach(Array(zip(coachList.diverEntries.indices, coachList.diverEntries)), id: \.0) { index, diver in
+                    ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 0 {
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: coachList.eventDate)) {
+                            //goes to diver editor
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -217,10 +228,12 @@ struct CoachDiveEventView: View {
                     
                 }
                 if hasUnfinishedDivers() {
+                    //shows all newly created divers with incomplete entries
                     DisclosureGroup("Unfinished diver entries") {
-                        ForEach(Array(zip(coachList.diverEntries.indices, coachList.diverEntries)), id: \.0) { index, diver in
+                        ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                             if diver.finishedEntry == nil || diver.finishedEntry == false {
-                                NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: coachList.eventDate)) {
+                                //goes to the diver editor
+                                NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -239,6 +252,7 @@ struct CoachDiveEventView: View {
                     }
                 }
             }
+            //adds an unfinished diver entry
             Button {
                 coachEntryStore.coachesList[coachListIndex].diverEntries.append(diverEntry(dives: [], level: -1, name: "", finishedEntry: false))
             } label: {
@@ -255,7 +269,7 @@ struct CoachDiveEventView: View {
                     )
                     .foregroundColor(colorScheme == .dark ? .white : .black)
             }
-            
+            //opens the qr code image for the divers event
             Button {
                 coachEntryStore.saveDiverEntry()
                 showQRCodeSheet = true
@@ -270,36 +284,42 @@ struct CoachDiveEventView: View {
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                 }
             }
-            .disabled(coachList.location != "" && coachList.diverEntries.isEmpty)
+            .disabled(entry.location != "" && entry.diverEntries.isEmpty) //button is disabled if there is no location or no divers
+            //qr code image view
             .sheet(isPresented: $showQRCodeSheet) {
-                CoachEntryQRCodeView(url: findQRCode())
+                CoachEntryQRCodeView(code: findQRCode())
             }
         }
         .onAppear {
-            if coachList.eventDate.isEmpty {
-                coachList.eventDate = Date().formatted(date: .numeric, time: .omitted)
+            //sets the date to the current date if there is not another date selected
+            if entry.eventDate.isEmpty {
+                entry.eventDate = Date().formatted(date: .numeric, time: .omitted)
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true) //disables the default back button
         .task {
-            if coachList.location != nil {
-                location = coachList.location ?? ""
+            //sets the location
+            if entry.location != nil {
+                location = entry.location ?? ""
             }
             taskComplete = true
         }
     }
+    //encodes the coaches entry into json and compresses it and returns the compressed data in string form
     func findQRCode() -> String {
         let encoder = JSONEncoder()
-        let data = try! encoder.encode(coachList)
+        let data = try! encoder.encode(entry)
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)
         return optimizedData.base64EncodedString()
     }
+    //removes a diver from the entry at the given index
     func deleteDiver(at offsets: IndexSet) {
-        coachList.diverEntries.remove(atOffsets: offsets)
+        entry.diverEntries.remove(atOffsets: offsets)
         coachEntryStore.saveDiverEntry()
     }
+    //returns true if all divers have finished entries otherwise returns false
     func hasUnfinishedDivers() -> Bool {
-        for diver in coachList.diverEntries {
+        for diver in entry.diverEntries {
             if diver.finishedEntry == false {
                 return true
             }
@@ -310,6 +330,6 @@ struct CoachDiveEventView: View {
 
 struct CoachDiveEventView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachDiveEventView(name: "name", team: "Team", coachListIndex: 0, coachList: .constant(coachEntry(diverEntries: [diverEntry(dives: [], level: 1, name: "Name")], eventDate: "Date", team: "Team", version: 0)))
+        CoachDiveEventView(name: "name", team: "Team", coachListIndex: 0, entry: .constant(coachEntry(diverEntries: [diverEntry(dives: [], level: 1, name: "Name")], eventDate: "Date", team: "Team", version: 0)))
     }
 }

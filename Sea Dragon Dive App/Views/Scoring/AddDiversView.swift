@@ -307,7 +307,7 @@ struct AddDiversView: View {
                             )
                     }
                     .sheet(isPresented: $showQRCodeSheet) {
-                        CoachEntryQRCodeView(url: createdQrCode())
+                        CoachEntryQRCodeView(code: createdQrCode())
                     }
                 }
             }

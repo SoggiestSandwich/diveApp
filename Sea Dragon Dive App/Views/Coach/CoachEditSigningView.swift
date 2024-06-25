@@ -8,19 +8,20 @@
 import SwiftUI
 
 struct CoachEditSigningView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used for custom back button
     
-    @State private var currentLine = Line()
-    @State private var lines: [Line] = []
+    @State private var currentLine = Line() //the line being currently drawn
+    @State private var lines: [Line] = [] //array of all lines that were drawn
     
-    @Binding var selectedCoachEntryIndex: Int
-    @Binding var selectedDiverEntryIndex: Int
+    @Binding var selectedCoachEntryIndex: Int //index of the coach entry that being confirmed
+    @Binding var selectedDiverEntryIndex: Int //index of the diver entry being confirmed
     
-    @EnvironmentObject var coachEntryStore: CoachEntryStore
+    @EnvironmentObject var coachEntryStore: CoachEntryStore //coach entry persistant data
     
     var body: some View {
             NavigationStack {
+                //closes this sheet
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -33,6 +34,7 @@ struct CoachEditSigningView: View {
                 Text("I agree that I can perform these dives")
                 
                 ZStack {
+                    //canvas for writing on
                     Canvas { context, size in
                         for line in lines {
                             var path = Path()
@@ -42,11 +44,13 @@ struct CoachEditSigningView: View {
                         
                     }.gesture(DragGesture(minimumDistance: 0, coordinateSpace: .local)
                         .onChanged({ value in
+                            //adds points to the line
                             let newPoint = value.location
                             currentLine.points.append(newPoint)
                             self.lines.append(currentLine)
                         })
                             .onEnded({ value in
+                                //adds the current line to the line list and sets the current line to a new line
                                 self.lines.append(currentLine)
                                 self.currentLine = Line(points: [])
                             })
@@ -61,6 +65,7 @@ struct CoachEditSigningView: View {
                 }
                 
                 HStack {
+                    //clears all lines from the line array
                     Button {
                         self.lines.removeAll()
                     } label: {
@@ -75,6 +80,7 @@ struct CoachEditSigningView: View {
                         )
                         .foregroundColor(colorScheme == .dark ? .white : .black)
                     }
+                    //if there is writing generate a qr code otherwise do nothing
                     if self.lines.isEmpty {
                         Text("Done")
                             .padding()

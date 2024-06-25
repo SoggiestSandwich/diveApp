@@ -10,31 +10,32 @@ import CodeScanner
 import Gzip
 
 struct CoachEventSelectionView: View {
-    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
     
-    @EnvironmentObject var coachEntryStore: CoachEntryStore
+    @EnvironmentObject var coachEntryStore: CoachEntryStore //persistant data of coach entries
     
-    @State var name: String
-    @State var team: String
-    @State var failedScanAlert = false
-    @State var isPresentingScanner = false
-    @State private var scannedCode: String = ""
-    @State var selectedCoachEntryIndex: Int = -1
+    @State var name: String //coaches name
+    @State var team: String //coaches school/team name
+    @State var failedScanAlert = false //triggers an alert when a qr code scan fails
+    @State var isPresentingScanner = false //opens the qr scanner
+    @State private var scannedCode: String = "" //the string read from the qr code
+    @State var selectedCoachEntryIndex: Int = -1 //the index of the entry being selected
     @Binding var path: [String]
     
+    //simple struct for holding identifiable codes
     struct Codes: Identifiable {
         let name: String
         let id = UUID()
     }
-    
+    //qr scanner
     var ScannerSheet : some View {
         CodeScannerView(
             codeTypes: [.qr],
             completion: { result in
+                //stores the code into tempCodes on a sucessful scan
                 if case let .success(code) = result {
-                    self.scannedCode = code.string
-                    
                     let tempCodes = Codes(name: code.string)
+                    //if it scans a non-empty string it will attempt to uncompress to json then decode the json into a coachEntry
                     if tempCodes.name != "" {
                         let  base64Data = tempCodes.name.data(using: .utf8)
                         let data = Data(base64Encoded: base64Data!)
@@ -50,6 +51,7 @@ struct CoachEventSelectionView: View {
                         }
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
+                        //if the code can be turned into a coaschEntry sets the loacation and finished
                         if entries != nil {
                             let tempLocation = coachEntryStore.coachesList[selectedCoachEntryIndex].location
                             coachEntryStore.coachesList[selectedCoachEntryIndex] = entries!
@@ -67,6 +69,7 @@ struct CoachEventSelectionView: View {
                 }
             }
         )
+        //alert for a failed scan
         .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
             Button("OK", role: .cancel) {
                 self.isPresentingScanner = false
@@ -76,9 +79,11 @@ struct CoachEventSelectionView: View {
         }
     }
     
+    //main view
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
+                //button that brings you back to the login view
                 Button {
                     path = []
                 } label: {
@@ -97,6 +102,7 @@ struct CoachEventSelectionView: View {
             Text("Current Events")
                 .font(.title)
                 .padding(.horizontal)
+            //list of all non-finished coach entries
             List {
                 if !coachEntryStore.coachesList.isEmpty {
                     ForEach(Array(zip(coachEntryStore.coachesList.indices, coachEntryStore.coachesList)), id: \.0) { index, coach in
@@ -104,13 +110,15 @@ struct CoachEventSelectionView: View {
                             HStack {
                                 Text(coach.eventDate)
                                 Divider()
-                                NavigationLink(destination: CoachDiveEventView(name: name, team: team, coachListIndex: index, coachList: $coachEntryStore.coachesList[index])) {
+                                //goes to the view for editing coach entries
+                                NavigationLink(destination: CoachDiveEventView(name: name, team: team, coachListIndex: index, entry: $coachEntryStore.coachesList[index])) {
                                     if coach.location == nil {
                                         Text("New dive event")
                                     }
                                     else {
                                         Text(coach.location ?? "")
                                     }
+                                    //button that opens the qr code scanner
                                     Button {
                                     } label: {
                                         Text("Scan Results")
@@ -126,6 +134,7 @@ struct CoachEventSelectionView: View {
                                         self.isPresentingScanner = true
                                     }
                                 }
+                                //qr code canner sheet
                                 .sheet(isPresented: $isPresentingScanner) {
                                     self.ScannerSheet
                                 }
@@ -134,7 +143,7 @@ struct CoachEventSelectionView: View {
                     }
                     .onDelete(perform: deleteEvent)
                 }
-                //list of current events
+                //adds a coach entry to the coach entry persistant data
                 Button {
                     coachEntryStore.addCoachEntry(coachEntry(diverEntries: [], eventDate: "", team: team, version: 0))
                     coachEntryStore.saveDiverEntry()
@@ -154,7 +163,7 @@ struct CoachEventSelectionView: View {
                 if !coachEntryStore.coachesList.isEmpty {
                     ForEach(coachEntryStore.coachesList, id: \.hashValue) { coach in
                         if coach.finished == true {
-                            NavigationLink(destination: CoachResultsView(coachList: coach)) {
+                            NavigationLink(destination: CoachResultsView(entry: coach)) {
                                 HStack {
                                     Text(coach.eventDate)
                                     Divider()
@@ -167,9 +176,9 @@ struct CoachEventSelectionView: View {
                 }
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true) //removes the default back button
     }
-    
+    //removes a coach entry from the coach entry persistant data at the entered index
     func deleteEvent(at offsets: IndexSet) {
         coachEntryStore.coachesList.remove(atOffsets: offsets)
         coachEntryStore.saveDiverEntry()

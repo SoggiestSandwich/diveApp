@@ -10,21 +10,20 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct CoachEntryQRCodeView: View {
-    
-    let context = CIContext()
-    let filter = CIFilter.qrCodeGenerator()
-    var url: String
+    let context = CIContext() //initializes a CIContext
+    let filter = CIFilter.qrCodeGenerator() //initializes a CIFilter
+    var code: String //the code being turned into a qr code
     
     var body: some View {
         VStack {
             Text("Dive Event")
                 .font(.largeTitle.bold())
-            
-            Image(uiImage: generateQRCodeImage(url)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
+            //qr image
+            Image(uiImage: generateQRCodeImage(code)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
             Spacer()
         }
     }
-    
+    //takes in a string and returns a qr image for that string
     func generateQRCodeImage(_ url: String) -> UIImage {
         let data = Data(url.utf8)
         filter.setValue(data, forKey: "inputMessage")
@@ -40,6 +39,6 @@ struct CoachEntryQRCodeView: View {
 
 struct CoachEntryQRCodeView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachEntryQRCodeView(url: "https://youtu.be/dQw4w9WgXcQ")
+        CoachEntryQRCodeView(code: "https://youtu.be/dQw4w9WgXcQ")
     }
 }
