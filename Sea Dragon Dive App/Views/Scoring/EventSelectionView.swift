@@ -17,6 +17,7 @@ struct EventSelectionView: View {
     @State var diveCount: Int = 0
     @State var judgeSheet: Bool = false
     @State var confirmed: Bool = false
+    @State var currentDiver: Int = -1
     @Binding var path: [String]
     
     var body: some View {
@@ -25,7 +26,7 @@ struct EventSelectionView: View {
                 List {
                     ForEach(Array(zip(eventStore.eventList.indices, eventStore.eventList)), id: \.0) { index, event in
                         if eventStore.eventList[index].finished {
-                            NavigationLink(event.date, destination: ResultsView(unsortedDiverList: makeDiversListResults(index: index), eventList: $eventStore.eventList[index], path: $path))
+                            NavigationLink(event.date, destination: ResultsView(unsortedDiverList: makeDiversListResults(index: index), eventList: $eventStore.eventList[index], path: $path, currentDiver: $currentDiver))
                         }
                         else {
                             NavigationLink(event.date, destination: AddDiversView(eventList: $eventStore.eventList[index], path: $path))

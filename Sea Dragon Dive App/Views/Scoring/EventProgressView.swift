@@ -51,6 +51,12 @@ struct EventProgressView: View {
                                                     findLastDiverIndex()
                                                     findFirstDiverIndex()
                                                     saveEventData()
+                                                    eventList.diveCount = 0
+                                                    for diver in diverList {
+                                                        if diver.dives.count > eventList.diveCount && diver.skip != true {
+                                                            eventList.diveCount = diver.dives.count
+                                                        }
+                                                    }
                                                 }
                                         }
                                         else if diver.skip == true {
@@ -81,6 +87,12 @@ struct EventProgressView: View {
                                                     findLastDiverIndex()
                                                     findFirstDiverIndex()
                                                     saveEventData()
+                                                    eventList.diveCount = 0
+                                                    for diver in diverList {
+                                                        if diver.dives.count > eventList.diveCount && diver.skip != true {
+                                                            eventList.diveCount = diver.dives.count
+                                                        }
+                                                    }
                                                 }
                                         }
                                     }
@@ -146,11 +158,17 @@ struct EventProgressView: View {
     }
     
     func findLastDiverIndex() {
-        lastDiverIndex = diverList.count
+        lastDiverIndex = diverList.count - 1
         var breakLoop = false
+        var fullCount = false
+        for diver in 0..<diverList.count {
+            if diverList[diver].dives.count == eventList.diveCount {
+                fullCount = true
+            }
+        }
         for diver in 0..<diverList.count {
             if !breakLoop {
-                if diverList[diverList.count - (1 + diver)].skip == true {
+                if diverList[diverList.count - (1 + diver)].skip == true || diverList[diverList.count - (1 + diver)].dives.count < eventList.diveCount && fullCount {
                     lastDiverIndex -= 1
                 }
                 else {
@@ -197,9 +215,9 @@ struct EventProgressView: View {
         var mostDives = 0
         var mostDivesIndex = 0
         for diver in 0..<diverList.count {
-            if diverList[diver].dives.count == eventList.diveCount {
-                return diver
-            }
+//            if diverList[diver].dives.count == eventList.diveCount {
+//                return diver
+//            }
             if diverList[diver].dives.count > mostDives {
                 mostDives = diverList[diver].dives.count
                 mostDivesIndex = diver

@@ -50,8 +50,12 @@ struct AnnounceDiveView: View {
                     Button("Confirm") {
                         //sets the diver as dq'ed
                         diverList[currentDiver].dq = true
+                        //finish the event if last diver is withdrawn
+                        if currentDiver == lastDiverIndex && currentDive >= lowestDiveCount - 1 {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                         //if on the last diver moves to the next round
-                        if currentDiver != lastDiverIndex {
+                        else if currentDiver != lastDiverIndex {
                             toggleNextDiver()
                         }
                         //else go to the next round
@@ -80,11 +84,10 @@ struct AnnounceDiveView: View {
                         //lowest
                         lowestDiveCount = 11
                         for diver in 0..<diverList.count {
-                            if diverList[diver].dives.count < diveCount && diverList[diver].dq != true {
+                            if diverList[diver].dives.count < lowestDiveCount && diverList[diver].dq != true {
                                 lowestDiveCount = diverList[diver].dives.count
                             }
                         }
-
                     }
                 } message: {
                     Text("Has \(diverList[currentDiver].name) been withdrawn from the competition?")
@@ -233,7 +236,7 @@ struct AnnounceDiveView: View {
                         toggleNextDiver()
                     }
                     //next round
-                    else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
+                    else if currentDiver == lastDiverIndex || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
                         toggleNextRound()
                     }
                     //finish event
@@ -242,7 +245,7 @@ struct AnnounceDiveView: View {
                     }
                 } label: {
                     //next diver
-                    if currentDiver < lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount  {
+                    if currentDiver < lastDiverIndex || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount  {
                         VStack {
                             Text("Next Diver")
                         }
@@ -339,11 +342,11 @@ struct AnnounceDiveView: View {
     }
     //sets the current diver to the firstDiverIndex then increments until it is on a legal diver and increases the current dive by one
     func toggleNextRound() {
+        currentDive = currentDive + 1
         var tempCurrentDiver = firstDiverIndex
-        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 <= currentDive {
+        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 < currentDive {
             tempCurrentDiver += 1
         }
-        currentDive = currentDive + 1
         currentDiver = tempCurrentDiver
     }
     //decrements the current diver by 1 and continues until it is on a legal diver
@@ -356,12 +359,12 @@ struct AnnounceDiveView: View {
     }
     //sets the current diver to the lastDiverIndex then decrements until it is on a legal diver and decreases the current dive by one
     func togglepreviousRound() {
+        currentDive = currentDive - 1
         var tempCurrentDiver = lastDiverIndex
         while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 <= currentDive {
             tempCurrentDiver -= 1
         }
         currentDiver = tempCurrentDiver
-        currentDive = currentDive - 1
     }
     //finds the first and last legal diver of each round
     func setFirstAndLastDiverIndex() {

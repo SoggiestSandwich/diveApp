@@ -12,11 +12,14 @@ struct ResultsView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
+    @EnvironmentObject var eventStore: EventStore
+    
     @State var unsortedDiverList: [divers]
     @State var isPresentingTeamSelector: Bool = false
     @State var sortedList: [divers] = []
     @Binding var eventList: events
     @Binding var path: [String]
+    @Binding var currentDiver: Int
     
     var body: some View {
             VStack {
@@ -113,6 +116,12 @@ struct ResultsView: View {
                     unsortedDiverList[diver].placementScore = -1
                 }
             }
+            
+            if currentDiver != -1 {
+                unsortedDiverList[currentDiver].skip = true
+                eventList.finished = true
+                saveEventData()
+            }
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -174,6 +183,26 @@ struct ResultsView: View {
         return vList
     }
     
+    func saveEventData() {
+        eventList.EList = []
+        eventList.JVList = []
+        eventList.VList = []
+        
+        for diver in unsortedDiverList {
+            if diver.diverEntries.level == 0 {
+                eventList.EList.append(diver)
+            }
+            else if diver.diverEntries.level == 1 {
+                eventList.JVList.append(diver)
+            }
+            else if diver.diverEntries.level == 2 {
+                eventList.VList.append(diver)
+            }
+        }
+        eventStore.saveEvent()
+    }
+
+    
 }
 
 struct ResultsView_Previews: PreviewProvider {
@@ -186,6 +215,6 @@ struct ResultsView_Previews: PreviewProvider {
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102), skip: true),
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakaw", team: "Kaw Kaw High", totalScore: 104.2), skip: true),
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)), path: .constant([]))
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)), path: .constant([]), currentDiver: .constant(0))
     }
 }
