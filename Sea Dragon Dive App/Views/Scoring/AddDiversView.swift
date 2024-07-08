@@ -9,54 +9,53 @@ import SwiftUI
 import CodeScanner
 
 struct AddDiversView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used to make custom back button
     
+    //tables from the database
     @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
     @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
     @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
     
-    @EnvironmentObject var eventStore: EventStore
+    @EnvironmentObject var eventStore: EventStore //persistant event data
     
-    @State private var isPresentingScanner = false
-    @State private var code: String = ""
-    @State private var value = ""
-    @State private var scannedCode: String = ""
-    @State private var coachList: [coachEntry] = []
-    @State private var allDivers: [diverEntry] = []
-    @State private var diversWithDives: [divers] = []
-    @State private var editingList = true
-    @State private var showPopUp = false
-    @State private var showAlert = false
-    @State private var teamsArray: [String] = []
-    @State private var failedScanAlert: Bool = false
-    @State private var diverInfoSheet: Bool = false
-    @State private var sentDiver: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))
-    @State private var failedScanMessage: String = "Could not find the needed data in the scanned QR Code\n"
-    @State private var showQRCodeSheet: Bool = false
+    @State private var isPresentingScanner = false //used to open the qr scanner
+    @State private var code: String = "" //the code being scanned in
+    @State private var coachList: [coachEntry] = [] //list of coach entries that are scanned in
+    @State private var allDivers: [diverEntry] = [] //list of the dive entries that are used to make the divers list
+    @State private var diversWithDives: [divers] = [] //list of divers that is shown
+    @State private var editingList = true //sets the list to editing mode for deleting and reordering
+    @State private var showPopUp = false //used to open a popup for official approval
+    @State private var showAlert = false //used to open an alert informing the user they need to add divers
+    @State private var teamsArray: [String] = [] //an array with all the team names of the entries
+    @State private var failedScanAlert: Bool = false //used to open an alert for a failed qr code scan
+    @State private var diverInfoSheet: Bool = false //opens sheet for viewing the divers dives
+    @State private var sentDiver: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: "")) //diver that is being viewed in the diver info view
+    @State private var failedScanMessage: String = "Could not find the needed data in the scanned QR Code\n" //message that is shown when a qr code scan fails
+    @State private var showQRCodeSheet: Bool = false //opens to qr scanner
     
-    @Binding var eventList: events
-    @Binding var path: [String]
+    @Binding var event: events //the event that is having divers added to
+    @Binding var path: [String] //used to go back to login view
     
+    //struct that holds an identifiable qr code
     struct Codes: Identifiable {
         let name: String
         let id = UUID()
     }
-    
+    //qr code scanner view
     var ScannerSheet : some View {
         CodeScannerView(
             codeTypes: [.qr],
             completion: { result in
+                //successful scan
                 if case let .success(code) = result {
-                    self.scannedCode = code.string
-                    
+                    //
                     let tempCodes = Codes(name: code.string)
                     if tempCodes.name != "" {
-                        let  base64Data = tempCodes.name.data(using: .utf8)
+                        let base64Data = tempCodes.name.data(using: .utf8)
+                        //uncompressing code into json
                         let data = Data(base64Encoded: base64Data!)
-                        //let result = String(data: data!, encoding: .utf8)
                         let compressedJsonCode = data
-                        //uncompress data
                         let jsonCode: Data
                         if compressedJsonCode!.isGzipped {
                             jsonCode = try! compressedJsonCode!.gunzipped()
@@ -64,43 +63,45 @@ struct AddDiversView: View {
                         else {
                             jsonCode = compressedJsonCode!
                         }
+                        //decode json into coach entry data
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         if entries != nil {
                             coachList = []
+                            //sorts the diver entries in the coach entries into their corresponding level.
                             if checkCodeValidity(entry: entries!) {
-                                if !eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty {
+                                if !event.EList.isEmpty || !event.JVList.isEmpty || !event.VList.isEmpty {
                                     makeTeamsArray()
                                 }
                                 for team in teamsArray {
                                     if team == entries?.team {
-                                        if !eventList.EList.isEmpty {
+                                        if !event.EList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < eventList.EList.count {
-                                                if eventList.EList[loops].diverEntries.team == team {
-                                                    eventList.EList.remove(at: loops)
+                                            while loops < event.EList.count {
+                                                if event.EList[loops].diverEntries.team == team {
+                                                    event.EList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
                                                 }
                                             }
                                         }
-                                        if !eventList.JVList.isEmpty {
+                                        if !event.JVList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < eventList.JVList.count {
-                                                if eventList.JVList[loops].diverEntries.team == team {
-                                                    eventList.JVList.remove(at: loops)
+                                            while loops < event.JVList.count {
+                                                if event.JVList[loops].diverEntries.team == team {
+                                                    event.JVList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
                                                 }
                                             }
                                         }
-                                        if !eventList.VList.isEmpty {
+                                        if !event.VList.isEmpty {
                                             var loops: Int = 0
-                                            while loops < eventList.VList.count {
-                                                if eventList.VList[loops].diverEntries.team == team {
-                                                    eventList.VList.remove(at: loops)
+                                            while loops < event.VList.count {
+                                                if event.VList[loops].diverEntries.team == team {
+                                                    event.VList.remove(at: loops)
                                                 }
                                                 else {
                                                     loops += 1
@@ -109,15 +110,14 @@ struct AddDiversView: View {
                                         }
                                     }
                                 }
-                                
                                 coachList.append(entries!)
                                 validateNewDivers()
                                 sortDivers()
                                 
                                 eventStore.saveEvent()
                                 
-                                eventList.reviewed = false
-                                self.isPresentingScanner = false
+                                event.reviewed = false
+                                self.isPresentingScanner = false //closes qr scanner
                             }
                             else {
                                 //popup saying invalid qr code was scanned
@@ -132,6 +132,7 @@ struct AddDiversView: View {
                 }
             }
         )
+        //aler for an invalid qr scan
         .alert("Ivalid QR Code", isPresented: $failedScanAlert) {
             Button("OK", role: .cancel) {
                 failedScanMessage = "Could not find the needed data in the scanned QR Code\n"
@@ -144,12 +145,14 @@ struct AddDiversView: View {
     
     var body: some View {
         VStack {
-            Text(!eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty ? "" : "No Divers Added")
+            Text(!event.EList.isEmpty || !event.JVList.isEmpty || !event.VList.isEmpty ? "" : "No Divers Added")
                 .font(.largeTitle.bold())
-            
+            //list of all divers in the event
             List {
-                Section(header: Text(!eventList.EList.isEmpty ? "Exhibition" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                    ForEach(Array(zip(eventList.EList.indices, eventList.EList)), id: \.0) { index, diver in
+                //exhibition divers
+                Section(header: Text(!event.EList.isEmpty ? "Exhibition" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(event.EList.indices, event.EList)), id: \.0) { index, diver in
+                        //opens the diver info view for the diver selected
                         Button {
                             sentDiver = diver
                             diverInfoSheet = true
@@ -166,19 +169,21 @@ struct AddDiversView: View {
                     }
                     .onDelete(perform: deleteEDiver)
                     .onMove { (indexSet, index) in
-                        eventList.reviewed = false
-                        self.eventList.EList.move(fromOffsets: indexSet, toOffset: index)
+                        event.reviewed = false
+                        self.event.EList.move(fromOffsets: indexSet, toOffset: index)
                         eventStore.saveEvent()
                     }
                 }
-                Section(header: Text(!eventList.JVList.isEmpty ? "Junior Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                    ForEach(Array(zip(eventList.JVList.indices, eventList.JVList)), id: \.1) { index, diver in
+                //junior varsity divers
+                Section(header: Text(!event.JVList.isEmpty ? "Junior Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(event.JVList.indices, event.JVList)), id: \.1) { index, diver in
+                        //opens the diver info view for the diver selected
                         Button {
                             sentDiver = diver
                             diverInfoSheet = true
                         } label: {
                             VStack(alignment: .leading) {
-                                Text("\(index + 1 + eventList.EList.count). \(diver.diverEntries.name)")
+                                Text("\(index + 1 + event.EList.count). \(diver.diverEntries.name)")
                                     .foregroundColor(colorScheme == .dark ? .white : .black)
                                 Text("\(diver.diverEntries.team!)")
                                     .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -189,18 +194,20 @@ struct AddDiversView: View {
                     }
                     .onDelete(perform: deleteJVDiver)
                     .onMove { (indexSet, index) in
-                        eventList.reviewed = false
-                        self.eventList.JVList.move(fromOffsets: indexSet, toOffset: index)
+                        event.reviewed = false
+                        self.event.JVList.move(fromOffsets: indexSet, toOffset: index)
                     }
                 }
-                Section(header: Text(!eventList.VList.isEmpty ? "Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                    ForEach(Array(zip(eventList.VList.indices, eventList.VList)), id: \.1) { index, diver in
+                //varsity divers
+                Section(header: Text(!event.VList.isEmpty ? "Varsity" : "").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
+                    ForEach(Array(zip(event.VList.indices, event.VList)), id: \.1) { index, diver in
+                        //opens the diver info view for the diver selected
                         Button {
                             sentDiver = diver
                             diverInfoSheet = true
                         } label: {
                             VStack(alignment: .leading) {
-                                Text("\(index + 1 + eventList.EList.count + eventList.JVList.count). \(diver.diverEntries.name)")
+                                Text("\(index + 1 + event.EList.count + event.JVList.count). \(diver.diverEntries.name)")
                                     .foregroundColor(colorScheme == .dark ? .white : .black)
                                 Text("\(diver.diverEntries.team!)")
                                     .foregroundColor(colorScheme == .dark ? .white : .black)
@@ -211,17 +218,17 @@ struct AddDiversView: View {
                     }
                     .onDelete(perform: deleteVDiver)
                     .onMove { (indexSet, index) in
-                        eventList.reviewed = false
-                        self.eventList.VList.move(fromOffsets: indexSet, toOffset: index)
+                        event.reviewed = false
+                        self.event.VList.move(fromOffsets: indexSet, toOffset: index)
                     }
                 }
             }
-            .environment(\.editMode, editingList ? .constant(.active) : .constant(.inactive))
+            .environment(\.editMode, editingList ? .constant(.active) : .constant(.inactive)) //sets the list to editing mode for deleting and reordering
             Spacer()
             HStack {
                 VStack {
+                    //opens the qr scanner view to scan from coach
                     Button {
-                        //opens qr scanner to scan in divers
                         self.isPresentingScanner = true
                     } label: {
                         Text("Add Divers")
@@ -235,13 +242,15 @@ struct AddDiversView: View {
                                     .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
                             )
                     }
+                    //qr code scanner sheet
                     .sheet(isPresented: $isPresentingScanner) {
                         self.ScannerSheet
                     }
                     
                     //moves to the score view once divers are entered and confirmed that official has verified it
-                    if eventList.reviewed {
-                        NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, eventList: $eventList, path: $path)) {
+                    if event.reviewed {
+                        //goes to the score info view to begin scoring the event
+                        NavigationLink(destination: ScoreInfoView(diverList: diversWithDives, lastDiverIndex: diversWithDives.count - 1, event: $event, path: $path)) {
                             Text("Start Event")
                                 .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .bold()
@@ -256,6 +265,7 @@ struct AddDiversView: View {
                         }
                     }
                     else {
+                        //pulls up official review popup
                         Button {
                             if !consolidateDiverList().isEmpty {
                                 //add all aspects to divers struct
@@ -277,21 +287,24 @@ struct AddDiversView: View {
                                     
                                 )
                         }
+                        //alert that asks for officials approval
                         .alert("Official's Approval Required", isPresented: $showPopUp) {
                             Button("Cancel", role: .cancel) {}
                             Button("Confirm") {
-                                eventList.reviewed = true
+                                event.reviewed = true
                                 eventStore.saveEvent()
                             }
                         } message: {
                             Text("Please hand this device to an official for review. press confirm to continue")
                         }
+                        //alert that tells the user to add divers
                         .alert("You must enter divers before starting an event", isPresented: $showAlert) {
                             Button("OK", role: .cancel) {}
                         }
                     }
                 }
-                if eventList.reviewed {
+                if event.reviewed {
+                    //creates a qr code to be sent to the announcer
                     Button {
                         showQRCodeSheet = true
                     } label: {
@@ -306,6 +319,7 @@ struct AddDiversView: View {
                                 
                             )
                     }
+                    //qr code view for the announcer to scan
                     .sheet(isPresented: $showQRCodeSheet) {
                         CoachEntryQRCodeView(code: createdQrCode())
                     }
@@ -313,13 +327,15 @@ struct AddDiversView: View {
             }
         }
         .onAppear {
-            if !eventList.EList.isEmpty || !eventList.JVList.isEmpty || !eventList.VList.isEmpty {
+            //makes a final diver list if any level isn't empty for if the event has already been approved by the official in re-entering
+            if !event.EList.isEmpty || !event.JVList.isEmpty || !event.VList.isEmpty {
                 makeFinalDiverList()
             }
         }
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(true) //removes the default back button
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
+                //saves the events data to persistant data and goes back a view
                 Button {
                     eventStore.saveEvent()
                     self.presentationMode.wrappedValue.dismiss()
@@ -331,46 +347,48 @@ struct AddDiversView: View {
                 }
             }
         }
+        //sheet for the diver's info
         .sheet(isPresented: $diverInfoSheet) {
-            diverInfoView(diverList: $sentDiver, diveCount: eventList.diveCount)
+            diverInfoView(diver: $sentDiver, diveCount: event.diveCount)
         }
     }
-    
+    //sorts the divers into their level and then sort the order based on what team they are on
     func sortDivers() {
         for coach in coachList {
             for diver in coach.diverEntries {
                 if diver.level == 0 {
-                    eventList.EList.append(divers(dives: [], diverEntries: diver))
-                    eventList.EList[eventList.EList.count - 1].diverEntries.team = coach.team
-                    eventList.EList[eventList.EList.count - 1].diverEntries.totalScore = 0
+                    event.EList.append(divers(dives: [], diverEntries: diver))
+                    event.EList[event.EList.count - 1].diverEntries.team = coach.team
+                    event.EList[event.EList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 1 {
-                    eventList.JVList.append(divers(dives: [], diverEntries: diver))
-                    eventList.JVList[eventList.JVList.count - 1].diverEntries.team = coach.team
-                    eventList.JVList[eventList.JVList.count - 1].diverEntries.totalScore = 0
+                    event.JVList.append(divers(dives: [], diverEntries: diver))
+                    event.JVList[event.JVList.count - 1].diverEntries.team = coach.team
+                    event.JVList[event.JVList.count - 1].diverEntries.totalScore = 0
                 }
                 if diver.level == 2 {
-                    eventList.VList.append(divers(dives: [], diverEntries: diver))
-                    eventList.VList[eventList.VList.count - 1].diverEntries.team = coach.team
-                    eventList.VList[eventList.VList.count - 1].diverEntries.totalScore = 0
+                    event.VList.append(divers(dives: [], diverEntries: diver))
+                    event.VList[event.VList.count - 1].diverEntries.team = coach.team
+                    event.VList[event.VList.count - 1].diverEntries.totalScore = 0
                 }
             }
         }
         //create array of every team
         makeTeamsArray()
-        if !eventList.EList.isEmpty {
+        if !event.EList.isEmpty {
             sortEListByTeam()
         }
-        if !eventList.JVList.isEmpty {
+        if !event.JVList.isEmpty {
             sortJVListByTeam()
         }
-        if !eventList.VList.isEmpty {
+        if !event.VList.isEmpty {
             sortVListByTeam()
         }
     }
     
+    //makes an array of every team name
     func makeTeamsArray() {
-        for diver in eventList.EList {
+        for diver in event.EList {
             var addTeam = true
             for tempTeam in teamsArray {
                 if diver.diverEntries.team == tempTeam {
@@ -381,7 +399,7 @@ struct AddDiversView: View {
                 teamsArray.append(diver.diverEntries.team!)
             }
         }
-        for diver in eventList.JVList {
+        for diver in event.JVList {
             var addTeam = true
             for tempTeam in teamsArray {
                 if diver.diverEntries.team == tempTeam {
@@ -392,7 +410,7 @@ struct AddDiversView: View {
                 teamsArray.append(diver.diverEntries.team!)
             }
         }
-        for diver in eventList.VList {
+        for diver in event.VList {
             var addTeam = true
             for tempTeam in teamsArray {
                 if diver.diverEntries.team == tempTeam {
@@ -404,127 +422,142 @@ struct AddDiversView: View {
             }
         }
     }
-    
+    //reorders the exhibition divers based on their team
     func sortEListByTeam() {
         var index: Int = 0
         var tempEList: [divers] = []
-        
-        while !eventList.EList.isEmpty {
+        while !event.EList.isEmpty {
             var breakLoop = false
-            for diver in 0..<eventList.EList.count {
+            //loops through the EList and moves a diver to the temp list if they match the team at the index
+            for diver in 0..<event.EList.count {
                 if breakLoop == false {
-                    if eventList.EList[diver].diverEntries.team == teamsArray[index] {
-                        tempEList.append(eventList.EList[diver])
-                        eventList.EList.remove(at: diver)
+                    if event.EList[diver].diverEntries.team == teamsArray[index] {
+                        tempEList.append(event.EList[diver])
+                        event.EList.remove(at: diver)
                         breakLoop = true
                     }
                 }
             }
             if index != teamsArray.count - 1 {
+                //next team
                 index += 1
             }
             else {
+                //go back to the start of the team array
                 index = 0
             }
         }
+        //move the templist divers back into the EList with the new order
         while !tempEList.isEmpty {
-            eventList.EList.append(tempEList[tempEList.count - 1])
+            event.EList.append(tempEList[tempEList.count - 1])
             tempEList.remove(at: tempEList.count - 1)
         }
     }
-    
+    //reorders to junior varsity divers based on their team
     func sortJVListByTeam() {
         var index: Int = 0
         var tempJVList: [divers] = []
         
-        while !eventList.JVList.isEmpty {
+        while !event.JVList.isEmpty {
             var breakLoop = false
-            for diver in 0..<eventList.JVList.count {
+            //loops through the JVList and moves a diver to the temp list if they match the team at the index
+            for diver in 0..<event.JVList.count {
                 if !breakLoop {
-                    if eventList.JVList[diver].diverEntries.team == teamsArray[index] {
-                        tempJVList.append(eventList.JVList[diver])
-                        eventList.JVList.remove(at: diver)
+                    if event.JVList[diver].diverEntries.team == teamsArray[index] {
+                        tempJVList.append(event.JVList[diver])
+                        event.JVList.remove(at: diver)
                         breakLoop = true
                     }
                 }
             }
             if index != teamsArray.count - 1 {
+                //next team
                 index += 1
             }
             else {
+                //go back to the start of the team array
                 index = 0
             }
         }
+        //move the templist divers back into the JVList with the new order
         while !tempJVList.isEmpty {
-            eventList.JVList.append(tempJVList[tempJVList.count - 1])
+            event.JVList.append(tempJVList[tempJVList.count - 1])
             tempJVList.remove(at: tempJVList.count - 1)
         }
     }
     
-    
+    //reorders to varsity divers based on their team
     func sortVListByTeam() {
         var index: Int = 0
         var tempVList: [divers] = []
         
-        while !eventList.VList.isEmpty {
+        while !event.VList.isEmpty {
             var breakLoop = false
-            for diver in 0..<eventList.VList.count {
+            //loops through the VList and moves a diver to the temp list if they match the team at the index
+            for diver in 0..<event.VList.count {
                 if !breakLoop {
-                    if eventList.VList[diver].diverEntries.team == teamsArray[index] {
-                        tempVList.append(eventList.VList[diver])
-                        eventList.VList.remove(at: diver)
+                    if event.VList[diver].diverEntries.team == teamsArray[index] {
+                        tempVList.append(event.VList[diver])
+                        event.VList.remove(at: diver)
                         breakLoop = true
                     }
                 }
             }
             if index != teamsArray.count - 1 {
+                //next team
                 index += 1
             }
             else {
+                //go back to the start of the team array
                 index = 0
             }
         }
+        //move the templist divers back into the VList with the new order
         while !tempVList.isEmpty {
-            eventList.VList.append(tempVList[tempVList.count - 1])
+            event.VList.append(tempVList[tempVList.count - 1])
             tempVList.remove(at: tempVList.count - 1)
         }
     }
-    
+    //takes all the divers from the diffferent levels and returns them in one list
     func consolidateDiverList() -> [divers] {
         var allDivers: [divers] = []
-        for diver in eventList.EList {
+        for diver in event.EList {
             allDivers.append(diver)
         }
-        for diver in eventList.JVList {
+        for diver in event.JVList {
             allDivers.append(diver)
         }
-        for diver in eventList.VList {
+        for diver in event.VList {
             allDivers.append(diver)
         }
         return allDivers
     }
-    
+    //removes a diver from the EList at the given index
     func deleteEDiver(at offsets: IndexSet) {
-        eventList.EList.remove(atOffsets: offsets)
-        eventList.reviewed = false
+        event.EList.remove(atOffsets: offsets)
+        event.reviewed = false
         eventStore.saveEvent()
     }
+    //removes a diver from the JVList at the given index
     func deleteJVDiver(at offsets: IndexSet) {
-        eventList.JVList.remove(atOffsets: offsets)
-        eventList.reviewed = false
+        event.JVList.remove(atOffsets: offsets)
+        event.reviewed = false
         eventStore.saveEvent()
     }
+    //removes a diver from the VList at the given index
     func deleteVDiver(at offsets: IndexSet) {
-        eventList.VList.remove(atOffsets: offsets)
-        eventList.reviewed = false
+        event.VList.remove(atOffsets: offsets)
+        event.reviewed = false
         eventStore.saveEvent()
     }
-    
+    //makes a list with all divers with their full dive info from their code to be sent to the scoring view
     func makeFinalDiverList() {
         diversWithDives = []
+        //loops through all divers
         for diver in consolidateDiverList() {
             var diveList: [dives] = []
             if diver.dives.isEmpty {
+                //loops through all the dive codes
                 for dive in diver.diverEntries.dives {
                     var name: String = ""
                     var positionId: Int64 = -1
@@ -557,7 +590,7 @@ struct AddDiversView: View {
                             dOD = fetchedWithPosition.degreeOfDifficulty
                         }
                     }
-                    
+                    //full dive
                     let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0)
                     diveList.append(newDive)
                 }
@@ -568,9 +601,10 @@ struct AddDiversView: View {
             }
         }
     }
+    //checks if the divers entries in the coach entry are valid
     func checkCodeValidity(entry: coachEntry) -> Bool {
         var valid = false
-        
+        //loops through all diver entries in the coach entry
         for diver in entry.diverEntries {
             //check dive num and code
             for dive in diver.dives {
@@ -603,7 +637,7 @@ struct AddDiversView: View {
             }
             
             //check dive count
-            if diver.dives.count > eventList.diveCount {
+            if diver.dives.count > event.diveCount {
                 //message saying to many dives
                 failedScanMessage += "A diver has too many dives\n"
                 return false
@@ -616,8 +650,9 @@ struct AddDiversView: View {
         var skipFirstDive = true
         var uniqueCategories: [Int] = []
         var uniqueCategoryCount: Int = 0
+        //loops through all diver entries in the first coach entry which is cleared after each is validated
         for diver in 0..<coachList[0].diverEntries.count {
-            if coachList[0].diverEntries[diver].dives.count < eventList.diveCount {
+            if coachList[0].diverEntries[diver].dives.count < event.diveCount {
                 coachList[0].diverEntries[diver].dq = true
             }
             if coachList[0].diverEntries[diver].dives.count == 6 {
@@ -934,7 +969,7 @@ struct AddDiversView: View {
             skipFirstDive = false
         }
     }
-    
+    //finds the dive of the week by going back day by day until it hits the start of a week and returns that dives code
     func findDiveOfTheWeek() -> ClosedRange<Int> {
         var tempDate = Date()
         var dateComponents = DateComponents()
@@ -962,16 +997,18 @@ struct AddDiversView: View {
         
         return 0...1
     }
-    
+    //returns a string to be sent through a qr code
     func createdQrCode() -> String {
         var announcerEvent = announcerEvent(diver: [])
+        //loops through each diver
         for diver in diversWithDives {
             announcerEvent.diver.append(announcerDiver(name: diver.diverEntries.name, school: diver.diverEntries.team ?? "", dives: []))
+            //loops through each dive
             for dive in diver.diverEntries.dives {
                 announcerEvent.diver[announcerEvent.diver.count - 1].dives.append(dive)
             }
         }
-        
+        //encode data to json
         let encoder = JSONEncoder()
         let data = try! encoder.encode(announcerEvent)
         // json compression
@@ -981,7 +1018,7 @@ struct AddDiversView: View {
     
     struct AddDiversView_Previews: PreviewProvider {
         static var previews: some View {
-            AddDiversView(eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: false)), path: .constant([]))
+            AddDiversView(event: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: false)), path: .constant([]))
         }
     }
 }

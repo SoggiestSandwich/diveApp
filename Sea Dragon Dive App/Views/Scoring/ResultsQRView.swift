@@ -10,22 +10,22 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct ResultsQRView: View {
-    let team: String
+    let team: String //selected team
     
-    let context = CIContext()
-    let filter = CIFilter.qrCodeGenerator()
-    var url: String
+    let context = CIContext() //sets a CI context
+    let filter = CIFilter.qrCodeGenerator() //sets a CI filter
+    var code: String //the code that is encoded into qr code
     
     var body: some View {
         VStack {
             Text(team)
                 .font(.largeTitle.bold())
-            
-            Image(uiImage: generateQRCodeImage(url)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
+            //qr code image
+            Image(uiImage: generateQRCodeImage(code)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
             Spacer()
         }
     }
-    
+    //returns the qr code image
     func generateQRCodeImage(_ url: String) -> UIImage {
         let data = Data(url.utf8)
         filter.setValue(data, forKey: "inputMessage")
@@ -41,6 +41,6 @@ struct ResultsQRView: View {
 
 struct ResultsQRView_Previews: PreviewProvider {
     static var previews: some View {
-        ResultsQRView(team: "Team", url: "")
+        ResultsQRView(team: "Team", code: "")
     }
 }

@@ -8,15 +8,13 @@
 import SwiftUI
 
 struct VarsityResultsView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
     
-    @State var unsortedDiverList: [divers]
-    @State var isPresentingTeamSelector: Bool = false
-    @Binding var eventList: events
-    @Binding var path: [String]
+    @State var unsortedDiverList: [divers] //list of all divers
+    @Binding var event: events //the scoring event being shown
     
     var body: some View {
+        //loops through all varsity divers
         ForEach(Array(zip(setVList().indices, setVList())), id: \.1) { index, diver in
             HStack {
                 Text("\(diver.skip == true || diver.diverEntries.dq == true ? "DQ" : "\(String(diver.placement!)).")")
@@ -33,14 +31,15 @@ struct VarsityResultsView: View {
             .listRowBackground(diver.skip == true || diver.diverEntries.dq == true ? colorScheme == .dark ? Color(red: 1, green: 1, blue: 1, opacity: 0.125) : Color.white : diver.placement == 1 ? Color.yellow : diver.placement == 2 ? Color.gray : diver.placement == 3 ? Color.brown : colorScheme == .dark ? .black : .white)
         }
         .onAppear {
+            //creates the diver list from each list
             unsortedDiverList = []
-            for diver in eventList.EList {
+            for diver in event.EList {
                 unsortedDiverList.append(diver)
             }
-            for diver in eventList.JVList {
+            for diver in event.JVList {
                 unsortedDiverList.append(diver)
             }
-            for diver in eventList.VList {
+            for diver in event.VList {
                 unsortedDiverList.append(diver)
             }
             for diver in 0..<unsortedDiverList.count {
@@ -53,6 +52,7 @@ struct VarsityResultsView: View {
             }
         }
     }
+    //sorts the diver list and returns a list of sorted varsity divers
     func setVList() -> [divers] {
         var vList: [divers] = []
         var num = 0
@@ -87,5 +87,5 @@ struct VarsityResultsView: View {
         divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102), skip: true),
         divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakaw", team: "Kaw Kaw High", totalScore: 104.2), skip: true),
         divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102)),
-        divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)), path: .constant([]))
+        divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], event: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)))
 }

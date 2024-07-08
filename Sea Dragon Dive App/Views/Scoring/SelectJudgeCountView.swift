@@ -8,17 +8,18 @@
 import SwiftUI
 
 struct SelectJudgeCountView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is in a verticle orientation
     
-    @Binding var judgeCount: Int
-    @Binding var diveCount: Int
-    @Binding var isShowing: Bool
-    @Binding var confirmed: Bool
+    @Binding var judgeCount: Int //the number of judges for the event
+    @Binding var diveCount: Int //the number of dives for the event
+    @Binding var isShowing: Bool //used to close the sheet
+    @Binding var confirmed: Bool //used to verify that judge and dive count have been selected
     
     var body: some View {
         VStack {
             Spacer()
+            //judge count
             Text("Select the number of judges")
                 .font(.title.bold())
             HStack {
@@ -68,6 +69,7 @@ struct SelectJudgeCountView: View {
                         //isShowing = false
                     }
             }
+            //dive count
                 Text("Select the number of dives")
                     .font(.title.bold())
             HStack {
@@ -102,6 +104,7 @@ struct SelectJudgeCountView: View {
                     }
             }
             Spacer()
+            //confirm
             Text("Confirm")
                 .font(.title.bold())
                 .foregroundStyle(judgeCount != 0 && diveCount != 0 ? colorScheme == .dark ? .white : .black : .gray)
@@ -112,6 +115,7 @@ struct SelectJudgeCountView: View {
                         .foregroundColor(judgeCount != 0 && diveCount != 0 ? colorScheme == .dark ? .white : .black : .gray)
                 )
                 .onTapGesture {
+                    //checks that a judge and dive count have been selected and if they have confirms and closes the sheet
                     if judgeCount != 0 && diveCount != 0 {
                         confirmed = true
                         isShowing = false
@@ -119,6 +123,7 @@ struct SelectJudgeCountView: View {
                 }
         }
         .onAppear {
+            //resets the judge and dive count to 0 when the sheet is opened
             judgeCount = 0
             diveCount = 0
         }

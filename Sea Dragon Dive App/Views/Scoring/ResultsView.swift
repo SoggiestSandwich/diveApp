@@ -9,26 +9,28 @@ import SwiftUI
 
 
 struct ResultsView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used for custom back button
     
-    @EnvironmentObject var eventStore: EventStore
+    @EnvironmentObject var eventStore: EventStore //persistant scoring event data
     
-    @State var unsortedDiverList: [divers]
-    @State var isPresentingTeamSelector: Bool = false
-    @State var sortedList: [divers] = []
-    @Binding var eventList: events
-    @Binding var path: [String]
-    @Binding var currentDiver: Int
+    @State var unsortedDiverList: [divers] //list of all the divers
+    @State var isPresentingTeamSelector: Bool = false //opens the qr code
+    @State var sortedList: [divers] = [] //list of divers sorted by level and placement
+    @Binding var event: events //event whose results are being shown
+    @Binding var path: [String] //used to go back to the login view
+    @Binding var currentDiver: Int //index of the last diver if they are dropped
     
     var body: some View {
             VStack {
                 HStack {
+                    //goes to event selection view
                     NavigationLink(destination: EventSelectionView(path: $path)) {
                         Image(systemName: "house")
                     }
                     Spacer()
-                    NavigationLink(destination: ScoreInfoView(diverList: unsortedDiverList, lastDiverIndex: unsortedDiverList.count - 1, eventList: $eventList, path: $path)) {
+                    //goes to scoring view
+                    NavigationLink(destination: ScoreInfoView(diverList: unsortedDiverList, lastDiverIndex: unsortedDiverList.count - 1, event: $event, path: $path)) {
                         Text("Edit Event")
                     }
                 }
@@ -36,7 +38,7 @@ struct ResultsView: View {
                 List {
                     //list divers in placement order
                     Section(header: Text(setVList().isEmpty ? "" : "Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        VarsityResultsView(unsortedDiverList: unsortedDiverList, eventList: $eventList, path: $path)
+                        VarsityResultsView(unsortedDiverList: unsortedDiverList, event: $event, path: $path)
                     }
                     Section(header: Text(setJVList().isEmpty ? "" : "Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         ForEach(Array(zip(setJVList().indices, setJVList())), id: \.1) { index, diver in
@@ -70,6 +72,7 @@ struct ResultsView: View {
                     }
                 }
             }
+        //puts the divers into a sorted list and shows the team selector sheet
             Button {
                 sortedList = []
                 for diver in setEList() {
@@ -94,18 +97,20 @@ struct ResultsView: View {
                             .stroke(colorScheme == .dark ? Color.white : Color.black, lineWidth: 2)
                     )
             }
+        //sheet for team selector
         .sheet(isPresented: $isPresentingTeamSelector) {
             TeamSelevtorView(diverList: sortedList)
         }
         .onAppear {
+            //puts divers into a list and drops the current diver if it is not the default
             unsortedDiverList = []
-            for diver in eventList.EList {
+            for diver in event.EList {
                 unsortedDiverList.append(diver)
             }
-            for diver in eventList.JVList {
+            for diver in event.JVList {
                 unsortedDiverList.append(diver)
             }
-            for diver in eventList.VList {
+            for diver in event.VList {
                 unsortedDiverList.append(diver)
             }
             for diver in 0..<unsortedDiverList.count {
@@ -119,13 +124,13 @@ struct ResultsView: View {
             
             if currentDiver != -1 {
                 unsortedDiverList[currentDiver].skip = true
-                eventList.finished = true
+                event.finished = true
                 saveEventData()
             }
         }
         .navigationBarBackButtonHidden(true)
     }
-    
+    //returns a list of exhibition divers from the sorted list
     func setEList() -> [divers] {
         var eList: [divers] = []
         let sortedDiverList = unsortedDiverList.sorted()
@@ -136,6 +141,7 @@ struct ResultsView: View {
         }
         return eList
     }
+    //returns a list of junior varsity divers from the sorted list
     func setJVList() -> [divers] {
         var jvList: [divers] = []
         var num = 0
@@ -159,6 +165,7 @@ struct ResultsView: View {
         }
         return jvList
     }
+    //returns a list of varsity divers from the sorted list
     func setVList() -> [divers] {
         var vList: [divers] = []
         var num = 0
@@ -182,21 +189,21 @@ struct ResultsView: View {
         }
         return vList
     }
-    
+    //puts divers from unsorted list to it level and saves the event
     func saveEventData() {
-        eventList.EList = []
-        eventList.JVList = []
-        eventList.VList = []
+        event.EList = []
+        event.JVList = []
+        event.VList = []
         
         for diver in unsortedDiverList {
             if diver.diverEntries.level == 0 {
-                eventList.EList.append(diver)
+                event.EList.append(diver)
             }
             else if diver.diverEntries.level == 1 {
-                eventList.JVList.append(diver)
+                event.JVList.append(diver)
             }
             else if diver.diverEntries.level == 2 {
-                eventList.VList.append(diver)
+                event.VList.append(diver)
             }
         }
         eventStore.saveEvent()
@@ -215,6 +222,6 @@ struct ResultsView_Previews: PreviewProvider {
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102), skip: true),
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 1, name: "Kakaw", team: "Kaw Kaw High", totalScore: 104.2), skip: true),
             divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakawington", team: "Kaw Kawing Ton High", totalScore: 102)),
-            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)), path: .constant([]), currentDiver: .constant(0))
+            divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 0, index: 0)], position: "p", roundScore: 0)], diverEntries: diverEntry(dives: ["", "", ""], level: 0, name: "Kakaw", team: "Kaw Kaw High", totalScore: 150), skip: true)], event: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: true, judgeCount: 3, diveCount: 6, reviewed: true)), path: .constant([]), currentDiver: .constant(0))
     }
 }

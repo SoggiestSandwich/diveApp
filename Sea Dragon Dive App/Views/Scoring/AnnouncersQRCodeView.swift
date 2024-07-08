@@ -10,20 +10,20 @@ import SwiftUI
 import CoreImage.CIFilterBuiltins
 
 struct AnnouncerQRCodeView: View {
-    let context = CIContext()
-    let filter = CIFilter.qrCodeGenerator()
-    var url: String
+    let context = CIContext() //sets the CI context
+    let filter = CIFilter.qrCodeGenerator() //sets the CI filter
+    var url: String //the string being encoded
     
     var body: some View {
         VStack {
             Text("Show to Announcer")
                 .font(.largeTitle.bold())
-            
+            //qr image
             Image(uiImage: generateQRCodeImage(url)).interpolation(.none).resizable().frame(width: 300, height: 300, alignment: .center)
             Spacer()
         }
     }
-    
+    //generates the qr image from a string and returns it
     func generateQRCodeImage(_ url: String) -> UIImage {
         let data = Data(url.utf8)
         filter.setValue(data, forKey: "inputMessage")

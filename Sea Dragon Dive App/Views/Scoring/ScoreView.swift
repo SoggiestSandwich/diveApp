@@ -7,17 +7,18 @@
 
 import SwiftUI
 
+//struct for handling drag and drop
 enum DragState {
     case unknown
     case good
 }
 
 struct ScoreView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.verticalSizeClass) var verticalSizeClass
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is vertical
     
-    @State var score: Double
-    @State var offset = CGSize.zero
+    @State var score: Double //the number displayed
+    @State var offset = CGSize.zero //
     
     var index: Int
     
@@ -39,6 +40,7 @@ struct ScoreView: View {
                     .shadow(color: dragState == .good ? .red : .clear, radius: 10)
                     .offset(x: offset.width, y: offset.height)
                     .gesture(
+                        //handles drag and drop functionality
                         DragGesture(coordinateSpace: .global)
                             .onChanged( {
                                 self.offset = CGSize(width: $0.translation.width, height: $0.translation.height)
@@ -53,7 +55,7 @@ struct ScoreView: View {
                     )
                     .padding(.horizontal)
     }
-    
+    //returns the formatting for the number shown
     func setFormat(score: Float) -> String {
         var tempScore = score
         

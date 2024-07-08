@@ -8,31 +8,34 @@
 import SwiftUI
 
 struct diverInfoView: View {
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode> //used for a custom back button
     
+    //tables from the database
     @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
     @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
     @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
     
-    @Binding var diverList: divers
-    @State private var dOfTheWeekError: String = ""
-    @State private var catCountError: String = ""
-    @State private var volDiveGreaterNineError: String = ""
-    @State private var volDiveCategoryError: String = ""
-    @State private var nonVolDiveCategoryError: String = ""
-    @State private var catCountFirstEigtError: String = ""
-    @State private var repeatDiveInFirstEightError: String = ""
-    @State private var twoVolZeroFourError: String = ""
-    @State private var twoVolFiveSevenError: String = ""
-    @State private var oneVolEightTenError: String = ""
-    @State private var notEnoughDivesError: String = ""
+    @Binding var diver: divers //diver being shown
+    //potential errors in an entry
+    @State private var dOfTheWeekError: String = "" //error for wrong dive of the week
+    @State private var catCountError: String = "" //error for not having enough categories 6 dives
+    @State private var volDiveGreaterNineError: String = "" //volentary dives DOD exceed 9
+    @State private var volDiveCategoryError: String = "" //volentary dives don't have the right number of categories
+    @State private var nonVolDiveCategoryError: String = "" //nonvolentary dives  do not have the roght number of volentary dives
+    @State private var catCountFirstEigtError: String = "" //first eight dives don't have the right amount of categories
+    @State private var repeatDiveInFirstEightError: String = "" //there is a category repeated 3 or more times in the first eight dives
+    @State private var twoVolZeroFourError: String = "" //there are not two volentary dives in dives 1-5
+    @State private var twoVolFiveSevenError: String = "" //there are not two volentary dives in dives 6-8
+    @State private var oneVolEightTenError: String = "" //there is not a volentary dive in dives 8-11
+    @State private var notEnoughDivesError: String = "" //there are not enough dives
     
-    @State var diveCount: Int
+    @State var diveCount: Int //number of dives needed to be valid
     
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
                 Spacer()
+                //dismisses the sheet
                 Button {
                     self.presentationMode.wrappedValue.dismiss()
                 } label: {
@@ -40,18 +43,18 @@ struct diverInfoView: View {
                 }
                 .padding()
             }
-            Text(diverList.diverEntries.name)
+            Text(diver.diverEntries.name)
                 .font(.title.bold())
                 .padding(.horizontal)
-            Text(diverList.diverEntries.team!)
+            Text(diver.diverEntries.team!)
                 .font(.title)
                 .padding(.horizontal)
-            Text(diverList.diverEntries.level == 0 ? "Exhibition" : diverList.diverEntries.level == 1 ? "Junior Varsity" : "Varsity")
+            Text(diver.diverEntries.level == 0 ? "Exhibition" : diver.diverEntries.level == 1 ? "Junior Varsity" : "Varsity")
                 .font(.title)
                 .padding(.horizontal)
-            
+            //list of all of the divers dives
             List {
-                ForEach(diverList.dives, id: \.hashValue) { dive in
+                ForEach(diver.dives, id: \.hashValue) { dive in
                     HStack {
                         Text("\(dive.name), \(dive.position)")
                         Text("(\(String(dive.degreeOfDiff)))")
@@ -107,8 +110,9 @@ struct diverInfoView: View {
             }
         }
         .onAppear {
-                if diverList.dives.isEmpty {
-                    for dive in diverList.diverEntries.dives {
+            //fills in all of the dive data
+                if diver.dives.isEmpty {
+                    for dive in diver.diverEntries.dives {
                         var name: String = ""
                         var positionId: Int64 = -1
                         var positionName: String = ""
@@ -142,22 +146,23 @@ struct diverInfoView: View {
                         }
                         
                         let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0)
-                        diverList.dives.append(newDive)
+                        diver.dives.append(newDive)
                     }
                 }
             findErrors()
         }
     }
+    //finds problems with the entry and adds them to their error string to be listed
     func findErrors() {
         var skipFirstDive = true
         var uniqueCategories: [Int] = []
         var uniqueCategoryCount: Int = 0
-        if diverList.diverEntries.dives.count < diveCount {
-            notEnoughDivesError = "Has \(diverList.diverEntries.dives.count) out of \(diveCount) dives"
+        if diver.diverEntries.dives.count < diveCount {
+            notEnoughDivesError = "Has \(diver.diverEntries.dives.count) out of \(diveCount) dives"
         }
-            if diverList.dives.count == 6 {
+            if diver.dives.count == 6 {
                 //check for dive of the week
-                var tempDiveCode = diverList.diverEntries.dives[0]
+                var tempDiveCode = diver.diverEntries.dives[0]
                 tempDiveCode.removeLast()
                 if findDiveOfTheWeek().contains(Int(tempDiveCode)!) {
                     dOfTheWeekError = ""
@@ -167,7 +172,7 @@ struct diverInfoView: View {
                     dOfTheWeekError = "Does not have the dive of the week in the first dive slot"
                 }
                 if !skipFirstDive {
-                    for dive in diverList.diverEntries.dives {
+                    for dive in diver.diverEntries.dives {
                         var tempDiveCode = dive
                         tempDiveCode.removeLast()
                         if Int(tempDiveCode)! < 200 {
@@ -210,11 +215,11 @@ struct diverInfoView: View {
                     }
                 }
             }
-            else if diverList.dives.count == 11 {
+            else if diver.dives.count == 11 {
                 var allCategories: [Int] = []
                 var uniqueCategories: Int = 0
                 var totalDOD: Double = 0
-                for dive in diverList.diverEntries.fullDives! {
+                for dive in diver.diverEntries.fullDives! {
                     if dive.volentary == true {
                         var diveNum = dive.code!
                         diveNum.removeLast()
@@ -267,7 +272,7 @@ struct diverInfoView: View {
                     volDiveCategoryError = "Only has \(uniqueCategories) out of 5 categories in volentary dives"
                 }
                 
-                for dive in diverList.diverEntries.fullDives! {
+                for dive in diver.diverEntries.fullDives! {
                     if dive.volentary != true {
                         var diveNum = dive.code!
                         diveNum.removeLast()
@@ -315,7 +320,7 @@ struct diverInfoView: View {
                 uniqueCategories = 0
                 allCategories.removeAll()
                 for dive in 0...7 {
-                    var diveNum = diverList.diverEntries.dives[dive]
+                    var diveNum = diver.diverEntries.dives[dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         if !allCategories.contains(1) {
@@ -355,7 +360,7 @@ struct diverInfoView: View {
                     //check for more than 3 or more repeats in the first 8 dives
                     allCategories.removeAll()
                     for dive in 0...7 {
-                        var diveNum = diverList.diverEntries.dives[dive]
+                        var diveNum = diver.diverEntries.dives[dive]
                         diveNum.removeLast()
                         if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                             allCategories.append(1)
@@ -396,7 +401,7 @@ struct diverInfoView: View {
                     //check the volentary to optional ratio
                     var volentaryCount = 0
                     for dive in 0...4 {
-                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                        if diver.diverEntries.fullDives![dive].volentary == true {
                             volentaryCount += 1
                         }
                     }
@@ -408,7 +413,7 @@ struct diverInfoView: View {
                     }
                     volentaryCount = 0
                     for dive in 5...7 {
-                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                        if diver.diverEntries.fullDives![dive].volentary == true {
                             volentaryCount += 1
                         }
                     }
@@ -420,7 +425,7 @@ struct diverInfoView: View {
                     }
                     volentaryCount = 0
                     for dive in 8...10 {
-                        if diverList.diverEntries.fullDives![dive].volentary == true {
+                        if diver.diverEntries.fullDives![dive].volentary == true {
                             volentaryCount += 1
                         }
                     }
@@ -437,6 +442,7 @@ struct diverInfoView: View {
             }
             skipFirstDive = false
     }
+    //finds the dive of the week by going back day by day until it hits the start of a week and returns the number range of those dives
     func findDiveOfTheWeek() -> ClosedRange<Int> {
         var tempDate = Date()
         var dateComponents = DateComponents()
@@ -468,6 +474,6 @@ struct diverInfoView: View {
 
 struct diverInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        diverInfoView(diverList: .constant(divers(dives: [dives(name: "dive1", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive2", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive3", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive4", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive5", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive6", degreeOfDiff: 1, score: [], position: "position", roundScore: 0)], diverEntries: diverEntry(dives: ["code", "code", "code", "code", "code", "code"], level: 0, name: "name", team: "Team"))), diveCount: 6)
+        diverInfoView(diver: .constant(divers(dives: [dives(name: "dive1", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive2", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive3", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive4", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive5", degreeOfDiff: 1, score: [], position: "position", roundScore: 0), dives(name: "dive6", degreeOfDiff: 1, score: [], position: "position", roundScore: 0)], diverEntries: diverEntry(dives: ["code", "code", "code", "code", "code", "code"], level: 0, name: "name", team: "Team"))), diveCount: 6)
     }
 }

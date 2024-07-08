@@ -8,21 +8,21 @@
 import SwiftUI
 
 struct ScoreSelectorView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Environment(\.verticalSizeClass) var verticalSizeClass
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.colorScheme) var colorScheme //detects if the device is in dark mode
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is vertical
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass //detects if the device is horizontal
     
-    @EnvironmentObject var eventStore: EventStore
+    @EnvironmentObject var eventStore: EventStore //persistant scoring event data
     
-    @Binding var halfAdded: Bool
-    @State var buttonFrames = [CGRect](repeating: .zero, count: 1)
-    @Binding var currentIndex: Int
-    @Binding var currentDiver: Int
-    @Binding var diverList: [divers]
-    @Binding var currentDive: Int
-    @Binding var eventList: events
+    @Binding var halfAdded: Bool //checks if a .5 has been added to the current score
+    @State var buttonFrames = [CGRect](repeating: .zero, count: 1) //the rectangular area of the trash can
+    @Binding var currentIndex: Int //index of the current score
+    @Binding var currentDiver: Int //index of the current diver being scored
+    @Binding var diverList: [divers] //list of all divers
+    @Binding var currentDive: Int //index of the current dive being scored
+    @Binding var event: events //the event being scored
     
-    @State var findTrash: Int = 0
+    @State var findTrash: Int = 0 //checks if the score has been in the trash
     
     var body: some View {
         VStack {
@@ -73,12 +73,12 @@ struct ScoreSelectorView: View {
                     .frame(width: UIScreen.main.bounds.size.width * 0.2, height: 25, alignment: .trailing)
             }
             .padding()
-            
+            //score selector
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 30, maximum: 2000)), count: verticalSizeClass == .regular ? UIDevice.current.localizedModel == "iPad" ? 4 : 3 : 12)) {
                 ForEach(1...12, id: \.self) { number in
                     if number < 10 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount && diverList[currentDiver].skip != true {
+                            if diverList[currentDiver].dives[currentDive].score.count < event.judgeCount && diverList[currentDiver].skip != true {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: Double(number), index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
@@ -122,7 +122,7 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 11 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount {
+                            if diverList[currentDiver].dives[currentDive].score.count < event.judgeCount {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 0, index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
@@ -144,7 +144,7 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 12 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < eventList.judgeCount {
+                            if diverList[currentDiver].dives[currentDive].score.count < event.judgeCount {
                                 currentIndex = currentIndex + 1
                                 let tempScore = scores(score: 10, index: currentIndex)
                                 diverList[currentDiver].dives[currentDive].score.append(tempScore)
@@ -170,7 +170,7 @@ struct ScoreSelectorView: View {
             .ignoresSafeArea()
         }
     }
-    
+    //adds the scores from the current dive and drop the top and bottom if 5 judges and top 2 and bottom 2 if there are 7 judges then multiplies by the degree of difficulty
     func SetRoundScore() {
         var roundScore: Double = 0
         var max: Double = -1
@@ -218,7 +218,7 @@ struct ScoreSelectorView: View {
         diverList[currentDiver].dives[currentDive].roundScore = roundScore
         SetTotalScore()
     }
-    
+    //totals the round scores to the total score
     func SetTotalScore() {
         var totalScore: Double = 0
         for dive in diverList[currentDiver].dives {
@@ -226,7 +226,7 @@ struct ScoreSelectorView: View {
         }
         diverList[currentDiver].diverEntries.totalScore = totalScore
     }
-    
+    //checks if a score has been moved
     func scoreMoved(location: CGPoint, score: Double) -> DragState {
         if diverList[currentDiver].skip != true {
             findTrash = findTrash + 1
@@ -244,7 +244,7 @@ struct ScoreSelectorView: View {
             return .unknown
         }
     }
-    
+    //removes score dropped on the trash
     func scoreDropped(location: CGPoint, scoreIndex: Int, score: Double) {
         let match = buttonFrames.firstIndex(where: {
             $0.contains(location)
@@ -265,21 +265,21 @@ struct ScoreSelectorView: View {
         }
         saveEventData()
     }
-    
+    //put divers into 3 lists based on level and saves the data
     func saveEventData() {
-        eventList.EList = []
-        eventList.JVList = []
-        eventList.VList = []
+        event.EList = []
+        event.JVList = []
+        event.VList = []
         
         for diver in diverList {
             if diver.diverEntries.level == 0 {
-                eventList.EList.append(diver)
+                event.EList.append(diver)
             }
             else if diver.diverEntries.level == 1 {
-                eventList.JVList.append(diver)
+                event.JVList.append(diver)
             }
             else if diver.diverEntries.level == 2 {
-                eventList.VList.append(diver)
+                event.VList.append(diver)
             }
         }
         eventStore.saveEvent()
@@ -288,6 +288,6 @@ struct ScoreSelectorView: View {
 
 struct ScoreSelectorView_Previews: PreviewProvider {
     static var previews: some View {
-        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), eventList: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: true)))
+        ScoreSelectorView(halfAdded: .constant(false), currentIndex: .constant(0), currentDiver: .constant(0), diverList: .constant([divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0)], position: "tempPos", roundScore: 0)], diverEntries: diverEntry(dives: [], level: 0, name: "Kakaw"))]), currentDive: .constant(0), event: .constant(events(date: "", EList: [], JVList: [], VList: [], finished: false, judgeCount: 3, diveCount: 6, reviewed: true)))
     }
 }
