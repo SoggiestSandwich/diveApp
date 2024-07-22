@@ -52,7 +52,7 @@ struct CoachEventSelectionView: View {
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         //if the code can be turned into a coaschEntry sets the loacation and finished
-                        if entries != nil {
+                        if entries != nil && entries?.team == coachEntryStore.coachesList[selectedCoachEntryIndex].team{
                             let tempLocation = coachEntryStore.coachesList[selectedCoachEntryIndex].location
                             coachEntryStore.coachesList[selectedCoachEntryIndex] = entries!
                             coachEntryStore.coachesList[selectedCoachEntryIndex].location = tempLocation
@@ -119,15 +119,12 @@ struct CoachEventSelectionView: View {
                                         Text(coach.location ?? "")
                                     }
                                     //button that opens the qr code scanner
-                                    Button {
-                                    } label: {
-                                        Text("Scan Results")
-                                            .padding(5)
-                                            .background (
-                                                RoundedRectangle(cornerRadius: 5)
-                                                    .stroke(lineWidth: 2)
-                                            )
-                                    }
+                                    Text("Scan Results")
+                                        .padding(5)
+                                        .background (
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .stroke(lineWidth: 2)
+                                        )
                                     .foregroundColor(colorScheme == .dark ? .white : .black)
                                     .onTapGesture {
                                         selectedCoachEntryIndex = index

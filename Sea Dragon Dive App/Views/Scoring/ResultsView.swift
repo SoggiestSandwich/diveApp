@@ -38,7 +38,7 @@ struct ResultsView: View {
                 List {
                     //list divers in placement order
                     Section(header: Text(setVList().isEmpty ? "" : "Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
-                        VarsityResultsView(unsortedDiverList: unsortedDiverList, event: $event, path: $path)
+                        VarsityResultsView(unsortedDiverList: unsortedDiverList, event: $event)
                     }
                     Section(header: Text(setJVList().isEmpty ? "" : "Junior Varsity").font(.title2.bold()).foregroundColor(colorScheme == .dark ? .white : .black)) {
                         ForEach(Array(zip(setJVList().indices, setJVList())), id: \.1) { index, diver in
@@ -114,7 +114,7 @@ struct ResultsView: View {
                 unsortedDiverList.append(diver)
             }
             for diver in 0..<unsortedDiverList.count {
-                if unsortedDiverList[diver].skip != true {
+                if unsortedDiverList[diver].skip != true && unsortedDiverList[diver].dq != true  {
                         unsortedDiverList[diver].placementScore = unsortedDiverList[diver].diverEntries.totalScore
                 }
                 else {

@@ -15,6 +15,11 @@ struct CoachDiveEventView: View {
     
     @EnvironmentObject var coachEntryStore: CoachEntryStore //persistant data for coach entries
     
+    //fetched tables from the database
+    @FetchRequest(entity: Dive.entity(), sortDescriptors: []) var fetchedDives: FetchedResults<Dive>
+    @FetchRequest(entity: Position.entity(), sortDescriptors: []) var fetchedPositions: FetchedResults<Position>
+    @FetchRequest(entity: WithPosition.entity(), sortDescriptors: []) var fetchedWithPositions: FetchedResults<WithPosition>
+    
     @State var failedScanAlert = false //triggers an alert for a failed qr scan
     @State var isPresentingScanner = false //opens the qr scanner
     //@State private var scannedCode: String = ""
@@ -61,6 +66,8 @@ struct CoachDiveEventView: View {
                             entries!.finishedEntry = true
                             
                             entry.diverEntries.append(entries!) //add the diver entry to the coaches entry
+                            //find full dives
+                            findDives(diverIndex: entry.diverEntries.count - 1)
                             coachEntryStore.saveDiverEntry()
                             self.isPresentingScanner = false
                         }
@@ -307,8 +314,25 @@ struct CoachDiveEventView: View {
     }
     //encodes the coaches entry into json and compresses it and returns the compressed data in string form
     func findQRCode() -> String {
+        var coachEntry = coachEntry(diverEntries: [], eventDate: entry.eventDate, team: entry.team, version: 0)
+        coachEntry.diverEntries = []
+        for diver in 0..<entry.diverEntries.count {
+            //diverEntry assembly
+            var diveEntries = diverEntry(dives: [], level: entry.diverEntries[diver].level, name: entry.diverEntries[diver].name)
+            
+            
+            for dive in 0..<entry.diverEntries[diver].dives.count {
+                diveEntries.dives.append(entry.diverEntries[diver].fullDives![dive].code ?? "")
+            }
+            diveEntries.volentary = []
+            for dive in 0..<entry.diverEntries[diver].fullDives!.count {
+                diveEntries.volentary!.append(entry.diverEntries[diver].fullDives![dive].volentary ?? false)
+                
+            }
+            coachEntry.diverEntries.append(diveEntries)
+        }
         let encoder = JSONEncoder()
-        let data = try! encoder.encode(entry)
+        let data = try! encoder.encode(coachEntry)
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)
         return optimizedData.base64EncodedString()
     }
@@ -325,6 +349,34 @@ struct CoachDiveEventView: View {
             }
         }
         return false
+    }
+    //puts the dives from the persistant data into the divelist and fillsn out the full dive details
+    func findDives(diverIndex: Int) {
+        var diveList: [dives] = []
+        var diveCodeCount = 0
+        for diveCode in entry.diverEntries[diverIndex].dives {
+            var tempCode: String = diveCode
+            tempCode.removeLast()
+            for fetchedDive in fetchedDives {
+                if Int(tempCode) ?? 0 == fetchedDive.diveNbr {
+                    tempCode = diveCode
+                    while tempCode.count != 1 {
+                        tempCode.removeFirst()
+                    }
+                    for fetchedWithPosition in fetchedWithPositions {
+                        if fetchedDive.diveNbr == fetchedWithPosition.diveNbr {
+                            for fetchedPosition in fetchedPositions {
+                                if tempCode.uppercased() == fetchedPosition.positionCode && fetchedPosition.positionId == fetchedWithPosition.positionId {
+                                    diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, code: diveCode, volentary: entry.diverEntries[diverIndex].volentary![diveCodeCount]))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            diveCodeCount += 1
+        }
+        entry.diverEntries[diverIndex].fullDives = diveList
     }
 }
 

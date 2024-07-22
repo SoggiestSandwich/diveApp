@@ -232,11 +232,11 @@ struct AnnounceDiveView: View {
                 //next diver/round and finish event button
                 Button {
                     //next diver
-                    if currentDiver < lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount {
+                    if currentDiver < lastDiverIndex || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount {
                         toggleNextDiver()
                     }
                     //next round
-                    else if currentDiver == lastDiverIndex || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
+                    else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount && currentDive != diveCount - 1 || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
                         toggleNextRound()
                     }
                     //finish event
@@ -245,13 +245,13 @@ struct AnnounceDiveView: View {
                     }
                 } label: {
                     //next diver
-                    if currentDiver < lastDiverIndex || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount  {
+                    if currentDiver < lastDiverIndex || diverWithLastDiveIndex != currentDiver && currentDive >= lowestDiveCount {
                         VStack {
                             Text("Next Diver")
                         }
                     }
                     //next round
-                    else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
+                    else if currentDiver == lastDiverIndex && currentDive < lowestDiveCount && currentDive != diveCount - 1 || diverWithLastDiveIndex == currentDiver && currentDive >= lowestDiveCount && currentDive < diveCount - 1 {
                         VStack {
                             Text("Next Round")
                         }

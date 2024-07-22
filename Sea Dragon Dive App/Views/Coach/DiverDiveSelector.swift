@@ -23,8 +23,6 @@ struct DiverDiveSelector: View {
     @State var expandedGroup: [Bool] = [false, false, false, false, false] //array that shows which dsclosure groups are open
     @State var subExpandedGroup: [Bool] = [false, false, false, false] //array that shows which sub disclosure groups are open
     
-    @State var entryList: diverEntry //the diver dives are being added to
-    @State var coachEntry: coachEntry //the coach entry that has the diver entry being added to
     @State var eventDate: String //date of the event
     @Binding var diveList: [dives] //list of the diver's dives
     
@@ -727,7 +725,6 @@ struct DiverDiveSelector: View {
     }
     //finds the dive of the week by going back one day at a time till the start of a dive of the week and returns that dives naem
     func findDiveOfTheWeek() -> String {
-        print(eventDate)
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/dd/yyyy"
         var tempDate = dateFormatter.date(from: eventDate)
@@ -761,6 +758,6 @@ struct DiverDiveSelector: View {
 
 struct DiverDiveSelector_Previews: PreviewProvider {
     static var previews: some View {
-        DiverDiveSelector(entryList: diverEntry(dives: [], level: 0, name: ""), coachEntry: coachEntry(diverEntries: [], eventDate: "", team: "", version: 0), eventDate: "1/1/2000", diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
+        DiverDiveSelector(eventDate: "1/1/2000", diveList: .constant([dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)]))
     }
 }

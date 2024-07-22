@@ -9,6 +9,8 @@ import SwiftUI
 
 struct BestDiveInfoView: View {
     
+    @Environment(\.verticalSizeClass) var verticalSizeClass //detects if the device is vertical
+    
     @State var entryList: [divers] //list of diver entries
     @State var name: String //dive's name
     @State var position: String //dive's position
@@ -27,9 +29,11 @@ struct BestDiveInfoView: View {
                                     VStack(alignment: .center) {
                                         Text("\(entry.date!.formatted(date: .abbreviated, time: .omitted))-\(entry.location ?? "")-\(entry.diverEntries.level == 0 ? "Exhibition" : entry.diverEntries.level == 1 ? "Junior Varsity" : "Varsity")")
                                         HStack {
-                                            ForEach(dive.score, id: \.hashValue) { score in
-                                                Text("\(String(format: "%.1f", score.score))")
-                                                    .padding(.horizontal)
+                                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(minimum: 65, maximum: 150)), count: verticalSizeClass == .regular ? 3 : 7)) {
+                                                ForEach(dive.score, id: \.hashValue) { score in
+                                                    Text("\(String(format: "%.1f", score.score))")
+                                                        .padding(.horizontal)
+                                                }
                                             }
                                             Spacer()
                                             Text("Score: \(String(format: "%.1f", dive.roundScore))")
@@ -48,6 +52,6 @@ struct BestDiveInfoView: View {
 
 struct BestDiveInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        BestDiveInfoView(entryList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0), scores(score: 1, index: 1), scores(score: 1, index: 2)], position: "position", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "Name"), date: Date(), location: "location", finished: true)], name: "diveName", position: "position", degreeOfDiff: 1.1)
+        BestDiveInfoView(entryList: [divers(dives: [dives(name: "diveName", degreeOfDiff: 1.1, score: [scores(score: 1, index: 0), scores(score: 1, index: 1), scores(score: 1, index: 2), scores(score: 1, index: 3), scores(score: 1, index: 4), scores(score: 1, index: 5), scores(score: 1, index: 6)], position: "position", roundScore: 3.3)], diverEntries: diverEntry(dives: [], level: 0, name: "Name"), date: Date(), location: "location", finished: true)], name: "diveName", position: "position", degreeOfDiff: 1.1)
     }
 }

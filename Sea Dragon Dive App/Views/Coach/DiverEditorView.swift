@@ -27,6 +27,7 @@ struct DiverEditorView: View {
     @State var diveList: [dives] = [] //list of all of the dives for the diver
     @State var name: String = "" //divers name
     @State var location: String = "" //location of the event
+    @State var failedValidationAlert = false //triggers the alert on failed validation
     
     var body: some View {
         VStack(alignment: .center) {
@@ -153,7 +154,7 @@ struct DiverEditorView: View {
             }
             //finish entry button
             Button {
-                signingSheet = true
+                validateEntry()
             } label: {
                 HStack {
                     Image(systemName: "signature")
@@ -163,20 +164,17 @@ struct DiverEditorView: View {
                 //sheet for diver to sign
                 .sheet(isPresented: $signingSheet) {
                     CoachEditSigningView(selectedCoachEntryIndex: $selectedCoachEntryIndex, selectedDiverEntryIndex: $selectedDiverEntryIndex)
-                        .onDisappear {
-                            signingSheet = false
-                        }
                 }
                 .padding()
                 .overlay(
                     Rectangle()
                         .stroke(lineWidth: 2)
                 )
-                .foregroundColor(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
+                .foregroundColor(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "" ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
                 .padding()
             }
             //disables the signing button if the entry is not fully filled out
-            .disabled(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0)
+            .disabled(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "")
             HStack {
                 //opens the dive selector sheet
                 Button {
@@ -230,10 +228,14 @@ struct DiverEditorView: View {
                                         )
                                         .onTapGesture {
                                             if dive.volentary == true {
-                                                //diverEntry[index].volentary = false
+                                                diveList[index].volentary = false
+                                                
+                                                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![index].volentary = false
                                             }
                                             else {
-                                                //diverEntry[index].volentary = true
+                                                diveList[index].volentary = true
+                                                
+                                                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![index].volentary = true
                                             }
                                         }
                                 }
@@ -268,13 +270,32 @@ struct DiverEditorView: View {
             }
             //dive selector sheet
             .sheet(isPresented: $diveSelector, onDismiss: didDismiss) {
-                DiverDiveSelector(entryList: coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex], coachEntry: coachEntryStore.coachesList[selectedCoachEntryIndex], eventDate: eventDate, diveList: $diveList)
+                DiverDiveSelector(eventDate: eventDate, diveList: $diveList)
             }
+        }
+        //tells the user all the reasons that the entry is invalid
+        .alert(errorMessage, isPresented: $failedValidationAlert) {
+            Button("Cancel", role: .cancel) {}
+            Button("Continue") {
+                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dq = true
+                signingSheet = true
+            }
+        } message: {
+            Text("Are you sure you want to continue?")
         }
         .task {
             //find dives and set diveCount on entry
             findDives()
             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount = diveList.count
+            diveList = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives ?? diveList
+            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary = []
+        }
+        .onDisappear {
+            for dive in 0..<diveList.count {
+                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary! = []
+                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary!.append(diveList[dive].volentary ?? false)
+                
+            }
         }
     }
     //syncs the persistant data with the dive list
@@ -287,6 +308,7 @@ struct DiverEditorView: View {
             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.append(dive.code ?? "")
         }
         findDives()
+        diveList = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives!
     }
     //removes a dive from divelist at the entered index
     func deleteDive(at offsets: IndexSet) {
@@ -320,6 +342,10 @@ struct DiverEditorView: View {
     }
     //returns a list of all ivalid aspects of the divelist //doesn't check volentary and doesn't set degree of difficulty
     func validateEntry() {
+        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary! = []
+        for dive in 0..<diveList.count {
+            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary!.append(diveList[dive].volentary ?? false)
+        }
         errorMessage = ""
         if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount == 6 {
             var dOW: Bool = false
@@ -349,9 +375,9 @@ struct DiverEditorView: View {
                 diveNum.removeLast()
                 if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
                     dOW = true
-//                    if entryList.dives[0].degreeOfDiff > 1.8 {
-//                        entryList.dives[0].degreeOfDiff = 1.8
-//                    }
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff > 1.8 {
+                        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff = 1.8
+                    }
                 }
                 else {
                     errorMessage += "The dive of the week is not the first dive in your entry. The dive of the week is \(findDiveOfTheWeek())"
@@ -362,9 +388,9 @@ struct DiverEditorView: View {
                 diveNum.removeLast()
                 if Int(diveNum)! > 5000 && Int(diveNum)! < 6000 {
                     dOW = true
-//                    if entryList.dives[0].degreeOfDiff > 1.8 {
-//                        entryList.dives[0].degreeOfDiff = 1.8
-//                    }
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff > 1.8 {
+                        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff = 1.8
+                    }
                 }
                 else {
                     errorMessage += "The dive of the week is not the first dive in your entry. The dive of the week is \(findDiveOfTheWeek())"
@@ -375,9 +401,9 @@ struct DiverEditorView: View {
                 diveNum.removeLast()
                 if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
                     dOW = true
-//                    if entryList.dives[0].degreeOfDiff > 1.8 {
-//                        entryList.dives[0].degreeOfDiff = 1.8
-//                    }
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff > 1.8 {
+                        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![0].degreeOfDiff = 1.8
+                    }
                 }
                 else {
                     errorMessage += "The dive of the week is not the first dive in your entry. The dive of the week is \(findDiveOfTheWeek())"
@@ -443,9 +469,13 @@ struct DiverEditorView: View {
             var uniqueCategories: Int = 0
             var totalDOD: Double = 0
             for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count {
-                //if diverEntry.volentary?[dive] == true {
+                if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] == true {
                 var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
                     diveNum.removeLast()
+                    var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                    while diveLetter.count != 1 {
+                        diveLetter.removeFirst()
+                    }
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         if !allCategories.contains(1) {
                             uniqueCategories += 1
@@ -453,12 +483,8 @@ struct DiverEditorView: View {
                         allCategories.append(1)
                         for fetchedWithPosition in fetchedWithPositions {
                             if Int(diveNum)! == fetchedWithPosition.diveNbr {
-                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
-                                while diveLetter.count != 1 {
-                                    diveLetter.removeFirst()
-                                }
                                 for fetchedPosition in fetchedPositions {
-                                    if fetchedPosition.positionCode == diveLetter {
+                                    if fetchedPosition.positionCode == diveLetter && fetchedPosition.positionId == fetchedWithPosition.positionId {
                                         totalDOD += fetchedWithPosition.degreeOfDifficulty
                                     }
                                 }
@@ -477,7 +503,7 @@ struct DiverEditorView: View {
                                     diveLetter.removeFirst()
                                 }
                                 for fetchedPosition in fetchedPositions {
-                                    if fetchedPosition.positionCode == diveLetter {
+                                    if fetchedPosition.positionCode == diveLetter && fetchedPosition.positionId == fetchedWithPosition.positionId {
                                         totalDOD += fetchedWithPosition.degreeOfDifficulty
                                     }
                                 }
@@ -497,7 +523,7 @@ struct DiverEditorView: View {
                                     diveLetter.removeFirst()
                                 }
                                 for fetchedPosition in fetchedPositions {
-                                    if fetchedPosition.positionCode == diveLetter {
+                                    if fetchedPosition.positionCode == diveLetter && fetchedPosition.positionId == fetchedWithPosition.positionId {
                                         totalDOD += fetchedWithPosition.degreeOfDifficulty
                                     }
                                 }
@@ -517,7 +543,7 @@ struct DiverEditorView: View {
                                     diveLetter.removeFirst()
                                 }
                                 for fetchedPosition in fetchedPositions {
-                                    if fetchedPosition.positionCode == diveLetter {
+                                    if fetchedPosition.positionCode == diveLetter && fetchedPosition.positionId == fetchedWithPosition.positionId {
                                         totalDOD += fetchedWithPosition.degreeOfDifficulty
                                     }
                                 }
@@ -536,7 +562,7 @@ struct DiverEditorView: View {
                                     diveLetter.removeFirst()
                                 }
                                 for fetchedPosition in fetchedPositions {
-                                    if fetchedPosition.positionCode == diveLetter {
+                                    if fetchedPosition.positionCode == diveLetter && fetchedPosition.positionId == fetchedWithPosition.positionId {
                                         totalDOD += fetchedWithPosition.degreeOfDifficulty
                                     }
                                 }
@@ -544,7 +570,7 @@ struct DiverEditorView: View {
                         }
                         
                     }
-                //}
+                }
             }
             if totalDOD > 9 {
                 errorMessage += "\nThe entered volentary dives exceed a degree of difficulty of nine"
@@ -556,7 +582,7 @@ struct DiverEditorView: View {
             }
             
             for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count {
-                //if diverEntry.volentary?[dive] != true {
+                if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] != true {
                     var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
@@ -592,7 +618,7 @@ struct DiverEditorView: View {
                         allCategories.append(5)
                         
                     }
-                //}
+                }
                 if uniqueCategories == 5 {
                 }
                 else {
@@ -683,10 +709,10 @@ struct DiverEditorView: View {
                 }
                 //check the volentary to optional ratio
                 var volentaryCount = 0
-                for _ in 0...4 {
-                    //if diverEntry.volentary?[dive] == true {
+                for dive in 0...4 {
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] == true {
                         volentaryCount += 1
-                    //}
+                    }
                 }
                 if volentaryCount == 2 {
                     //success
@@ -695,28 +721,28 @@ struct DiverEditorView: View {
                     errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the first five dives"
                 }
                 volentaryCount = 0
-                for _ in 5...7 {
-                    //if diverEntry.volentary?[dive] == true {
+                for dive in 5...7 {
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] == true {
                         volentaryCount += 1
-                    //}
+                    }
                 }
                 if volentaryCount == 2 {
                     //success
                 }
                 else {
-                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the 5th-7th dives"
+                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the 6th-8th dives"
                 }
                 volentaryCount = 0
-                for _ in 8...10 {
-                    //if diverEntry.volentary?[dive] == true {
+                for dive in 8...10 {
+                    if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] == true {
                         volentaryCount += 1
-                    //}
+                    }
                 }
                 if volentaryCount == 1 {
                     //success
                 }
                 else {
-                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the last three dives"
+                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of one in the last three dives"
                 }
             }
             else {
@@ -727,7 +753,7 @@ struct DiverEditorView: View {
             errorMessage = "This should be literally impossible to see because the button is disabled unless a diveCount is chosen"
         }
         if errorMessage != "" {
-            //failedValidationAlert = true
+            failedValidationAlert = true
         }
         else {
             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dq = false
@@ -739,7 +765,6 @@ struct DiverEditorView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/dd/yyyy"
         var tempDate = dateFormatter.date(from: eventDate)
-        print(tempDate!.formatted(date: .numeric, time: .omitted))
         var dateComponents = DateComponents()
         dateComponents.month = 0
         dateComponents.day = -1

@@ -43,7 +43,7 @@ struct VarsityResultsView: View {
                 unsortedDiverList.append(diver)
             }
             for diver in 0..<unsortedDiverList.count {
-                if unsortedDiverList[diver].skip != true {
+                if unsortedDiverList[diver].skip != true && unsortedDiverList[diver].dq != true {
                         unsortedDiverList[diver].placementScore = unsortedDiverList[diver].diverEntries.totalScore
                 }
                 else {

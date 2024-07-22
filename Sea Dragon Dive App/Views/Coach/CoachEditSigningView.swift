@@ -98,6 +98,11 @@ struct CoachEditSigningView: View {
                         Button {
                             coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].finishedEntry = true
                             //validateEntry()
+                            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary = []
+                            for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count {
+                                coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary!.append(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives![dive].volentary ?? false)
+                                
+                            }
                             coachEntryStore.saveDiverEntry()
                             self.presentationMode.wrappedValue.dismiss()
                         } label: {

@@ -594,7 +594,7 @@ struct AddDiversView: View {
                     let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0)
                     diveList.append(newDive)
                 }
-                diversWithDives.append(divers(dives: diveList, diverEntries: diver.diverEntries))
+                diversWithDives.append(divers(dives: diveList, diverEntries: diver.diverEntries, dq: diver.diverEntries.dq))
             }
             else {
                 diversWithDives.append(diver)
