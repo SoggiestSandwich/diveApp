@@ -667,35 +667,37 @@ struct AddDiversView: View {
                     coachList[0].diverEntries[diver].dq = true
                 }
                 if !skipFirstDive {
+                    uniqueCategories = []
+                    uniqueCategoryCount = 0
                     for dive in coachList[0].diverEntries[diver].dives {
                         var tempDiveCode = dive
                         tempDiveCode.removeLast()
                         if Int(tempDiveCode)! < 200 {
-                            if uniqueCategories.contains(1) {
+                            if !uniqueCategories.contains(1) {
                                 uniqueCategoryCount += 1
                             }
                             uniqueCategories.append(1)
                         }
                         else if Int(tempDiveCode)! < 300 {
-                            if uniqueCategories.contains(2) {
+                            if !uniqueCategories.contains(2) {
                                 uniqueCategoryCount += 1
                             }
                             uniqueCategories.append(2)
                         }
                         else if Int(tempDiveCode)! < 400 {
-                            if uniqueCategories.contains(3) {
+                            if !uniqueCategories.contains(3) {
                                 uniqueCategoryCount += 1
                             }
                             uniqueCategories.append(3)
                         }
                         else if Int(tempDiveCode)! < 500 {
-                            if uniqueCategories.contains(4) {
+                            if !uniqueCategories.contains(4) {
                                 uniqueCategoryCount += 1
                             }
                             uniqueCategories.append(4)
                         }
                         else if Int(tempDiveCode)! < 6000 {
-                            if uniqueCategories.contains(5) {
+                            if !uniqueCategories.contains(5) {
                                 uniqueCategoryCount += 1
                             }
                             uniqueCategories.append(5)

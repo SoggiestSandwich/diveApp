@@ -220,6 +220,9 @@ struct DiveEntryView: View {
                             if entry.diveCount == 0 {
                                 diveCountIsZero = true //alert telling the user that they have not selected a dive count
                             }
+                            else if entry.dives.count > entry.diveCount! - 1 {
+                                
+                            }
                             else {
                                 var breakLoop = false
                                 for entry in diverStore.entryList {
@@ -419,10 +422,17 @@ struct DiveEntryView: View {
                 }
             }
         }
+        for dive in 0..<uniqueDiveList.count {
+            for dive2 in entry.dives {
+                if uniqueDiveList[dive].name == dive2.name && uniqueDiveList[dive].position == dive2.position {
+                    uniqueDiveList.remove(at: dive)
+                }
+            }
+        }
         //sorts the list of dives with their averages
         uniqueDiveList = uniqueDiveList.sorted()
         //remove the dives thathave lower scores than the top up to an amount equal to the dive count
-        while uniqueDiveList.count > entry.diveCount ?? 0 {
+        while uniqueDiveList.count > entry.diveCount! - entry.dives.count {
             uniqueDiveList.removeLast()
         }
         //adds the top dives to the dive list

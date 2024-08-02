@@ -100,7 +100,7 @@ struct SelectDivesView: View {
                         DisclosureGroup(isExpanded: $expandedGroup[0]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 //shows all forward dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
-                                if selection == 0 && fetchedDive.diveNbr - 100 < 100 || selection == 2 && fetchedDive.diveNbr - 100 < 100 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
+                                if selection == 0 && fetchedDive.diveNbr - 100 < 100 || selection == 2 && fetchedDive.diveNbr - 100 < 100 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 < 100 {
                                     VStack(alignment: .leading) {
                                         //dive name and heart
                                         HStack {
@@ -206,7 +206,7 @@ struct SelectDivesView: View {
                         DisclosureGroup(isExpanded: $expandedGroup[1]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 //shows all back dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
-                                if selection == 0 && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
+                                if selection == 0 && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 100 && fetchedDive.diveNbr - 100 < 200  {
                                     VStack(alignment: .leading) {
                                         //dive name and heart
                                         HStack {
@@ -312,7 +312,7 @@ struct SelectDivesView: View {
                         DisclosureGroup(isExpanded: $expandedGroup[2]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 //shows all reverse dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
-                                if selection == 0 && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
+                                if selection == 0 && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 2 && isFavorited(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 200 && fetchedDive.diveNbr - 100 < 300 {
                                     VStack(alignment: .leading) {
                                         //dive name and heart
                                         HStack {
@@ -418,7 +418,7 @@ struct SelectDivesView: View {
                         DisclosureGroup(isExpanded: $expandedGroup[3]) {
                             ForEach(fetchedDives) { fetchedDive in
                                 //shows all inward dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
-                                if selection == 0 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 || selection == 2 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
+                                if selection == 0 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 || selection == 2 && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 300 && fetchedDive.diveNbr - 100 < 400 {
                                     VStack(alignment: .leading) {
                                         //dive name and heart
                                         HStack {
@@ -528,7 +528,7 @@ struct SelectDivesView: View {
                                 //shows all forward twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 1000, highRange: 5200) || selection == 1 && !noRecentDives(lowRange: 1000, highRange: 5200) {
                                     ForEach(fetchedDives) { fetchedDive in
-                                        if selection == 0 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 || selection == 2 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") {
+                                        if selection == 0 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 || selection == 2 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 && isFavorited(name: fetchedDive.diveName ?? "") || selection == 1 && isRecent(name: fetchedDive.diveName ?? "") && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5200 {
                                             VStack(alignment: .leading) {
                                                 //dive name and heart
                                                 HStack {

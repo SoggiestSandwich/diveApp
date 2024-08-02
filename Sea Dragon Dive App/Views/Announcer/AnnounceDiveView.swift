@@ -24,6 +24,7 @@ struct AnnounceDiveView: View {
     @State var verbosity: Bool = true //determines if the whole script is shown
     @State var diveCount: Int = 0 //the largest amount of dives in the event
     @State var lowestDiveCount: Int = 11 //the smallest amount of dives in the event
+    @State var goToNext: Bool = false
     
     @Binding var diverList: [diverEntry] //list of all the divers
     
@@ -50,17 +51,27 @@ struct AnnounceDiveView: View {
                     Button("Confirm") {
                         //sets the diver as dq'ed
                         diverList[currentDiver].dq = true
-                        //finish the event if last diver is withdrawn
-                        if currentDiver == lastDiverIndex && currentDive >= lowestDiveCount - 1 {
-                            presentationMode.wrappedValue.dismiss()
+                        for diver in diverList {
+                            if diver.dq != true {
+                                goToNext = true
+                            }
                         }
-                        //if on the last diver moves to the next round
-                        else if currentDiver != lastDiverIndex {
-                            toggleNextDiver()
+                        if goToNext == true {
+                            //finish the event if last diver is withdrawn
+                            if currentDiver == lastDiverIndex && currentDive >= lowestDiveCount - 1 {
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                            //if on the last diver moves to the next round
+                            else if currentDiver != lastDiverIndex {
+                                toggleNextDiver()
+                            }
+                            //else go to the next round
+                            else {
+                                toggleNextRound()
+                            }
                         }
-                        //else go to the next round
                         else {
-                            toggleNextRound()
+                            presentationMode.wrappedValue.dismiss()
                         }
                         //ensure the first and last diver remain the same or readjust skipping dq'ed dives
                         setFirstAndLastDiverIndex()
@@ -88,6 +99,7 @@ struct AnnounceDiveView: View {
                                 lowestDiveCount = diverList[diver].dives.count
                             }
                         }
+                        goToNext = false
                     }
                 } message: {
                     Text("Has \(diverList[currentDiver].name) been withdrawn from the competition?")

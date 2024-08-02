@@ -122,12 +122,14 @@ struct ScoreSelectorView: View {
                     }
                     else if number == 11 {
                         Button {
-                            if diverList[currentDiver].dives[currentDive].score.count < event.judgeCount {
-                                currentIndex = currentIndex + 1
-                                let tempScore = scores(score: 0, index: currentIndex)
-                                diverList[currentDiver].dives[currentDive].score.append(tempScore)
+                            if !halfAdded && !diverList[currentDiver].dives[currentDive].score.isEmpty {
+                                if diverList[currentDiver].dives[currentDive].score.count < event.judgeCount {
+                                    currentIndex = currentIndex + 1
+                                    let tempScore = scores(score: 0, index: currentIndex)
+                                    diverList[currentDiver].dives[currentDive].score.append(tempScore)
+                                }
+                                halfAdded = false
                             }
-                            halfAdded = false
                             SetRoundScore()
                             saveEventData()
                         } label: {

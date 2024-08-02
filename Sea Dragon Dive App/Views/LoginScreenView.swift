@@ -96,7 +96,6 @@ struct LoginScreenView: View {
                     .disabled(settingsStore.settingsList.role == 0 ? true : settingsStore.settingsList.role == 1 ? settingsStore.settingsList.name != "" && settingsStore.settingsList.school != "" ? false : true : false) //disables the button if any necessary fields are blank
                     .bold()
                     .padding(5)
-                    //.shadow(color: .black.opacity(1),radius: 1, x: 3, y: 3)
                     .border(.foreground, width: 2)
                 }
                 .navigationDestination(for: String.self) { _ in

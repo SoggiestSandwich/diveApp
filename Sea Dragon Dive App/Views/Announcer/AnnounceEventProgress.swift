@@ -117,7 +117,7 @@ struct AnnounceEventProgress: View {
     
     //finds the last legal diver index
     func findLastDiverIndex() {
-        lastDiverIndex = diversList.count
+        lastDiverIndex = diversList.count - 1
         var breakLoop = false
         for diver in 0..<diversList.count {
             if !breakLoop {
