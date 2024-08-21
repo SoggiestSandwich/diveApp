@@ -170,11 +170,11 @@ struct DiverEditorView: View {
                     Rectangle()
                         .stroke(lineWidth: 2)
                 )
-                .foregroundColor(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "" ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
+                .foregroundColor(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "" ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
                 .padding()
             }
             //disables the signing button if the entry is not fully filled out
-            .disabled(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "")
+            .disabled(coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count != coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].diveCount || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level > 2 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].level < 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count == 0 || coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].name == "")
             HStack {
                 //opens the dive selector sheet
                 Button {
@@ -204,7 +204,7 @@ struct DiverEditorView: View {
                 .padding(.horizontal)
                 //list of the selected dives
                 List {
-                    if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
+                    if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.isEmpty {
                         ForEach(Array(zip(diveList.indices, diveList)), id: \.0) { index, dive in
                             VStack(alignment: .leading) {
                                 HStack {
@@ -243,7 +243,7 @@ struct DiverEditorView: View {
                         }
                         .onDelete(perform: deleteDive)
                         .onMove { (indexSet, index) in
-                            self.coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.move(fromOffsets: indexSet, toOffset: index)
+                            self.coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.move(fromOffsets: indexSet, toOffset: index)
                             diveList.move(fromOffsets: indexSet, toOffset: index)
                         }
                     }
@@ -254,11 +254,11 @@ struct DiverEditorView: View {
                 .environment(\.editMode, .constant(.active))
                 .padding(.horizontal)
                 //shows a reset button for dives if there are dives in the list
-                if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
+                if !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.isEmpty {
                     //removes all dives from the list and persistant data
                     Button {
-                        while !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.isEmpty {
-                            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.removeFirst()
+                        while !coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.isEmpty {
+                            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.removeFirst()
                         }
                         while !diveList.isEmpty {
                             diveList.removeFirst()
@@ -302,23 +302,23 @@ struct DiverEditorView: View {
     func didDismiss() {
         coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives = diveList
         
-        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.removeAll()
+        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.removeAll()
         
         for dive in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives! {
-            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.append(dive.code ?? "")
+            coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.append(dive.code ?? "")
         }
         findDives()
         diveList = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].fullDives!
     }
     //removes a dive from divelist at the entered index
     func deleteDive(at offsets: IndexSet) {
-        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.remove(atOffsets: offsets)
+        coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.remove(atOffsets: offsets)
         diveList.remove(atOffsets: offsets)
     }
     //puts the dives from the persistant data into the divelist and fillsn out the full dive details
     func findDives() {
         diveList = []
-        for diveCode in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives {
+        for diveCode in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives! {
             var tempCode: String = diveCode
             tempCode.removeLast()
             for fetchedDive in fetchedDives {
@@ -351,7 +351,7 @@ struct DiverEditorView: View {
             var dOW: Bool = false
             //check for dive of the week
             if findDiveOfTheWeek() == "Forward" {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[0]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![0]
                 diveNum.removeLast()
                 if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                     dOW = true
@@ -361,7 +361,7 @@ struct DiverEditorView: View {
                 }
             }
             else if findDiveOfTheWeek() == "Back" {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[0]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![0]
                 diveNum.removeLast()
                 if Int(diveNum)! > 200 && Int(diveNum)! < 300 {
                     dOW = true
@@ -371,7 +371,7 @@ struct DiverEditorView: View {
                 }
             }
             else if findDiveOfTheWeek() == "Inward" {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[0]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![0]
                 diveNum.removeLast()
                 if Int(diveNum)! > 400 && Int(diveNum)! < 500 {
                     dOW = true
@@ -384,7 +384,7 @@ struct DiverEditorView: View {
                 }
             }
             else if findDiveOfTheWeek() == "Twisting" {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[0]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![0]
                 diveNum.removeLast()
                 if Int(diveNum)! > 5000 && Int(diveNum)! < 6000 {
                     dOW = true
@@ -397,7 +397,7 @@ struct DiverEditorView: View {
                 }
             }
             else if findDiveOfTheWeek() == "Reverse" {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[0]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![0]
                 diveNum.removeLast()
                 if Int(diveNum)! > 300 && Int(diveNum)! < 400 {
                     dOW = true
@@ -413,7 +413,7 @@ struct DiverEditorView: View {
             var allCategories: [Int] = []
             var uniqueCategories: Int = 0
             var skipFirstEntry = true
-            for dive in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives {
+            for dive in coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives! {
                 if !skipFirstEntry {
                     var diveNum = dive
                     diveNum.removeLast()
@@ -468,11 +468,11 @@ struct DiverEditorView: View {
             var allCategories: [Int] = []
             var uniqueCategories: Int = 0
             var totalDOD: Double = 0
-            for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count {
+            for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count {
                 if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] == true {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                     diveNum.removeLast()
-                    var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                    var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                     while diveLetter.count != 1 {
                         diveLetter.removeFirst()
                     }
@@ -498,7 +498,7 @@ struct DiverEditorView: View {
                         allCategories.append(2)
                         for fetchedWithPosition in fetchedWithPositions {
                             if Int(diveNum)! == fetchedWithPosition.diveNbr {
-                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                                 while diveLetter.count != 1 {
                                     diveLetter.removeFirst()
                                 }
@@ -518,7 +518,7 @@ struct DiverEditorView: View {
                         allCategories.append(3)
                         for fetchedWithPosition in fetchedWithPositions {
                             if Int(diveNum)! == fetchedWithPosition.diveNbr {
-                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                                 while diveLetter.count != 1 {
                                     diveLetter.removeFirst()
                                 }
@@ -538,7 +538,7 @@ struct DiverEditorView: View {
                         allCategories.append(4)
                         for fetchedWithPosition in fetchedWithPositions {
                             if Int(diveNum)! == fetchedWithPosition.diveNbr {
-                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                                 while diveLetter.count != 1 {
                                     diveLetter.removeFirst()
                                 }
@@ -557,7 +557,7 @@ struct DiverEditorView: View {
                         allCategories.append(5)
                         for fetchedWithPosition in fetchedWithPositions {
                             if Int(diveNum)! == fetchedWithPosition.diveNbr {
-                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                                var diveLetter = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                                 while diveLetter.count != 1 {
                                     diveLetter.removeFirst()
                                 }
@@ -581,9 +581,9 @@ struct DiverEditorView: View {
                 errorMessage += "\nThe volentary dives selected only includes \(uniqueCategories) groups"
             }
             
-            for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives.count {
+            for dive in 0..<coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives!.count {
                 if coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].volentary?[dive] != true {
-                    var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                    var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         if !allCategories.contains(1) {
@@ -629,7 +629,7 @@ struct DiverEditorView: View {
             uniqueCategories = 0
             allCategories.removeAll()
             for dive in 0...7 {
-                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                 diveNum.removeLast()
                 if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                     if !allCategories.contains(1) {
@@ -669,7 +669,7 @@ struct DiverEditorView: View {
                 //check for more than 3 or more repeats in the first 8 dives
                 allCategories.removeAll()
                 for dive in 0...7 {
-                    var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives[dive]
+                    var diveNum = coachEntryStore.coachesList[selectedCoachEntryIndex].diverEntries[selectedDiverEntryIndex].dives![dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         allCategories.append(1)

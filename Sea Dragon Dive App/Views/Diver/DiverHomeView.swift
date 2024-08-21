@@ -38,7 +38,7 @@ struct DiverHomeView: View {
     @State private var misMatchDiveAlert: Bool = false
     @State private var selectedEntry: divers = divers(dives: [], diverEntries: diverEntry(dives: [], level: 0, name: ""))
     @State private var selectedEntryIndex: Int = -1
-    @State private var entries: resultsList? = nil
+    @State private var entries: diverEntry? = nil
     
     //simple struct for holding the string from qr codes
     struct Codes: Identifiable {
@@ -65,16 +65,17 @@ struct DiverHomeView: View {
                         let jsonCode: Data
                         if compressedJsonCode!.isGzipped {
                             jsonCode = try! compressedJsonCode!.gunzipped()
+                            print(String(data: jsonCode, encoding: .utf8) ?? "")
                         }
                         else {
                             jsonCode = compressedJsonCode!
                         }
                         let decoder = JSONDecoder()
-                        entries = try? decoder.decode(resultsList.self, from: jsonCode)
+                        entries = try? decoder.decode(diverEntry.self, from: jsonCode)
                         if entries != nil {
                             //create new entry with scanned results or edit old entry
                             for dive in 0..<selectedEntry.dives.count {
-                                if selectedEntry.dives[dive].code! != entries!.diveResults[dive].code && !nonMatchingScan {
+                                if selectedEntry.dives[dive].code! != entries!.scoringDives![dive].diveId && !nonMatchingScan {
                                     misMatchDiveAlert = true
                                 }
                             }
@@ -330,18 +331,18 @@ struct DiverHomeView: View {
         return highestScore
     }
     //
-    func addScores(entries: resultsList) {
-        for result in 0..<entries.diveResults.count {
-            if entries.diveResults[result].code != selectedEntry.dives[result].code {
+    func addScores(entries: diverEntry) {
+        for result in 0..<entries.scoringDives!.count {
+            if entries.scoringDives![result].diveId != selectedEntry.dives[result].code {
                 //finds and replaces nonmatching dives
-                var diveNbr = entries.diveResults[result].code
-                diveNbr.removeLast()
+                var diveNbr = entries.scoringDives![result].diveId
+                diveNbr!.removeLast()
                 for fetchedDive in fetchedDives {
-                    if Int(diveNbr)! == fetchedDive.diveNbr {
+                    if Int(diveNbr!)! == fetchedDive.diveNbr {
                         selectedEntry.dives[result].name = fetchedDive.diveName ?? ""
-                        var divePos = entries.diveResults[result].code
-                        while divePos.count > 1 {
-                            divePos.removeFirst()
+                        var divePos = entries.scoringDives![result].diveId
+                        while divePos!.count > 1 {
+                            divePos!.removeFirst()
                         }
                         for fetchedPosition in fetchedPositions {
                             if divePos == fetchedPosition.positionCode {
@@ -362,53 +363,15 @@ struct DiverHomeView: View {
         selectedEntry.diverEntries.totalScore = 0
         for dive in 0..<selectedEntry.dives.count {
             //adds the scores from results to the entry
-            for score in entries.diveResults[dive].score {
+            for score in entries.scoringDives![dive].scores {
                 var count = 0
-                selectedEntry.dives[dive].score.append(scores(score: score, index: count))
+                selectedEntry.dives[dive].score.append(scores(score: Double(score)!, index: count))
                 count += 1
             }
-            //calculates the round score based on the scores above
-            for score in entries.diveResults[dive].score {
-                selectedEntry.dives[dive].roundScore += score
-            }
-            var lowestIndex = -1
-            var greatestIndex = -1
-            //drops greatest and lowest scores if there are 5 and holds their indices
-            if entries.diveResults[dive].score.count > 3 {
-                var greatestScore = -1.0
-                var lowestScore = 11.0
-                for score in entries.diveResults[dive].score {
-                    if score > greatestScore {
-                        greatestScore = score
-                        greatestIndex = score.hashValue
-                    }
-                    if score < lowestScore {
-                        lowestScore = score
-                        lowestIndex = score.hashValue
-                    }
-                }
-                selectedEntry.dives[dive].roundScore -= greatestScore + lowestScore
-            }
-            selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
-            //drops the second highest and second lowest scores if 7 scores
-            if entries.diveResults[dive].score.count > 5 {
-                var greatestScore = -1.0
-                var lowestScore = 11.0
-                for score in entries.diveResults[dive].score {
-                    if score > greatestScore && score.hashValue != greatestIndex {
-                        greatestScore = score
-                    }
-                    if score < lowestScore && score.hashValue != lowestIndex {
-                        lowestScore = score
-                    }
-                }
-                selectedEntry.dives[dive].roundScore -= (greatestScore + lowestScore)
-                selectedEntry.dives[dive].roundScore *= selectedEntry.dives[dive].degreeOfDiff
-            }
-            //add round score to the total
-            selectedEntry.diverEntries.totalScore! += selectedEntry.dives[dive].roundScore
-            
+            selectedEntry.dives[dive].roundScore = entries.scoringDives![dive].diveTotal
         }
+        selectedEntry.diverEntries.totalScore = entries.totalScore
+        
         //sets the entry into the persistant data and saves it
         diverStore.entryList[selectedEntryIndex] = selectedEntry
         diverStore.saveDivers()

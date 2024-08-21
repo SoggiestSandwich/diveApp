@@ -112,7 +112,7 @@ struct diverInfoView: View {
         .onAppear {
             //fills in all of the dive data
                 if diver.dives.isEmpty {
-                    for dive in diver.diverEntries.dives {
+                    for dive in diver.diverEntries.dives! {
                         var name: String = ""
                         var positionId: Int64 = -1
                         var positionName: String = ""
@@ -157,12 +157,12 @@ struct diverInfoView: View {
         var skipFirstDive = true
         var uniqueCategories: [Int] = []
         var uniqueCategoryCount: Int = 0
-        if diver.diverEntries.dives.count < diveCount {
-            notEnoughDivesError = "Has \(diver.diverEntries.dives.count) out of \(diveCount) dives"
+        if diver.diverEntries.dives!.count < diveCount {
+            notEnoughDivesError = "Has \(diver.diverEntries.dives!.count) out of \(diveCount) dives"
         }
             if diver.dives.count == 6 {
                 //check for dive of the week
-                var tempDiveCode = diver.diverEntries.dives[0]
+                var tempDiveCode = diver.diverEntries.dives![0]
                 tempDiveCode.removeLast()
                 if findDiveOfTheWeek().contains(Int(tempDiveCode)!) {
                     dOfTheWeekError = ""
@@ -172,7 +172,7 @@ struct diverInfoView: View {
                     dOfTheWeekError = "Does not have the dive of the week in the first dive slot"
                 }
                 if !skipFirstDive {
-                    for dive in diver.diverEntries.dives {
+                    for dive in diver.diverEntries.dives! {
                         var tempDiveCode = dive
                         tempDiveCode.removeLast()
                         if Int(tempDiveCode)! < 200 {
@@ -320,7 +320,7 @@ struct diverInfoView: View {
                 uniqueCategories = 0
                 allCategories.removeAll()
                 for dive in 0...7 {
-                    var diveNum = diver.diverEntries.dives[dive]
+                    var diveNum = diver.diverEntries.dives![dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         if !allCategories.contains(1) {
@@ -360,7 +360,7 @@ struct diverInfoView: View {
                     //check for more than 3 or more repeats in the first 8 dives
                     allCategories.removeAll()
                     for dive in 0...7 {
-                        var diveNum = diver.diverEntries.dives[dive]
+                        var diveNum = diver.diverEntries.dives![dive]
                         diveNum.removeLast()
                         if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                             allCategories.append(1)

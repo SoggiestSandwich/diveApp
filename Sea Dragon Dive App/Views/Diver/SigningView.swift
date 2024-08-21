@@ -120,7 +120,7 @@ struct SigningView: View {
         //diverEntry assembly
         var entries = diverEntry(dives: [], level: entry.diverEntries.level, name: entry.diverEntries.name)
         for dive in 0..<entry.dives.count {
-            entries.dives.append(entry.dives[dive].code ?? "")
+            entries.dives!.append(entry.dives[dive].code ?? "")
         }
         entries.volentary = []
         for dive in 0..<entry.dives.count {
@@ -131,6 +131,7 @@ struct SigningView: View {
         //json encoding
         let encoder = JSONEncoder()
         let data = try! encoder.encode(entries)
+        //print(String(data: data, encoding: .utf8) ?? "")
         
         // json compression
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)

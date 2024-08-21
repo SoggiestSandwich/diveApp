@@ -52,9 +52,10 @@ struct CoachEventSelectionView: View {
                         let decoder = JSONDecoder()
                         let entries = try? decoder.decode(coachEntry.self, from: jsonCode)
                         //if the code can be turned into a coaschEntry sets the loacation and finished
-                        if entries != nil && entries?.team == coachEntryStore.coachesList[selectedCoachEntryIndex].team{
+                        if entries != nil && entries!.team == coachEntryStore.coachesList[selectedCoachEntryIndex].team {
                             let tempLocation = coachEntryStore.coachesList[selectedCoachEntryIndex].location
                             coachEntryStore.coachesList[selectedCoachEntryIndex] = entries!
+                            
                             coachEntryStore.coachesList[selectedCoachEntryIndex].location = tempLocation
                             coachEntryStore.coachesList[selectedCoachEntryIndex].finished = true
                             coachEntryStore.saveDiverEntry()
@@ -108,7 +109,7 @@ struct CoachEventSelectionView: View {
                     ForEach(Array(zip(coachEntryStore.coachesList.indices, coachEntryStore.coachesList)), id: \.0) { index, coach in
                         if coach.finished != true {
                             HStack {
-                                Text(coach.eventDate)
+                                Text(coach.eventDate ?? Date().formatted(date: .numeric, time: .omitted))
                                 Divider()
                                 //goes to the view for editing coach entries
                                 NavigationLink(destination: CoachDiveEventView(name: name, team: team, coachListIndex: index, entry: $coachEntryStore.coachesList[index])) {
@@ -142,7 +143,7 @@ struct CoachEventSelectionView: View {
                 }
                 //adds a coach entry to the coach entry persistant data
                 Button {
-                    coachEntryStore.addCoachEntry(coachEntry(diverEntries: [], eventDate: "", team: team, version: 0))
+                    coachEntryStore.addCoachEntry(coachEntry(diverEntries: [], team: team, version: 0))
                     coachEntryStore.saveDiverEntry()
                 } label: {
                     HStack {
@@ -162,7 +163,7 @@ struct CoachEventSelectionView: View {
                         if coach.finished == true {
                             NavigationLink(destination: CoachResultsView(entry: coach)) {
                                 HStack {
-                                    Text(coach.eventDate)
+                                    Text(coach.eventDate ?? Date().formatted(date: .numeric, time: .omitted))
                                     Divider()
                                     Text(coach.location ?? "")
                                 }

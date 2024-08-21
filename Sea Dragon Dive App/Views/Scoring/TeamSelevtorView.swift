@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import Gzip
 
 
@@ -54,34 +55,39 @@ struct TeamSelevtorView: View {
     }
     //create a string to be sent to the qr code
     func createQRDataString(team: String) -> String {
-        var coachList: coachEntry = coachEntry(diverEntries: [], eventDate: "", team: "", version: 0)
+        var coachList: coachEntry = coachEntry(diverEntries: [], team: "", version: 0)
         var num = 0
         //assembles a coach entry from the diver list
         for diver in diverList {
             if team == diver.diverEntries.team {
-                coachList.diverEntries.append(diverEntry(dives: diver.diverEntries.dives, level: diver.diverEntries.level, name: diver.diverEntries.name, dq: diver.diverEntries.dq, placement: diver.placement))
-                coachList.diverEntries[num].fullDivesScores = []
+                coachList.diverEntries.append(diverEntry(level: diver.diverEntries.level, name: diver.diverEntries.name, dq: diver.diverEntries.dq, placement: diver.placement))
+                //coachList.diverEntries[num].fullDivesScores = []
+                coachList.diverEntries[num].scoringDives = []
                 var index = 0
                 //adds scores from each dive to the diver in the coach entry
                 for dive in diver.dives {
                     index+=1
-                    var tempScoreList = [0.0, 0.0, 0.0]
+                    var tempScoreList = ["", "", ""]
                     tempScoreList = []
+                    
                     for score in dive.score {
-                        tempScoreList.append(score.score)
+                        tempScoreList.append(String(score.score))
                     }
-                    coachList.diverEntries[num].fullDivesScores?.append(tempScoreList)
+                    coachList.diverEntries[num].scoringDives!.append(scoringDives(scores: tempScoreList, diveTotal: round(dive.roundScore * 10)/10.0, diveId: dive.code))
                 }
+            
                 coachList.diverEntries[num].placement = diver.placement ?? 0
                 coachList.diverEntries[num].totalScore = diver.diverEntries.totalScore
                 num += 1
             }
             coachList.team = team
-            coachList.eventDate = Date().formatted(date: .numeric, time: .omitted)
         }
         //encode from coach entry into json
         let encoder = JSONEncoder()
         let data = try! encoder.encode(coachList)
+        
+        print(String(data: data, encoding: .utf8) ?? "")
+
         // json compression
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)
         return optimizedData.base64EncodedString()

@@ -558,7 +558,7 @@ struct AddDiversView: View {
             var diveList: [dives] = []
             if diver.dives.isEmpty {
                 //loops through all the dive codes
-                for dive in diver.diverEntries.dives {
+                for dive in diver.diverEntries.dives! {
                     var name: String = ""
                     var positionId: Int64 = -1
                     var positionName: String = ""
@@ -591,7 +591,7 @@ struct AddDiversView: View {
                         }
                     }
                     //full dive
-                    let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0)
+                    let newDive = dives(name: name, degreeOfDiff: dOD, score: [], position: positionName, roundScore: 0, code: dive)
                     diveList.append(newDive)
                 }
                 diversWithDives.append(divers(dives: diveList, diverEntries: diver.diverEntries, dq: diver.diverEntries.dq))
@@ -607,7 +607,7 @@ struct AddDiversView: View {
         //loops through all diver entries in the coach entry
         for diver in entry.diverEntries {
             //check dive num and code
-            for dive in diver.dives {
+            for dive in diver.dives! {
                 valid = false
                 var tempDive = dive
                 while tempDive.count > 1 {
@@ -637,7 +637,7 @@ struct AddDiversView: View {
             }
             
             //check dive count
-            if diver.dives.count > event.diveCount {
+            if diver.dives!.count > event.diveCount {
                 //message saying to many dives
                 failedScanMessage += "A diver has too many dives\n"
                 return false
@@ -652,12 +652,12 @@ struct AddDiversView: View {
         var uniqueCategoryCount: Int = 0
         //loops through all diver entries in the first coach entry which is cleared after each is validated
         for diver in 0..<coachList[0].diverEntries.count {
-            if coachList[0].diverEntries[diver].dives.count < event.diveCount {
+            if coachList[0].diverEntries[diver].dives!.count < event.diveCount {
                 coachList[0].diverEntries[diver].dq = true
             }
-            if coachList[0].diverEntries[diver].dives.count == 6 {
+            if coachList[0].diverEntries[diver].dives!.count == 6 {
                 //check for dive of the week
-                var tempDiveCode = coachList[0].diverEntries[diver].dives[0]
+                var tempDiveCode = coachList[0].diverEntries[diver].dives![0]
                 tempDiveCode.removeLast()
                 if findDiveOfTheWeek().contains(Int(tempDiveCode)!) {
                     
@@ -669,7 +669,7 @@ struct AddDiversView: View {
                 if !skipFirstDive {
                     uniqueCategories = []
                     uniqueCategoryCount = 0
-                    for dive in coachList[0].diverEntries[diver].dives {
+                    for dive in coachList[0].diverEntries[diver].dives! {
                         var tempDiveCode = dive
                         tempDiveCode.removeLast()
                         if Int(tempDiveCode)! < 200 {
@@ -712,13 +712,13 @@ struct AddDiversView: View {
                     }
                 }
             }
-            else if coachList[0].diverEntries[diver].dives.count == 11 {
+            else if coachList[0].diverEntries[diver].dives!.count == 11 {
                 coachList[0].diverEntries[diver].fullDives = []
                 var fullDive = dives(name: "", degreeOfDiff: 0, score: [], position: "", roundScore: 0)
-                for dive in 0..<coachList[0].diverEntries[diver].dives.count {
-                    var number = coachList[0].diverEntries[diver].dives[dive]
+                for dive in 0..<coachList[0].diverEntries[diver].dives!.count {
+                    var number = coachList[0].diverEntries[diver].dives![dive]
                     number.removeLast()
-                    var letter = coachList[0].diverEntries[diver].dives[dive]
+                    var letter = coachList[0].diverEntries[diver].dives![dive]
                     var positionId: Int64 = 0
                     
                     while letter.count > 1 {
@@ -740,7 +740,7 @@ struct AddDiversView: View {
                             fullDive.degreeOfDiff = fetchedWithPosition.degreeOfDifficulty
                         }
                     }
-                    fullDive.code = coachList[0].diverEntries[diver].dives[dive]
+                    fullDive.code = coachList[0].diverEntries[diver].dives![dive]
                     fullDive.volentary = coachList[0].diverEntries[diver].volentary?[dive]
                     coachList[0].diverEntries[diver].fullDives!.append(fullDive)
                 }
@@ -848,7 +848,7 @@ struct AddDiversView: View {
                 uniqueCategories = 0
                 allCategories.removeAll()
                 for dive in 0...7 {
-                    var diveNum = coachList[0].diverEntries[diver].dives[dive]
+                    var diveNum = coachList[0].diverEntries[diver].dives![dive]
                     diveNum.removeLast()
                     if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                         if !allCategories.contains(1) {
@@ -888,7 +888,7 @@ struct AddDiversView: View {
                     //check for more than 3 or more repeats in the first 8 dives
                     allCategories.removeAll()
                     for dive in 0...7 {
-                        var diveNum = coachList[0].diverEntries[diver].dives[dive]
+                        var diveNum = coachList[0].diverEntries[diver].dives![dive]
                         diveNum.removeLast()
                         if Int(diveNum)! > 100 && Int(diveNum)! < 200 {
                             allCategories.append(1)
@@ -1006,7 +1006,7 @@ struct AddDiversView: View {
         for diver in diversWithDives {
             announcerEvent.diver.append(announcerDiver(name: diver.diverEntries.name, school: diver.diverEntries.team ?? "", dives: []))
             //loops through each dive
-            for dive in diver.diverEntries.dives {
+            for dive in diver.diverEntries.dives! {
                 announcerEvent.diver[announcerEvent.diver.count - 1].dives.append(dive)
             }
         }

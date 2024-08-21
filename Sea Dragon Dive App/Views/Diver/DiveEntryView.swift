@@ -392,7 +392,7 @@ struct DiveEntryView: View {
     //adds all of the codes from the full dives to put in the "dives" list
     func encodeDives() {
         for dive in entry.dives {
-            entry.diverEntries.dives.append(dive.code ?? "")
+            entry.diverEntries.dives!.append(dive.code ?? "")
         }
     }
     //adds a number of the highest average scoring dives to the dive list equal to dive count
@@ -855,7 +855,7 @@ struct DiveEntryView: View {
                     errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the first five dives"
                 }
                 volentaryCount = 0
-                //dives 5-8
+                //dives 6-8
                 for dive in 5...7 {
                     if entry.dives[dive].volentary == true {
                         volentaryCount += 1
@@ -865,7 +865,7 @@ struct DiveEntryView: View {
                     //success
                 }
                 else {
-                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the 5th-7th dives"
+                    errorMessage = "\nThere are \(volentaryCount) volentary dives out of two in the 6th-8th dives"
                 }
                 volentaryCount = 0
                 //dives 9-11

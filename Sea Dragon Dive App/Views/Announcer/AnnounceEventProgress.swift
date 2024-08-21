@@ -27,12 +27,12 @@ struct AnnounceEventProgress: View {
     var body: some View {
         VStack {
             List {
-                ForEach(Array(zip(diversList[findDiverWithDiveCount()].dives.indices, diversList[findDiverWithDiveCount()].dives)), id: \.0) { index, dive in
+                ForEach(Array(zip(diversList[findDiverWithDiveCount()].dives!.indices, diversList[findDiverWithDiveCount()].dives!)), id: \.0) { index, dive in
                     //has a dropdown for each dive as displayed by rounds
                     DisclosureGroup("Round \(index + 1)") {
                         ForEach(Array(zip(diversList.indices, diversList)), id: \.0) { diverIndex, diver in
                             //stops displaying divers after they don't have any more dives
-                            if index < diver.dives.count {
+                            if index < diver.dives!.count {
                                 HStack {
                                     //each diver is a button that selects that dive and diver
                                     Button {
@@ -150,11 +150,11 @@ struct AnnounceEventProgress: View {
         var mostDives = 0
         var mostDivesIndex = 0
         for diver in 0..<diversList.count {
-            if diversList[diver].dives.count == diveCount {
+            if diversList[diver].dives!.count == diveCount {
                 return diver
             }
-            if diversList[diver].dives.count > mostDives {
-                mostDives = diversList[diver].dives.count
+            if diversList[diver].dives!.count > mostDives {
+                mostDives = diversList[diver].dives!.count
                 mostDivesIndex = diver
             }
         }

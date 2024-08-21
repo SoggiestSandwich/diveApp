@@ -79,13 +79,13 @@ struct AnnounceDiveView: View {
                         diveCount = 0
                         var first = true
                         for diver in 0..<diverList.count {
-                            if diverList[diver].dives.count >= diveCount && diverList[diver].dq != true {
-                                diveCount = diverList[diver].dives.count
+                            if diverList[diver].dives!.count >= diveCount && diverList[diver].dq != true {
+                                diveCount = diverList[diver].dives!.count
                                 diverWithLastDiveIndex = diver
                             }
                         }
                         for diver in 0..<diverList.count {
-                            if diverList[diver].dives.count == diveCount && diverList[diver].dq != true {
+                            if diverList[diver].dives!.count == diveCount && diverList[diver].dq != true {
                                 if first {
                                     first = false
                                     diverWithFirstMaxDiveIndex = diver
@@ -95,8 +95,8 @@ struct AnnounceDiveView: View {
                         //lowest
                         lowestDiveCount = 11
                         for diver in 0..<diverList.count {
-                            if diverList[diver].dives.count < lowestDiveCount && diverList[diver].dq != true {
-                                lowestDiveCount = diverList[diver].dives.count
+                            if diverList[diver].dives!.count < lowestDiveCount && diverList[diver].dq != true {
+                                lowestDiveCount = diverList[diver].dives!.count
                             }
                         }
                         goToNext = false
@@ -132,7 +132,7 @@ struct AnnounceDiveView: View {
                         .padding(.horizontal)
                         .padding(.bottom)
                     //code
-                    Text(diverList[currentDiver].dives[currentDive])
+                    Text(diverList[currentDiver].dives![currentDive])
                         .font(.title2)
                         .bold()
                         .padding(.horizontal)
@@ -190,7 +190,7 @@ struct AnnounceDiveView: View {
                     Text("dive \(currentDive + 1)")
                         .font(.title2)                        .padding(.horizontal)
                     //code
-                    Text(diverList[currentDiver].dives[currentDive])
+                    Text(diverList[currentDiver].dives![currentDive])
                         .font(.title2)
                         .bold()
 
@@ -288,14 +288,14 @@ struct AnnounceDiveView: View {
             diveCount = 0
             var first = true
             for diver in 0..<diverList.count {
-                if diverList[diver].dives.count >= diveCount && diverList[diver].dq != true {
-                    diveCount = diverList[diver].dives.count
+                if diverList[diver].dives!.count >= diveCount && diverList[diver].dq != true {
+                    diveCount = diverList[diver].dives!.count
                     diverWithLastDiveIndex = diver
                 }
             }
             //index of the first diver with the greatest amount of dives
             for diver in 0..<diverList.count {
-                if diverList[diver].dives.count == diveCount && diverList[diver].dq != true {
+                if diverList[diver].dives!.count == diveCount && diverList[diver].dq != true {
                     if first {
                         first = false
                         diverWithFirstMaxDiveIndex = diver
@@ -305,8 +305,8 @@ struct AnnounceDiveView: View {
             //lowest
             lowestDiveCount = 11
             for diver in 0..<diverList.count {
-                if diverList[diver].dives.count < lowestDiveCount && diverList[diver].dq != true {
-                    lowestDiveCount = diverList[diver].dives.count
+                if diverList[diver].dives!.count < lowestDiveCount && diverList[diver].dq != true {
+                    lowestDiveCount = diverList[diver].dives!.count
                 }
             }
         }
@@ -349,14 +349,14 @@ struct AnnounceDiveView: View {
         var tempCurrentDiver = currentDiver
         repeat {
             tempCurrentDiver = tempCurrentDiver + 1
-        } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count <= currentDive
+        } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives!.count <= currentDive
         currentDiver = tempCurrentDiver
     }
     //sets the current diver to the firstDiverIndex then increments until it is on a legal diver and increases the current dive by one
     func toggleNextRound() {
         currentDive = currentDive + 1
         var tempCurrentDiver = firstDiverIndex
-        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 < currentDive {
+        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives!.count - 1 < currentDive {
             tempCurrentDiver += 1
         }
         currentDiver = tempCurrentDiver
@@ -366,14 +366,14 @@ struct AnnounceDiveView: View {
         var tempCurrentDiver = currentDiver
         repeat {
             tempCurrentDiver = tempCurrentDiver - 1
-        } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count <= currentDive
+        } while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives!.count <= currentDive
         currentDiver = tempCurrentDiver
     }
     //sets the current diver to the lastDiverIndex then decrements until it is on a legal diver and decreases the current dive by one
     func togglepreviousRound() {
         currentDive = currentDive - 1
         var tempCurrentDiver = lastDiverIndex
-        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives.count - 1 <= currentDive {
+        while diverList[tempCurrentDiver].dq == true || diverList[tempCurrentDiver].dives!.count - 1 <= currentDive {
             tempCurrentDiver -= 1
         }
         currentDiver = tempCurrentDiver

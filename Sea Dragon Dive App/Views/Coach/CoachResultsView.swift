@@ -34,14 +34,18 @@ struct CoachResultsView: View {
     }
     //converts entered string to json and compresses it then returns it in string form
     func makeQRCode(diver: diverEntry) -> String {
-        var diverResults = resultsList(diveResults: [], placement: diver.placement ?? 0)
-        for dive in 0..<diver.dives.count {
-            diverResults.diveResults.append(diveResults(code: diver.dives[dive], score: diver.fullDivesScores![dive]))
-        }
-        
+//        var diverResults = resultsList(diveResults: [], placement: diver.placement ?? 0)
+//        var tempScore = [0.0, 0.0, 0.0]
+//        tempScore = []
+//        for dive in 0..<diver.scoringDives!.count {
+//            for score in diver.scoringDives![dive].scores {
+//                tempScore.append(Double(score)!)
+//            }
+//            diverResults.diveResults.append(diveResults(code: diver.scoringDives![dive].diveId!, score: tempScore))
+//        }
         
         let encoder = JSONEncoder()
-        let data = try! encoder.encode(diverResults)
+        let data = try! encoder.encode(diver)
         
         // json compression
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)
@@ -51,6 +55,6 @@ struct CoachResultsView: View {
 
 struct CoachResultsView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachResultsView(entry: coachEntry(diverEntries: [diverEntry(dives: [], level: 0, name: "diver", totalScore: 10)], eventDate: "Date", team: "Team", version: 0))
+        CoachResultsView(entry: coachEntry(diverEntries: [diverEntry(dives: [], level: 0, name: "diver", totalScore: 10)], team: "Team", version: 0))
     }
 }

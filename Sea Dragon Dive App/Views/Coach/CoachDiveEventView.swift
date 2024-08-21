@@ -34,6 +34,8 @@ struct CoachDiveEventView: View {
     
     @Binding var entry: coachEntry //the seleced coach entry
     
+    //@State var backGroundColor : Color = .blue
+    
     //simple struct for holding an identifiable qr code string
     struct Codes: Identifiable {
         let name: String
@@ -73,6 +75,7 @@ struct CoachDiveEventView: View {
                         }
                         else {
                             //popup saying invalid qr code was scanned
+                            print("TSET")
                             failedScanAlert = true
                         }
                     }
@@ -174,7 +177,7 @@ struct CoachDiveEventView: View {
                     ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 2 {
                             //goes to diver editor
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate!)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -195,7 +198,7 @@ struct CoachDiveEventView: View {
                     ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 1 {
                             //goes to diver editor
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate!)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -217,7 +220,7 @@ struct CoachDiveEventView: View {
                     ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                         if diver.level == 0 {
                             //goes to diver editor
-                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
+                            NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate!)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -240,7 +243,7 @@ struct CoachDiveEventView: View {
                         ForEach(Array(zip(entry.diverEntries.indices, entry.diverEntries)), id: \.0) { index, diver in
                             if diver.finishedEntry == nil || diver.finishedEntry == false {
                                 //goes to the diver editor
-                                NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate)) {
+                                NavigationLink(destination: DiverEditorView(selectedCoachEntryIndex: coachListIndex, selectedDiverEntryIndex: index, eventDate: entry.eventDate!)) {
                                     HStack {
                                         Text("\(index + 1)")
                                             .padding(5)
@@ -297,9 +300,10 @@ struct CoachDiveEventView: View {
                 CoachEntryQRCodeView(code: findQRCode())
             }
         }
+        //.background(backGroundColor)
         .onAppear {
             //sets the date to the current date if there is not another date selected
-            if entry.eventDate.isEmpty {
+            if ((entry.eventDate?.isEmpty) == nil) {
                 entry.eventDate = Date().formatted(date: .numeric, time: .omitted)
             }
         }
@@ -314,15 +318,16 @@ struct CoachDiveEventView: View {
     }
     //encodes the coaches entry into json and compresses it and returns the compressed data in string form
     func findQRCode() -> String {
-        var coachEntry = coachEntry(diverEntries: [], eventDate: entry.eventDate, team: entry.team, version: 0)
+        var coachEntry = coachEntry(diverEntries: [], team: entry.team, version: 0)
         coachEntry.diverEntries = []
+        coachEntry.eventDate = date.formatted(date: .numeric, time: .omitted)
         for diver in 0..<entry.diverEntries.count {
             //diverEntry assembly
             var diveEntries = diverEntry(dives: [], level: entry.diverEntries[diver].level, name: entry.diverEntries[diver].name)
             
             
-            for dive in 0..<entry.diverEntries[diver].dives.count {
-                diveEntries.dives.append(entry.diverEntries[diver].fullDives![dive].code ?? "")
+            for dive in 0..<entry.diverEntries[diver].dives!.count {
+                diveEntries.dives!.append(entry.diverEntries[diver].fullDives![dive].code ?? "")
             }
             diveEntries.volentary = []
             for dive in 0..<entry.diverEntries[diver].fullDives!.count {
@@ -333,6 +338,9 @@ struct CoachDiveEventView: View {
         }
         let encoder = JSONEncoder()
         let data = try! encoder.encode(coachEntry)
+        
+        print(String(data: data, encoding: .utf8) ?? "")
+        
         let optimizedData : Data = try! data.gzipped(level: .bestCompression)
         return optimizedData.base64EncodedString()
     }
@@ -354,7 +362,7 @@ struct CoachDiveEventView: View {
     func findDives(diverIndex: Int) {
         var diveList: [dives] = []
         var diveCodeCount = 0
-        for diveCode in entry.diverEntries[diverIndex].dives {
+        for diveCode in entry.diverEntries[diverIndex].dives! {
             var tempCode: String = diveCode
             tempCode.removeLast()
             for fetchedDive in fetchedDives {
@@ -363,11 +371,12 @@ struct CoachDiveEventView: View {
                     while tempCode.count != 1 {
                         tempCode.removeFirst()
                     }
+                    
                     for fetchedWithPosition in fetchedWithPositions {
                         if fetchedDive.diveNbr == fetchedWithPosition.diveNbr {
                             for fetchedPosition in fetchedPositions {
                                 if tempCode.uppercased() == fetchedPosition.positionCode && fetchedPosition.positionId == fetchedWithPosition.positionId {
-                                    diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, code: diveCode, volentary: entry.diverEntries[diverIndex].volentary![diveCodeCount]))
+                                    diveList.append(dives(name: fetchedDive.diveName ?? "", degreeOfDiff: fetchedWithPosition.degreeOfDifficulty, score: [], position: fetchedPosition.positionName ?? "", roundScore: 0, code: diveCode, volentary: entry.diverEntries[diverIndex].volentary?[diveCodeCount] ?? false))
                                 }
                             }
                         }
@@ -382,6 +391,6 @@ struct CoachDiveEventView: View {
 
 struct CoachDiveEventView_Previews: PreviewProvider {
     static var previews: some View {
-        CoachDiveEventView(name: "name", team: "Team", coachListIndex: 0, entry: .constant(coachEntry(diverEntries: [diverEntry(dives: [], level: 1, name: "Name")], eventDate: "Date", team: "Team", version: 0)))
+        CoachDiveEventView(name: "name", team: "Team", coachListIndex: 0, entry: .constant(coachEntry(diverEntries: [diverEntry(dives: [], level: 1, name: "Name")], team: "Team", version: 0)))
     }
 }
