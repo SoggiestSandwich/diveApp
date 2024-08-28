@@ -193,7 +193,7 @@ struct DiveEntryView: View {
                             Rectangle()
                                 .stroke(lineWidth: 2)
                         )
-                        .foregroundColor(entry.location == "" || entry.dives.count != entry.diveCount || entry.diverEntries.level > 2 || entry.diverEntries.level < 0 || entry.dives.count == 0 ? colorScheme == .dark ? .white : .gray : colorScheme == .dark ? .white : .black)
+                        .foregroundColor(entry.location == "" || entry.dives.count != entry.diveCount || entry.diverEntries.level > 2 || entry.diverEntries.level < 0 || entry.dives.count == 0 ? .gray : colorScheme == .dark ? .white : .black)
                         .padding()
                     }
                     .disabled(entry.location == "" || entry.dives.count != entry.diveCount || entry.diverEntries.level > 2 || entry.diverEntries.level < 0 || entry.dives.count == 0)
@@ -217,7 +217,7 @@ struct DiveEntryView: View {
                         }
                         //automatically adds a number of dives equal to the selected number that have the highest sores
                         Button {
-                            if entry.diveCount == 0 {
+                            if entry.diveCount == 0 || entry.diveCount == nil {
                                 diveCountIsZero = true //alert telling the user that they have not selected a dive count
                             }
                             else if entry.dives.count > entry.diveCount! - 1 {

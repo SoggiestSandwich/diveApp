@@ -627,7 +627,7 @@ struct SelectDivesView: View {
                                 //shows all back twist dives if selection = 0, all favorited dives if selection = 2 or all dives from within the last 3 months
                                 if selection == 0 || selection == 2 && !noFavoritedDives(lowRange: 5200, highRange: 5300) || selection == 1 && !noRecentDives(lowRange: 5200, highRange: 5300) {
                                     ForEach(fetchedDives) { fetchedDive in
-                                        if selection == 0 && fetchedDive.diveNbr - 100 > 5100 && fetchedDive.diveNbr < 5300 || selection == 2 && fetchedDive.diveNbr - 100 > 400 && fetchedDive.diveNbr < 5300 && isFavorited(name: fetchedDive.diveName ?? "") {
+                                        if selection == 0 && fetchedDive.diveNbr - 100 > 5100 && fetchedDive.diveNbr < 5300 || selection == 2 && fetchedDive.diveNbr - 100 > 5100 && fetchedDive.diveNbr < 5300 && isFavorited(name: fetchedDive.diveName ?? "") {
                                             VStack(alignment: .leading) {
                                                 //dive name and heart
                                                 HStack {
